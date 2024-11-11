@@ -19,6 +19,9 @@
 .right-panel {
   margin: 5%;
   padding: 20px;
+  height: 80vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
 }
 
 .heatmapClass {
@@ -30,10 +33,14 @@
   aspect-ratio: 1 / 1;
 }
 
+.footer-buttons {
+  display: flex;
+  align-items: end;
+  flex-direction: column;
+}
+
 .downloadButtonClass {
-  padding: 10px;
-  bottom: 5%;
-  right: 5%;
+  margin: 10px 0;
 }
 .overlay-details {
   z-index: 2;
