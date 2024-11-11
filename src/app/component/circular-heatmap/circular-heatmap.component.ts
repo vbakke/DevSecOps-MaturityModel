@@ -382,15 +382,16 @@ export class CircularHeatmapComponent implements OnInit {
     chart.accessor(function (d: any) {
       return d['Done%'];
     });
-    //d3.select("svg").remove();
+    
     var svg = d3
       .select(dom_element_to_append_to)
       .selectAll('svg')
       .data([dataset])
       .enter()
       .append('svg')
-      .attr('width', '60%') // 70% forces the heatmap down
-      .attr('height', height + margin.top + margin.bottom)
+      .attr('width', '100%')
+      .attr('height', '100%')
+      .attr('viewBox', '0 0 1150 1150') 
       .append('g')
       .attr(
         'transform',

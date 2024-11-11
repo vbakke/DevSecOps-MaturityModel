@@ -192,7 +192,8 @@
           </div>
         </ng-template>
       </div>
-      <div id="chart" class="heatmapClass">
+      <div class="heatmapClass">
+        <div id="chart" class="heatmapChart"></div>
         <div class="right-panel">
           <div class="team-filter">
             <mat-form-field class="team-chip-list">
@@ -269,22 +270,25 @@
               </mat-expansion-panel>
             </mat-card-content>
           </mat-card>
+          <div>
+            <button
+            class="normal-button"
+            mat-raised-button
+            class="downloadButtonClass"
+            (click)="SaveEditedYAMLfile()">
+            Download edited YAML file
+          </button>
+          <!-- <button
+            class="normal-button"
+            mat-raised-button
+            class="resetButtonClass"
+            (click)="ResetIsImplemented()">
+            Reset Implemented
+          </button> -->
+  
+          </div>
         </div>
 
-        <button
-          class="normal-button"
-          mat-raised-button
-          class="downloadButtonClass"
-          (click)="SaveEditedYAMLfile()">
-          Download edited YAML file
-        </button>
-        <button
-          class="normal-button"
-          mat-raised-button
-          class="resetButtonClass"
-          (click)="ResetIsImplemented()">
-          Reset Implemented
-        </button>
       </div>
     </div>
     <div class="col-md-3"></div>

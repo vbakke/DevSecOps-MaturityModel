@@ -17,22 +17,23 @@
 }
 
 .right-panel {
-  float: right;
-  width: 25%;
   margin: 5%;
   padding: 20px;
 }
+
+.heatmapClass {
+  display: grid;
+  grid-template-columns: minmax(300px, 80vh) minmax(30%, 90%);
+}
+
+#chart {
+  aspect-ratio: 1 / 1;
+}
+
 .downloadButtonClass {
-  position: fixed;
   padding: 10px;
   bottom: 5%;
   right: 5%;
-}
-.resetButtonClass {
-  position: fixed;
-  padding: 10px;
-  bottom: 5%;
-  right: 18%;
 }
 .overlay-details {
   z-index: 2;
