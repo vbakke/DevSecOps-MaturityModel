@@ -1,10 +1,11 @@
-<html>
+<!DOCTYPE html>
+<html lang="en"> 
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
     .main {
         display: grid;
-        background-color: aquamarine;
+        background-color: #9fada8;
         grid-template-rows: auto auto 1fr auto;
         grid-template-columns: 1fr 1fr;
         height: 100%;
@@ -14,8 +15,11 @@
         background-color: burlywood;
         grid-column: 1/3;
     }
+    header button {
+        display: none;
+    }
     chart {
-        background-color: greenyellow;
+        background-color: #a7ed88;
         grid-row: 2/5;
     }
     chart div {
@@ -42,6 +46,16 @@
     }
     matcard {
         background-color: rgb(167, 109, 190);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-bottom: 2rem;
+    }
+    card {
+        background-color: #d0bad9;
+        width: 80%;
+        padding: 1rem;
+        margin: 1rem;
     }
     button-footer {
         background-color: rgb(219, 220, 136);
@@ -57,20 +71,26 @@
             background-color: #1683d6;
             grid-row: 2;
         }
+        filter-pane.hidden {
+            height: 0;
+        }
+
         chart {
             grid-row: 3;
         }
         header, chart, matcard, filter-pane, button-footer {
             grid-column: 1/3;
         }
+        header button {
+            display: inline;
+        }
         
     }
     </style>
 </head>
-
     <body>
         <div class="main">
-            <header>Menu bar</header>
+            <header><span>Menu bar</span> <button onclick="onHeaderClick()">Toggle filter</button></header>
             <filter-pane>
                 <filter-row>
                     <filter>Group A</filter>
@@ -81,17 +101,32 @@
                     <filter>A Team</filter>
                     <filter>Tut &amp; Kjør-teamet</filter>
                     <filter>Team C</filter>
+                    <filter>Team D</filter>
+                    <filter>Eva</filter>
+                    <filter>Fresh & Fruity</filter>
                 </filter-row>
             </filter-pane>
             <chart>
                 <div>
                     <svg width="100%" height="100%" viewBox="0 0 1150 1150">
-                        <circle cx="550" cy="550" r="500" fill="white" stroke="black" />
+                        <circle cx="575" cy="575" r="550" fill="white" stroke="black" />
                     </svg>
                 </div>
             </chart>
-            <matcard>Mat card</matcard>
+            <matcard>
+                <card> Conduction of simple threat modeling on business level </card>
+                <card>  Creation of threat modeling processes and standards </card>
+                <card>  SBOM of components </card>
+            </matcard>
             <button-footer><button>Export YAML</button></button-footer>
         </div>
     </body>
+    <script>
+        function onHeaderClick(event) {
+            console.log('header clicked')
+            let $filter = document.querySelector('filter-pane');
+            $filter.classList.toggle('hidden');
+        }
+    </script>
+    
 </html>
