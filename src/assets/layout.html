@@ -76,11 +76,12 @@
         }
         filter-pane.hidden {
             height: 0;
+            visibility: collapse;
         }
 
         chart {
             grid-row: 3;
-            max-width: 60vh;
+            max-width: max(60vh, 60vw);
         }
         header, chart, matcard, filter-pane, button-footer {
             grid-column: 1/3;
