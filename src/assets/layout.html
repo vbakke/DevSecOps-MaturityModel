@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html lang="en"> 
+<html lang="en">
 <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
     .main {
@@ -21,9 +22,12 @@
     chart {
         background-color: #a7ed88;
         grid-row: 2/5;
+        display: grid;
+        justify-items: center;
+        align-content: space-between;
     }
     chart div {
-        aspect-ratio: 1 / 1;
+        width: 100%;
     }
     filter-pane {
         background-color: #528cb9;
@@ -81,6 +85,8 @@
 
         chart {
             grid-row: 3;
+        }
+        chart div {
             max-width: max(60vh, 60vw);
         }
         header, chart, matcard, filter-pane, button-footer {
@@ -108,13 +114,13 @@
                     <filter>Team C</filter>
                     <filter>Team D</filter>
                     <filter>Eva</filter>
-                    <filter>Fresh & Fruity</filter>
+                    <filter>Fresh &amp; Fruity</filter>
                 </filter-row>
             </filter-pane>
             <chart>
                 <div onclick="onChartClick()">
                     <svg width="100%" height="100%" viewBox="0 0 1150 1150">
-                        <circle cx="575" cy="575" r="550" fill="white" stroke="black" />
+                        <circle cx="575" cy="575" r="550" fill="white" stroke="black"></circle>
                         <text x="575" y="575" font-size="3rem" text-anchor="middle">toggle</text>
                     </svg>
                 </div>
@@ -127,7 +133,7 @@
             </matcard>
             <button-footer><button>Export YAML</button></button-footer>
         </div>
-    </body>
+    
     <script>
         function onHeaderClick(event) {
             console.log('header clicked')
@@ -140,5 +146,5 @@
             $cards.forEach((e) => e.classList.toggle('hidden'));
         }
     </script>
-    
+</body>
 </html>
