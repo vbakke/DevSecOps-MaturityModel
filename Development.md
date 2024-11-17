@@ -2,7 +2,14 @@
 
 ## Development server
 
-- Clone the repo
+The DSOMM is based on [Angular](https://angular.dev/). 
+- If you have not yet installed Angular command line tools, install them now:
+``` 
+npm install -g @angular/cli
+
+``` 
+
+- Clone the DSOMM repo
 ```
 git clone https://github.com/devsecopsmaturitymodel/DevSecOps-MaturityModel.git
 ```
