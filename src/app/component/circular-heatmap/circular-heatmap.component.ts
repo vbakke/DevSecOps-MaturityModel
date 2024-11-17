@@ -356,28 +356,34 @@ export class CircularHeatmapComponent implements OnInit {
     //console.log(segment_labels)
     //d3.select(dom_element_to_append_to).selectAll('svg').exit()
     let _self = this;
+    var imageWidth = 1200;
+    var marginAll = 5;
     var margin = {
-      top: 50,
-      right: 50,
-      bottom: 50,
-      left: 50,
+      top: marginAll,
+      right: marginAll,
+      bottom: marginAll,
+      left: marginAll,
     };
-    var width = 1250 - margin.left - margin.right;
+    var bbWidth = imageWidth - Math.max(margin.left+margin.right, margin.top+margin.bottom)*2;  // bounding box
+    var segmentLabelHeight = bbWidth * 0.0155;  // Fuzzy number, to match the longest label within one sector
+    // segmentLabelHeight = 50;
+    var outerRadius = bbWidth / 2 - segmentLabelHeight; 
+    var innerRadius = outerRadius / 7; 
+    var segmentHeight = (outerRadius -  innerRadius) / radial_labels.length;
+    
+    console.log(`Outer width: ${imageWidth}, inner radius: ${innerRadius},  outer radius: ${outerRadius}`);
+    console.log(`segmentHeight: ${segmentHeight}, labelHeight: ${segmentLabelHeight}, margin: ${(margin.left + margin.right + margin.top + margin.bottom) / 4}`);
+    
     var curr: any;
-    var height = width;
-    var innerRadius = 100; // width/14;
-
-    var segmentHeight =
-      (width - margin.top - margin.bottom - 2 * innerRadius) /
-      (2 * radial_labels.length);
-
     var chart = this.circularHeatChart(segment_labels.length)
+      .margin(margin)
       .innerRadius(innerRadius)
       .segmentHeight(segmentHeight)
       .domain([0, 1])
       .range(['white', 'green'])
       .radialLabels(radial_labels)
-      .segmentLabels(segment_labels);
+      .segmentLabels(segment_labels)
+      .segmentLabelHeight(segmentLabelHeight)
 
     chart.accessor(function (d: any) {
       return d['Done%'];
@@ -389,17 +395,15 @@ export class CircularHeatmapComponent implements OnInit {
       .data([dataset])
       .enter()
       .append('svg')
+      // .attr('width', imageWidth)
+      // .attr('height', imageWidth)
       .attr('width', '100%')
       .attr('height', '100%')
-      .attr('viewBox', '0 0 1150 1150') 
+      .attr('viewBox', `0 0 ${imageWidth} ${imageWidth}`) 
       .append('g')
       .attr(
         'transform',
-        'translate(' +
-          (width / 2 - (radial_labels.length * segmentHeight + innerRadius)) +
-          ',' +
-          margin.top +
-          ')'
+        `translate(${margin.left + segmentLabelHeight}, ${margin.top + segmentLabelHeight})`
       )
       .call(chart);
 
@@ -455,7 +459,9 @@ export class CircularHeatmapComponent implements OnInit {
               curr.SubDimension.replace(/ /g, '-') +
               '-' +
               curr.Level.replaceAll(' ', '-')
-          ).attr('fill', 'yellow');
+          )
+          .attr('stroke-width', '7')
+          .attr('stroke', 'green');
         }
       })
 
@@ -468,7 +474,10 @@ export class CircularHeatmapComponent implements OnInit {
               curr.SubDimension.replace(/ /g, '-') +
               '-' +
               curr.Level.replaceAll(' ', '-')
-          ).attr('fill', function (p) {
+          )
+          .attr('stroke-width', '')
+          .attr('stroke', '#252525')
+          .attr('fill', function (p) {
             var color = d3
               .scaleLinear<string, string>()
               .domain([0, 1])
@@ -499,6 +508,7 @@ export class CircularHeatmapComponent implements OnInit {
       innerRadius = 20,
       numSegments = num_of_segments,
       segmentHeight = 20,
+      segmentLabelHeight = 12,
       domain: any = null,
       range = ['white', 'red'],
       accessor = function (d: any) {
@@ -563,9 +573,7 @@ export class CircularHeatmapComponent implements OnInit {
               .startAngle(sa)
               .endAngle(ea)
           )
-          .attr('stroke', function (d) {
-            return '#252525';
-          })
+          .attr('stroke', '#252525')
           .attr('fill', function (d) {
             return color(accessor(d));
           });
@@ -575,7 +583,8 @@ export class CircularHeatmapComponent implements OnInit {
         var id = 1;
 
         //Segment labels
-        var segmentLabelOffset = 5;
+        var segmentLabelFontSize = segmentLabelHeight * 2/3;
+        var segmentLabelOffset = segmentLabelHeight * 1/3;
         var r =
           innerRadius +
           Math.ceil(data.length / numSegments) * segmentHeight +
@@ -605,10 +614,11 @@ export class CircularHeatmapComponent implements OnInit {
           .enter()
           .append('text')
           .append('textPath')
+          .attr('text-anchor', 'middle')
           .attr('xlink:href', '#segment-label-path-' + id)
-          .style('font-size', '12px')
+          .style('font-size', segmentLabelFontSize)
           .attr('startOffset', function (d, i) {
-            return (i * 100) / numSegments + 0.1 + '%';
+            return ((i+.5) * 100) / numSegments + '%';   // shift ½ segment to center
           })
           .text(function (d: any) {
             return d;
@@ -656,6 +666,12 @@ export class CircularHeatmapComponent implements OnInit {
     chart.segmentHeight = function (_: any) {
       // if (!arguments.length) return segmentHeight;
       segmentHeight = _;
+      return chart;
+    };
+
+    chart.segmentLabelHeight = function (_: any) {
+      // if (!arguments.length) return segmentLabelHeight;
+      segmentLabelHeight = _;
       return chart;
     };
 

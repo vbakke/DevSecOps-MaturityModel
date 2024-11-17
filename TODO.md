@@ -23,6 +23,7 @@
 
 
 # Done
+- Heatmap: Fix calculations of heatmap dimension
 - Heatmap: Toggle filters' visibility
 - Heatmap: (Re)move Reset button
 - Heatmap: Fix responsive layout
