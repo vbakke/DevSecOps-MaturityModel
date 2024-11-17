@@ -8,9 +8,7 @@
 .sidenav-content {
   display: flex;
   padding: 10px;
-  align-items: left;
-  justify-content: left;
-  /*background-color: red;*/
+  justify-content: space-between;
 }
 
 .example-sidenav {
@@ -19,4 +17,11 @@
 
 .github-fork-ribbon:before {
   background-color: #333;
+}
+
+@media only screen and (max-width: 750px) {
+    .github-fork-ribbon {
+        display: none;
+      }
+    
 }

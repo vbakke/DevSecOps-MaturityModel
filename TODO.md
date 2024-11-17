@@ -8,7 +8,7 @@
 - Heatmap: Make heatmap the start page
 - Heatmap: TeamGroup filter: No selection means all selected
 - Heatmap: TeamGroup filter: Fix removing last filter
-- Heatmap: (Re)move Reset button
+- Heatmap: Add Reset data under settings
 - Heatmap: Center labels on sectors
 - Heatmap: Highlight selected sector
 - Heatmap: Alter current bright yellow hover
@@ -23,4 +23,6 @@
 
 
 # Done
+- Heatmap: Toggle filters' visibility
+- Heatmap: (Re)move Reset button
 - Heatmap: Fix responsive layout
