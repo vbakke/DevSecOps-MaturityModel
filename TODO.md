@@ -1,10 +1,10 @@
+# ToDo
 - App: Alert when generated.yaml is not found
 - App: Filter radio buttons: Default, no selections: meaning all selected
 - App: Make radio button, and use Ctrl-Click to multiple (hold click on mobile)
 - App: Fix bug, that greys out all sectors on startup
 - App: Onboarding: Define teams, Setup generated.yaml (is 'generated.yaml' a good name?)
 
-- Heatmap: Fix responsive layout
 - Heatmap: Make heatmap the start page
 - Heatmap: TeamGroup filter: No selection means all selected
 - Heatmap: TeamGroup filter: Fix removing last filter
@@ -20,3 +20,7 @@
 - Mapping: Fix: Sort by ISO 2017 is DESC (and 12.2)
 
 - Matrix: Make radio button, and use Ctrl-Click to multiple (hold click on mobile)
+
+
+# Done
+- Heatmap: Fix responsive layout
