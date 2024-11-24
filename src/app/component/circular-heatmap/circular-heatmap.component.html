@@ -193,6 +193,7 @@
         </ng-template>
       </div>
       <div class="heatmapClass">
+        <div id="chart" class="heatmapChart"></div>
         <div class="team-filter">
           <mat-form-field class="team-chip-list">
             <mat-label>Team Group Filter</mat-label>
@@ -217,13 +218,14 @@
               <mat-chip
                 #c="matChip"
                 *ngFor="let team of teamList"
-                (click)="toggleTeamSelection(c)">
+                (click)="toggleTeamSelection(c)"
+                selected
+                >
                 {{ team }}
               </mat-chip>
             </mat-chip-list>
           </mat-form-field>
         </div>
-        <div class="heatmapChart"><div id="chart"></div></div>
         <mat-card class="example-card" *ngIf="showActivityCard">
           <mat-card-title-group>
             <mat-card-title>{{ cardHeader }}</mat-card-title>
@@ -251,13 +253,12 @@
               <ng-template matExpansionPanelContent>
                 <ul class="team-list">
                   <li
-                    *ngFor="let item of activity.teamsImplemented | keyvalue">
+                    *ngFor="let teamname of teamVisible">
                     <mat-checkbox
-                      [checked]="item.value === true"
-                      *ngIf="teamVisible.includes(item.key | ToStringValue)"
+                      [checked]="activity.teamsImplemented[teamname]"
                       color="primary"
-                      (click)="this.teamCheckbox(activityIndex, item.key)">
-                      {{ item.key }}
+                      (click)="this.teamCheckbox(activityIndex, teamname); $event.preventDefault()">
+                      {{ teamname }}
                     </mat-checkbox>
                   </li>
                 </ul>

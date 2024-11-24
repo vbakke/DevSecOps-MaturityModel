@@ -77,6 +77,7 @@ export class CircularHeatmapComponent implements OnInit {
     this.yaml.setURI('./assets/YAML/generated/generated.yaml');
 
     this.yaml.getJson().subscribe(data => {
+      console.log('LoadMaturityDataFromGeneratedYaml')
       this.YamlObject = data;
       var allDimensionNames = Object.keys(this.YamlObject);
       var totalTeamsImplemented: number = 0;
@@ -101,10 +102,12 @@ export class CircularHeatmapComponent implements OnInit {
 
             for (var a = 0; a < allActivityInThisSubDimension.length; a++) {
               try {
-                var lvlOfCurrentActivity =
+                var currentActivity:any =
                   this.YamlObject[allDimensionNames[d]][
                     allSubDimensionInThisDimension[s]
-                  ][allActivityInThisSubDimension[a]]['level'];
+                  ][allActivityInThisSubDimension[a]];
+
+                var lvlOfCurrentActivity = currentActivity['level'];
 
                 if (lvlOfCurrentActivity == l + 1) {
                   var nameOfActivity: string = allActivityInThisSubDimension[a];
@@ -118,9 +121,7 @@ export class CircularHeatmapComponent implements OnInit {
                   });
 
                   var teamsImplemented: any =
-                    this.YamlObject[allDimensionNames[d]][
-                      allSubDimensionInThisDimension[s]
-                    ][allActivityInThisSubDimension[a]]['teamsImplemented'];
+                    currentActivity.teamsImplemented;
 
                   if (teamsImplemented) {
                     teamStatus = teamsImplemented;
@@ -129,33 +130,36 @@ export class CircularHeatmapComponent implements OnInit {
                   var localStorageData = this.getFromBrowserState();
 
                   if (localStorageData != null && localStorageData.length > 0) {
-                    this.YamlObject[allDimensionNames[d]][
-                      allSubDimensionInThisDimension[s]
-                    ][allActivityInThisSubDimension[a]]['teamsImplemented'] =
+                    var combinedTeamsImplemented = Object.assign(
+                      {},
+                      teamsImplemented,
                       this.getTeamImplementedFromJson(
                         localStorageData,
                         allActivityInThisSubDimension[a]
-                      );
-                  }
-
-                  (
-                    Object.keys(teamStatus) as (keyof typeof teamStatus)[]
-                  ).forEach((key, index) => {
-                    totalActivityTeams += 1;
-                    if (teamStatus[key] === true) {
-                      totalTeamsImplemented += 1;
-                    }
-                  });
-
-                  activity.push({
-                    activityName: nameOfActivity,
-                    teamsImplemented: teamStatus,
-                  });
+                      ));
+                    currentActivity.teamsImplemented = combinedTeamsImplemented;
                 }
 
-                if (totalActivityTeams > 0) {
-                  activityCompletionStatus =
-                    totalTeamsImplemented / totalActivityTeams;
+                //  Suspected dead code - 2024-11-24
+                //   (
+                //     Object.keys(teamStatus) as (keyof typeof teamStatus)[]
+                //   ).forEach((key, index) => {
+                //     totalActivityTeams += 1;
+                //     if (teamStatus[key] === true) {
+                //       totalTeamsImplemented += 1;
+                //     }
+                //   });
+                // 
+                //   activity.push({
+                //     activityName: nameOfActivity,
+                //     teamsImplemented: teamStatus,
+                //   });
+                // }
+                //
+                // if (totalActivityTeams > 0) {
+                //   // activityCompletionStatus =
+                //     totalTeamsImplemented / totalActivityTeams;
+                //   console.log(`${totalTeamsImplemented} of ${totalActivityTeams} (${(activityCompletionStatus*100).toFixed(1)}%) ${currentActivity.measure}`)
                 }
               } catch {
                 console.log('level for activity does not exist');
@@ -220,18 +224,22 @@ export class CircularHeatmapComponent implements OnInit {
   private LoadTeamsFromMetaYaml() {
     this.yaml.setURI('./assets/YAML/meta.yaml');
     this.yaml.getJson().subscribe(data => {
+      console.log('LoadTeamsFromMetaYaml')
       this.YamlObject = data;
-
+      
       this.teamList = this.YamlObject['teams'];
       this.teamGroups = this.YamlObject['teamGroups'];
       this.teamVisible = [...this.teamList];
+      console.log('Teams: ', this.teamList)
+      console.log('Teams vis: ', this.teamVisible)
     });
   }
-
+  
   private LoadMaturityLevels() {
     this.yaml.setURI('./assets/YAML/meta.yaml');
     // Function sets column header
     this.yaml.getJson().subscribe(data => {
+      console.log('LoadMaturityLevels')
       this.YamlObject = data;
 
       // Levels header
@@ -245,27 +253,21 @@ export class CircularHeatmapComponent implements OnInit {
 
   toggleTeamGroupSelection(chip: MatChip) {
     chip.toggleSelected();
-    let currChipValue = chip.value.replace(/\s/g, '');
+    let currChipValue = chip.value.trim();
 
     if (chip.selected) {
       this.selectedTeamChips = [currChipValue];
       if (currChipValue == 'All') {
         this.teamVisible = [...this.teamList];
       } else {
-        this.teamVisible = [];
-
-        (
-          Object.keys(this.teamGroups) as (keyof typeof this.teamGroups)[]
-        ).forEach((key, index) => {
-          if (key === currChipValue) {
-            console.log('group selected');
-            this.teamVisible = [...this.teamGroups[key]];
-          }
-        });
+        var teamGroup:any = this.teamGroups[currChipValue];
+        this.teamVisible = this.teamList.filter(
+          (teamname:string) =>  teamGroup.includes(teamname)
+        );
       }
     } else {
       this.selectedTeamChips = this.selectedTeamChips.filter(
-        o => o !== currChipValue
+        (teamname:string) => teamname !== currChipValue
       );
     }
     console.log('Selected Chips', this.selectedTeamChips);
@@ -278,7 +280,7 @@ export class CircularHeatmapComponent implements OnInit {
 
   toggleTeamSelection(chip: MatChip) {
     chip.toggleSelected();
-    let currChipValue = chip.value.replace(/\s/g, '');
+    let currChipValue = chip.value.trim();
     let prevSelectedChip = this.selectedTeamChips;
     if (chip.selected) {
       this.teamVisible.push(currChipValue);
@@ -309,7 +311,7 @@ export class CircularHeatmapComponent implements OnInit {
     console.log('updating chips', fromTeamGroup);
     // Re select chips
     this.matChipsArray.forEach(chip => {
-      let currChipValue = chip.value.replace(/\s/g, '');
+      let currChipValue = chip.value.trim();
 
       if (this.teamVisible.includes(currChipValue)) {
         console.log(currChipValue);
@@ -342,7 +344,7 @@ export class CircularHeatmapComponent implements OnInit {
       !this.ALL_CARD_DATA[index]['Activity'][activityIndex]['teamsImplemented'][
         teamKey
       ];
-
+    console.log(`teamCheckbox(${teamKey}); Changed into: ${this.ALL_CARD_DATA[index]['Activity'][activityIndex]['teamsImplemented'][teamKey]}`);
     this.saveState();
     this.reColorHeatmap();
   }
@@ -711,11 +713,8 @@ export class CircularHeatmapComponent implements OnInit {
   }
 
   noActivitytoGrey(): void {
-    console.log(this.ALL_CARD_DATA);
     for (var x = 0; x < this.ALL_CARD_DATA.length; x++) {
       if (this.ALL_CARD_DATA[x]['Done%'] == -1) {
-        console.log(this.ALL_CARD_DATA[x]['SubDimension']);
-        console.log(this.ALL_CARD_DATA[x]['Level']);
         d3.selectAll(
           '#segment-' +
             this.ALL_CARD_DATA[x]['SubDimension'].replace(/ /g, '-') +
@@ -760,31 +759,28 @@ export class CircularHeatmapComponent implements OnInit {
 
   reColorHeatmap() {
     console.log('recolor');
+    var teamsCount = this.teamVisible.length;
+
     for (var index = 0; index < this.ALL_CARD_DATA.length; index++) {
-      let cntAll: number = 0;
+      var activities = this.ALL_CARD_DATA[index]['Activity'];
+      let cntAll: number = teamsCount * activities.length;
       let cntTrue: number = 0;
       var _self = this;
-      for (var i = 0; i < this.ALL_CARD_DATA[index]['Activity'].length; i++) {
-        var activityTeamList: any;
-        activityTeamList =
-          this.ALL_CARD_DATA[index]['Activity'][i]['teamsImplemented'];
-        (
-          Object.keys(activityTeamList) as (keyof typeof activityTeamList)[]
-        ).forEach((key, index) => {
-          if (typeof key === 'string') {
-            if (this.teamVisible.includes(key)) {
-              if (activityTeamList[key] === true) {
-                cntTrue += 1;
-              }
-              cntAll += 1;
-            }
+      for (var i = 0; i < activities.length; i++) {
+        for (var teamname of this.teamVisible) {
+          if (activities[i]['teamsImplemented'][teamname]) {
+            cntTrue++;
+            console.log(`Counting ${activities[i].activityName}: ${teamname} (${cntTrue})`);
           }
-        });
+        }
       }
+      
       if (cntAll !== 0) {
         this.ALL_CARD_DATA[index]['Done%'] = cntTrue / cntAll;
+        console.log(`${this.ALL_CARD_DATA[index].SubDimension} ${this.ALL_CARD_DATA[index].Level} Done: ${cntTrue}/${cntAll} = ${(cntTrue / cntAll*100).toFixed(1)}%`);
       } else {
         this.ALL_CARD_DATA[index]['Done%'] = -1;
+        console.log(`${this.ALL_CARD_DATA[index].SubDimension} ${this.ALL_CARD_DATA[index].Level} None`);
       }
       var color = d3
         .scaleLinear<string, string>()
