@@ -40,8 +40,8 @@ strings:
         'Level 5: Advanced deployment of security practices at scale',
       ]
 # Default team
-teams: ['Default', 'B', 'C']
+teams: ['B', 'C', 'eCare', 'Lead Time', 'TKS', 'Workbench', 'NY']
 teamGroups:
-  GroupA: ['Default', 'B']
-  GroupB: ['B', 'C']
-  GroupC: ['Default', 'C']
+  WebLogic: ['TKS', 'Workbench']
+  K8s: ['Lead Time', 'eCare', 'NY']
+  GroupC: ['B', 'C']
