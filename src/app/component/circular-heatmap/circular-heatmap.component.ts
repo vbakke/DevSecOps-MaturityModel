@@ -77,6 +77,7 @@ export class CircularHeatmapComponent implements OnInit {
     this.yaml.setURI('./assets/YAML/generated/generated.yaml');
 
     this.yaml.getJson().subscribe(data => {
+      console.log('LoadMaturityDataFromGeneratedYaml')
       this.YamlObject = data;
       var allDimensionNames = Object.keys(this.YamlObject);
       var totalTeamsImplemented: number = 0;
@@ -223,6 +224,7 @@ export class CircularHeatmapComponent implements OnInit {
   private LoadTeamsFromMetaYaml() {
     this.yaml.setURI('./assets/YAML/meta.yaml');
     this.yaml.getJson().subscribe(data => {
+      console.log('LoadTeamsFromMetaYaml')
       this.YamlObject = data;
       
       this.teamList = this.YamlObject['teams'];
@@ -237,6 +239,7 @@ export class CircularHeatmapComponent implements OnInit {
     this.yaml.setURI('./assets/YAML/meta.yaml');
     // Function sets column header
     this.yaml.getJson().subscribe(data => {
+      console.log('LoadMaturityLevels')
       this.YamlObject = data;
 
       // Levels header
