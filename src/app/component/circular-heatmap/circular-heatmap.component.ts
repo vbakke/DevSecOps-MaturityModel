@@ -66,7 +66,7 @@ export class CircularHeatmapComponent implements OnInit {
 
   ngOnInit(): void {
     // Ensure that Levels and Teams load before MaturityData
-    // using promises, since ngOnInit does not support async/await
+    // Using promises, since ngOnInit does not support async/await
     this.LoadMaturityLevels()
       .then(() => this.LoadTeamsFromMetaYaml())
       .then(() => this.LoadMaturityDataFromGeneratedYaml());
@@ -230,7 +230,7 @@ export class CircularHeatmapComponent implements OnInit {
 
       console.log((performance.now()/1000).toFixed(3) + 's: LoadTeamsFromMetaYaml STARTUP');
       this.yaml.setURI('./assets/YAML/teams.yaml');
-      this.yaml.getJson().subscribe(data => { setTimeout((data) => {
+      this.yaml.getJson().subscribe(data => { 
         console.log((performance.now()/1000).toFixed(3) + 's: LoadTeamsFromMetaYaml RECEIVED');
         
         this.YamlObject = data;
@@ -240,7 +240,7 @@ export class CircularHeatmapComponent implements OnInit {
         this.teamVisible = [...this.teamList];
         console.log((performance.now()/1000).toFixed(3) + 's: LoadTeamsFromMetaYaml END');
         resolve();
-      }, 500, data)});
+      });
     });
   }
 
@@ -249,7 +249,7 @@ export class CircularHeatmapComponent implements OnInit {
       console.log((performance.now()/1000).toFixed(3) + 's: LoadMaturityLevels STARTUP');
       this.yaml.setURI('./assets/YAML/meta.yaml');
       // Function sets column header
-      this.yaml.getJson().subscribe(data => { setTimeout((data) => {
+      this.yaml.getJson().subscribe(data => { 
         console.log((performance.now()/1000).toFixed(3) + 's: LoadMaturityLevels RECEIVED');
         this.YamlObject = data;
 
@@ -261,7 +261,7 @@ export class CircularHeatmapComponent implements OnInit {
         }
         console.log((performance.now()/1000).toFixed(3) + 's: LoadMaturityLevels END');
         resolve();
-      }, 700, data)});
+      });
     });
   }
 
