@@ -74,9 +74,11 @@ export class CircularHeatmapComponent implements OnInit {
   matChipsArray: MatChip[] = [];
 
   private LoadMaturityDataFromGeneratedYaml() {
+    console.log((performance.now()/1000).toFixed(3) + 's: LoadMaturityDataFromGeneratedYaml STARTUP');
     this.yaml.setURI('./assets/YAML/generated/generated.yaml');
 
     this.yaml.getJson().subscribe(data => {
+      console.log((performance.now()/1000).toFixed(3) + 's: LoadMaturityDataFromGeneratedYaml RECEIVED');
       this.YamlObject = data;
       var allDimensionNames = Object.keys(this.YamlObject);
       var totalTeamsImplemented: number = 0;
@@ -184,6 +186,8 @@ export class CircularHeatmapComponent implements OnInit {
         this.segment_labels
       );
       this.noActivitytoGrey();
+      console.log((performance.now()/1000).toFixed(3) + 's: LoadMaturityDataFromGeneratedYaml END');
+
     });
   }
 
@@ -218,20 +222,26 @@ export class CircularHeatmapComponent implements OnInit {
   }
 
   private LoadTeamsFromMetaYaml() {
-    this.yaml.setURI('./assets/YAML/meta.yaml');
-    this.yaml.getJson().subscribe(data => {
+    console.log((performance.now()/1000).toFixed(3) + 's: LoadTeamsFromMetaYaml STARTUP');
+    this.yaml.setURI('./assets/YAML/teams.yaml');
+    this.yaml.getJson().subscribe(data => { setTimeout((data) => {
+      console.log((performance.now()/1000).toFixed(3) + 's: LoadTeamsFromMetaYaml RECEIVED');
+      
       this.YamlObject = data;
 
       this.teamList = this.YamlObject['teams'];
       this.teamGroups = this.YamlObject['teamGroups'];
       this.teamVisible = [...this.teamList];
-    });
+      console.log((performance.now()/1000).toFixed(3) + 's: LoadTeamsFromMetaYaml END');
+    }, 500, data)});
   }
 
   private LoadMaturityLevels() {
+    console.log((performance.now()/1000).toFixed(3) + 's: LoadMaturityLevels STARTUP');
     this.yaml.setURI('./assets/YAML/meta.yaml');
     // Function sets column header
-    this.yaml.getJson().subscribe(data => {
+    this.yaml.getJson().subscribe(data => { setTimeout((data) => {
+      console.log((performance.now()/1000).toFixed(3) + 's: LoadMaturityLevels RECEIVED');
       this.YamlObject = data;
 
       // Levels header
@@ -240,7 +250,8 @@ export class CircularHeatmapComponent implements OnInit {
         this.radial_labels.push('Level ' + y);
         this.maxLevelOfActivities = y;
       }
-    });
+      console.log((performance.now()/1000).toFixed(3) + 's: LoadMaturityLevels END');
+    }, 700, data)});
   }
 
   toggleTeamGroupSelection(chip: MatChip) {
@@ -390,7 +401,8 @@ export class CircularHeatmapComponent implements OnInit {
       .enter()
       .append('svg')
       .attr('width', '60%') // 70% forces the heatmap down
-      .attr('height', height + margin.top + margin.bottom)
+      .attr('height', 'auto')
+      .attr('viewBox', '0 0 1150 1150')
       .append('g')
       .attr(
         'transform',
@@ -694,11 +706,11 @@ export class CircularHeatmapComponent implements OnInit {
   }
 
   noActivitytoGrey(): void {
-    console.log(this.ALL_CARD_DATA);
+    // console.log(this.ALL_CARD_DATA);
     for (var x = 0; x < this.ALL_CARD_DATA.length; x++) {
       if (this.ALL_CARD_DATA[x]['Done%'] == -1) {
-        console.log(this.ALL_CARD_DATA[x]['SubDimension']);
-        console.log(this.ALL_CARD_DATA[x]['Level']);
+        // console.log(this.ALL_CARD_DATA[x]['SubDimension']);
+        // console.log(this.ALL_CARD_DATA[x]['Level']);
         d3.selectAll(
           '#segment-' +
             this.ALL_CARD_DATA[x]['SubDimension'].replace(/ /g, '-') +
