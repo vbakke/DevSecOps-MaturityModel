@@ -229,7 +229,7 @@ export class CircularHeatmapComponent implements OnInit {
     return new Promise<void>((resolve, reject) => {
 
       console.log((performance.now()/1000).toFixed(3) + 's: LoadTeamsFromMetaYaml STARTUP');
-      this.yaml.setURI('./assets/YAML/teams.yaml');
+      this.yaml.setURI('./assets/YAML/meta.yaml');
       this.yaml.getJson().subscribe(data => { 
         console.log((performance.now()/1000).toFixed(3) + 's: LoadTeamsFromMetaYaml RECEIVED');
         
