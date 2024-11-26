@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
 import { MatChip } from '@angular/material/chips';
 
 export interface activitySchema {
+  uuid: string;
   activityName: string;
   teamsImplemented: any;
 }
@@ -112,6 +113,7 @@ export class CircularHeatmapComponent implements OnInit {
                   ][allActivityInThisSubDimension[a]];
 
                 var lvlOfCurrentActivity = currentActivity['level'];
+                var uuid = currentActivity['uuid'];
 
                   if (lvlOfCurrentActivity == l + 1) {
                     var nameOfActivity: string = allActivityInThisSubDimension[a];
@@ -141,29 +143,27 @@ export class CircularHeatmapComponent implements OnInit {
                         localStorageData,
                         allActivityInThisSubDimension[a]
                       ));
-                    currentActivity.teamsImplemented = combinedTeamsImplemented;
+                  }
+
+                  (
+                    Object.keys(teamStatus) as (keyof typeof teamStatus)[]
+                  ).forEach((key, index) => {
+                    totalActivityTeams += 1;
+                    if (teamStatus[key] === true) {
+                      totalTeamsImplemented += 1;
+                    }
+                  });
+
+                  activity.push({
+                    uuid: uuid,
+                    activityName: nameOfActivity,
+                    teamsImplemented: teamStatus,
+                  });
                 }
 
-                //  Suspected dead code - 2024-11-24
-                //   (
-                //     Object.keys(teamStatus) as (keyof typeof teamStatus)[]
-                //   ).forEach((key, index) => {
-                //     totalActivityTeams += 1;
-                //     if (teamStatus[key] === true) {
-                //       totalTeamsImplemented += 1;
-                //     }
-                //   });
-                // 
-                //   activity.push({
-                //     activityName: nameOfActivity,
-                //     teamsImplemented: teamStatus,
-                //   });
-                // }
-                //
-                // if (totalActivityTeams > 0) {
-                //   // activityCompletionStatus =
-                //     totalTeamsImplemented / totalActivityTeams;
-                //   console.log(`${totalTeamsImplemented} of ${totalActivityTeams} (${(activityCompletionStatus*100).toFixed(1)}%) ${currentActivity.measure}`)
+                if (totalActivityTeams > 0) {
+                  activityCompletionStatus =
+                    totalTeamsImplemented / totalActivityTeams;
                 }
               } catch {
                 console.log('level for activity does not exist');
@@ -821,7 +821,7 @@ export class CircularHeatmapComponent implements OnInit {
 
   ResetIsImplemented() {
     localStorage.removeItem('dataset');
-    this.loadState()
+    this.loadState();
   }
 
   saveState() {
