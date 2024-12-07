@@ -2,7 +2,7 @@
 #
 # Teams
 #
-teams: ['A', 'B', 'C']
+teams: ['A', 'B', 'C', 'Default']
 teamGroups:
   AB: ['A', 'B']
   BC: ['B', 'C']
