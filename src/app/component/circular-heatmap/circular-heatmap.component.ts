@@ -232,7 +232,7 @@ export class CircularHeatmapComponent implements OnInit {
     return new Promise<void>((resolve, reject) => {
 
       console.log((performance.now()/1000).toFixed(3) + 's: LoadTeamsFromMetaYaml STARTUP');
-      this.yaml.setURI('./assets/YAML/teams.yaml');
+      this.yaml.setURI('./assets/YAML/my_teams.yaml');
       this.yaml.getJson().subscribe(data => { 
       console.log('LoadTeamsFromMetaYaml')
         console.log((performance.now()/1000).toFixed(3) + 's: LoadTeamsFromMetaYaml RECEIVED');
@@ -439,14 +439,19 @@ export class CircularHeatmapComponent implements OnInit {
     }
 
     svg
-      .selectAll('path')
+      .selectAll('path,use')
       .on('click', function (d) {
-        console.log(d);
-        try {
-          curr = d.explicitOriginalTarget.__data__;
-        } catch {
+        console.log(_self.perfNow() + ': click: ', d);
+        var clickedId;
+        if (d.currentTarget.localName === 'use') {
+          clickedId = d.currentTarget.href.baseVal;
+          curr = document.querySelector(clickedId).__data__;
+        } else {
+          clickedId = '#' + d.srcElement.id;
           curr = d.srcElement.__data__;
         }
+
+
         var index = 0;
         var cnt = 0;
         for (var i = 0; i < _self.ALL_CARD_DATA.length; i++) {
@@ -459,15 +464,22 @@ export class CircularHeatmapComponent implements OnInit {
           }
         }
         console.log('index', _self.ALL_CARD_DATA[index]['Activity']);
-        _self.currentDimension = curr.Dimension;
-        _self.cardSubheader = curr.Level;
-        _self.activityData = curr.Activity;
-        _self.cardHeader = curr.SubDimension;
-        _self.showActivityCard = true;
-        //console.log(_self.activityData)
+        var cursor = document.querySelector('use#selected');
+        if (_self.ALL_CARD_DATA[index]['Done%'] == -1) {
+          _self.showActivityCard = false;          
+          cursor?.setAttribute('href', '');  
+        } else {
+          _self.showActivityCard = true;
+          _self.currentDimension = curr.Dimension;
+          _self.cardSubheader = curr.Level;
+          _self.activityData = curr.Activity;
+          _self.cardHeader = curr.SubDimension;
+          
+          cursor?.setAttribute('href', clickedId);  
+        }
       })
       .on('mouseover', function (d) {
-        //console.log(d.toElement.__data__.Name)
+        console.log(_self.perfNow() + ': mouseover', d)
         try {
           curr = d.explicitOriginalTarget.__data__;
         } catch {
@@ -475,7 +487,13 @@ export class CircularHeatmapComponent implements OnInit {
         }
         // increase the segment height of the one being hovered as well as all others of the same date
         // while decreasing the height of all others accordingly
-        if (curr['Done%'] != -1) {
+        if (curr && curr['Done%'] != -1) {
+          var clickedId = '#' + d.srcElement.id;
+          var cursor = document.querySelector('use#hover');
+          cursor?.setAttribute('href', clickedId);
+  
+
+
           d3.selectAll(
             '#segment-' +
               curr.SubDimension.replace(/ /g, '-') +
@@ -488,9 +506,27 @@ export class CircularHeatmapComponent implements OnInit {
       })
 
       .on('mouseout', function (d) {
-        //console.log(d.explicitOriginalTarget.__data__.Day)
+        console.log(_self.perfNow() + ': mouseout', d)
+        var clickedId;
+        if (d.currentTarget.localName === 'use') {
+          if (d.currentTarget.id === 'selected') {
+            return;
+          }
+          clickedId = d.currentTarget.href.baseVal;
+          curr = document.querySelector(clickedId).__data__;
+          d.currentTarget.setAttribute('href', '');  
+        } else {
+          clickedId = '#' + d.srcElement.id;
+          curr = d.srcElement.__data__;
+        }
 
-        if (curr['Done%'] != -1) {
+        // try {
+        //   curr = d.explicitOriginalTarget.__data__;
+        // } catch {
+        //   curr = d.srcElement.__data__;
+        // }
+
+        if (curr && curr['Done%'] != -1) {
           d3.selectAll(
             '#segment-' +
               curr.SubDimension.replace(/ /g, '-') +
@@ -499,22 +535,16 @@ export class CircularHeatmapComponent implements OnInit {
           )
           .attr('stroke-width', '')
           .attr('stroke', '#252525')
-          .attr('fill', function (p) {
-            var color = d3
-              .scaleLinear<string, string>()
-              .domain([0, 1])
-              .range(['white', 'green']);
-            // how to access a function within reusable charts
-            //console.log(color(d.Done));
-            return color(curr['Done%']);
-          });
-        } else {
-          d3.selectAll(
-            '#segment-' +
-              curr.SubDimension.replace(/ /g, '-') +
-              '-' +
-              curr.Level.replaceAll(' ', '-')
-          ).attr('fill', '#DCDCDC');
+          // .attr('fill', function (p) {
+          //     var color = d3
+          //     .scaleLinear<string, string>()
+          //     .domain([0, 1])
+          //     .range(['white', 'green']);
+          //   // how to access a function within reusable charts
+          //   //console.log(color(d.Done));
+          //   return color(curr['Done%']);
+          // })
+          ;
         }
       });
     this.reColorHeatmap();
@@ -645,6 +675,27 @@ export class CircularHeatmapComponent implements OnInit {
           .text(function (d: any) {
             return d;
           });
+        var cursors = svg
+          .append('g')
+          .classed('cursors', true)
+          .attr(
+            'transform',
+            'translate(' +
+              (margin.left + offset) +
+              ',' +
+              (margin.top + offset) +
+              ')'
+          );
+        cursors
+          .append('use')
+          .attr('id', 'hover')
+          .attr('stroke', 'green')
+          .attr('stroke-width', '3');
+        cursors
+          .append('use')
+          .attr('id', 'selected')
+          .attr('stroke-width', '5');
+
       });
     }
 
@@ -845,5 +896,9 @@ export class CircularHeatmapComponent implements OnInit {
     if (content != null) {
       return JSON.parse(content);
     }
+  }
+
+  perfNow(): string {
+    return (performance.now() / 1000).toFixed(3);
   }
 }
