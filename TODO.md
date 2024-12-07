@@ -1,6 +1,5 @@
 # File issue:
  - UI not responsive to screen size
-
  - Changing team names has no effect
  - Default installation (no generated.yaml) does not work
  - Filter illogical / not working as expected
