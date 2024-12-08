@@ -87,6 +87,10 @@
   display: flex;
   flex-direction: column;
 }
+.team-filter.hidden {
+  height: 0;
+  visibility: collapse;
+}
 .team-filter > .mat-form-field {
   display: block;
 }
@@ -125,10 +129,6 @@
   .team-filter {
       grid-row: 1;
       padding: 0.4rem;
-  }
-  .team-filter.hidden {
-      height: 0;
-      visibility: collapse;
   }
   .mat-chip-list {
       padding: 0.4rem;
