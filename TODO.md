@@ -12,7 +12,6 @@
 - App: Fix bug, that greys out all sectors on startup
 - App: Onboarding: Define teams, Setup generated.yaml (is 'generated.yaml' a good name?)
 
-- Heatmap: Make heatmap the start page
 - Heatmap: TeamGroup filter: No selection means all selected
 - Heatmap: TeamGroup filter: Fix removing last filter
 - Heatmap: Add Reset data under settings
@@ -33,6 +32,7 @@
 - Heatmap: Allow non-standard team names and groups
 
 # Done
+- Heatmap: Make heatmap the start page
 - Heatmap: Center labels on sectors
 - Heatmap: Fix calculations of heatmap dimension
 - Heatmap: Toggle filters' visibility
