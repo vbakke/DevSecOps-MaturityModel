@@ -87,10 +87,16 @@
   display: flex;
   flex-direction: column;
 }
+
 .team-filter.hidden {
   height: 0;
   visibility: collapse;
 }
+
+.filter-toggle .hidden {
+  display: none;
+}
+
 .team-filter > .mat-form-field {
   display: block;
 }
@@ -109,12 +115,28 @@
   flex-wrap: wrap;
   padding: 1rem;  
 }
+.filter-container {
+  position: relative;
+}
+button.filter-toggle {
+  position: absolute;
+  top: -6px;
+  right: 0;
+  border: 0;
+  background-color: transparent;
+  z-index: 1;
+  padding: 0;
+  min-width: 0;
+}
+
+
 .footer-buttons {
   grid-column: 2/3;
-  place-self: end;
+  place-self: flex-end;
   margin: 0 1rem;
+  padding-top: 1rem;
   display: flex;
-  align-items: end;
+  align-items: flex-end;
   flex-direction: column;
 }
 

@@ -194,37 +194,46 @@
       </div>
       <div class="heatmapClass">
         <div id="chart" class="heatmapChart"></div>
-        <div class="team-filter">
-          <mat-form-field class="team-chip-list">
-            <mat-label>Team Group Filter</mat-label>
-            <mat-chip-list selectable>
-              <mat-chip
-                #c="matChip"
-                (click)="toggleTeamGroupSelection(c)"
-                selected>
-                All
-              </mat-chip>
-              <mat-chip
-                #c="matChip"
-                *ngFor="let group of teamGroups | keyvalue"
-                (click)="toggleTeamGroupSelection(c)">
-                {{ group.key }}
-              </mat-chip>
-            </mat-chip-list>
-          </mat-form-field>
-          <mat-form-field>
-            <mat-label>Team Filter</mat-label>
-            <mat-chip-list selectable multiple>
-              <mat-chip
-                #c="matChip"
-                *ngFor="let team of teamList"
-                (click)="toggleTeamSelection(c)"
-                selected
-                >
-                {{ team }}
-              </mat-chip>
-            </mat-chip-list>
-          </mat-form-field>
+          <div class="filter-container">
+            <button class="filter-toggle" mat-button color="primary"
+            (click)="toggleFilters()">
+              <mat-icon 
+                [class.hidden]="!showFilters">keyboard_arrow_up</mat-icon>
+              <mat-icon 
+                [class.hidden]="showFilters">filter_alt</mat-icon>
+            </button>        
+          <div class="team-filter" [class.hidden]="!showFilters">
+            <mat-form-field class="team-chip-list">
+              <mat-label>Team Group Filter</mat-label>
+              <mat-chip-list selectable>
+                <mat-chip
+                  #c="matChip"
+                  (click)="toggleTeamGroupSelection(c)"
+                  selected>
+                  All
+                </mat-chip>
+                <mat-chip
+                  #c="matChip"
+                  *ngFor="let group of teamGroups | keyvalue"
+                  (click)="toggleTeamGroupSelection(c)">
+                  {{ group.key }}
+                </mat-chip>
+              </mat-chip-list>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Team Filter</mat-label>
+              <mat-chip-list selectable multiple>
+                <mat-chip
+                  #c="matChip"
+                  *ngFor="let team of teamList"
+                  (click)="toggleTeamSelection(c)"
+                  selected
+                  >
+                  {{ team }}
+                </mat-chip>
+              </mat-chip-list>
+            </mat-form-field>
+          </div>
         </div>
         <mat-card class="example-card" *ngIf="showActivityCard">
           <mat-card-title-group>

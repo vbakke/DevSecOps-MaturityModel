@@ -56,6 +56,7 @@ export class CircularHeatmapComponent implements OnInit {
   segment_labels: string[] = [];
   activityDetails: any;
   showOverlay: boolean;
+  showFilters: boolean;
 
   constructor(
     private yaml: ymlService,
@@ -63,6 +64,7 @@ export class CircularHeatmapComponent implements OnInit {
     private changeDetector: ChangeDetectorRef
   ) {
     this.showOverlay = false;
+    this.showFilters = true;
   }
 
   ngOnInit(): void {
@@ -816,6 +818,10 @@ export class CircularHeatmapComponent implements OnInit {
 
   closeOverlay() {
     this.showOverlay = false;
+  }
+
+  toggleFilters() {
+    this.showFilters = !this.showFilters;
   }
 
   SaveEditedYAMLfile() {
