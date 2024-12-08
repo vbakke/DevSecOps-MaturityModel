@@ -10,7 +10,6 @@
 .main-container {
   width: 100%;
   height: 100%;
-  /*border: 10px solid yellow;*/
 }
 
 .sidenav-content {
@@ -19,13 +18,23 @@
   justify-content: space-between;
 }
 
-.example-sidenav {
+.sidenav-menu {
   padding: 20px;
+}
+
+.menu-close {
+  position: absolute;
+  right: 0;
+  top: 2px;
+  background: transparent;
+  border: 0;
+  color: #ddd;
 }
 
 .github-fork-ribbon:before {
   background-color: #333;
 }
+
 
 @media only screen and (max-width: 750px) {
     .github-fork-ribbon {
