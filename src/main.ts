@@ -10,7 +10,7 @@ if (environment.production) {
   enableProdMode();
 }
 
-if (environment.experimental) {
+if (environment?.experimental) {
   initializeFaro({
     url: 'https://faro-collector-prod-eu-north-0.grafana.net/collect/a7eda57dbf6b581662f2bf43a70c7508',
     app: {
