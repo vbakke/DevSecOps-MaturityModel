@@ -443,7 +443,8 @@ export class CircularHeatmapComponent implements OnInit {
     svg
       .selectAll('path,use')
       .on('click', function (d) {
-        console.log(_self.perfNow() + ': click: ', d);
+        // console.log('click: ', d);
+        _self.console_log_event('click', d);
         var clickedId;
         if (d.currentTarget.localName === 'use') {
           clickedId = d.currentTarget.href.baseVal;
@@ -481,7 +482,13 @@ export class CircularHeatmapComponent implements OnInit {
         }
       })
       .on('mouseover', function (d) {
-        console.log(_self.perfNow() + ': mouseover', d)
+        // console.log(_self.perfNow() + ': mouseover', d);
+        _self.console_log_event('mouseover', d);
+        if (d.currentTarget.localName === 'use') {
+          if (d.currentTarget.id === 'hover') {
+            return;
+          }
+        }        
         try {
           curr = d.explicitOriginalTarget.__data__;
         } catch {
@@ -508,7 +515,8 @@ export class CircularHeatmapComponent implements OnInit {
       })
 
       .on('mouseout', function (d) {
-        console.log(_self.perfNow() + ': mouseout', d)
+        // console.log(_self.perfNow() + ': mouseout', d);
+        _self.console_log_event('mouseout', d);
         var clickedId;
         if (d.currentTarget.localName === 'use') {
           if (d.currentTarget.id === 'selected') {
@@ -906,5 +914,27 @@ export class CircularHeatmapComponent implements OnInit {
 
   perfNow(): string {
     return (performance.now() / 1000).toFixed(3);
+  }
+
+  console_log_event(type:string, event:any) {
+    console.log(this.perfNow() + ': ' + type);
+    console.log(this.perfNow() + ': ' + type + this.event_to_str('explicitOriginalTarget', event));
+    console.log(this.perfNow() + ': ' + type + this.event_to_str('currentTarget', event));
+    // console.log(this.perfNow() + ': ' + type + this.event_to_str('originalTarget', event));
+    console.log(this.perfNow() + ': ' + type + this.event_to_str('relatedTarget', event));
+    // console.log(this.perfNow() + ': ' + type + this.event_to_str('target', event));
+    console.log(this.perfNow() + ': ' + type + this.event_to_str('srcElement', event));
+    console.log(this.perfNow() + ': ' + type + this.event_to_str('toElement', event));
+    // console.log(_self.perfNow() + ': mouseover', d);
+  }
+  event_to_str(name:string, event:any): string {
+    let str:string = ': ' + name + ': ';
+    if (event[name]) {
+      str += `<${event[name]?.localName} id="${event[name]?.id}" class="${event[name]?.classList?.toString()}">` ;
+     } else {
+      str += event[name];
+     }
+
+    return str;
   }
 }
