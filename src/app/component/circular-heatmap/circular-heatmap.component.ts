@@ -441,19 +441,18 @@ export class CircularHeatmapComponent implements OnInit {
     }
 
     svg
-      .selectAll('path,use')
+      .selectAll('path')
+      .on('touchstart', function (d) {
+        _self.console_log_event('touchstart', d);
+      })
+      .on('touchend', function (d) {
+        _self.console_log_event('touchend', d);
+      })
       .on('click', function (d) {
         // console.log('click: ', d);
         _self.console_log_event('click', d);
-        var clickedId;
-        if (d.currentTarget.localName === 'use') {
-          clickedId = d.currentTarget.href.baseVal;
-          curr = document.querySelector(clickedId).__data__;
-        } else {
-          clickedId = '#' + d.srcElement.id;
-          curr = d.srcElement.__data__;
-        }
-
+        curr = d.currentTarget.__data__;
+        var clickedId = '#' + d.currentTarget.id;
 
         var index = 0;
         var cnt = 0;
@@ -484,78 +483,22 @@ export class CircularHeatmapComponent implements OnInit {
       .on('mouseover', function (d) {
         // console.log(_self.perfNow() + ': mouseover', d);
         _self.console_log_event('mouseover', d);
-        if (d.currentTarget.localName === 'use') {
-          if (d.currentTarget.id === 'hover') {
-            return;
-          }
-        }        
-        try {
-          curr = d.explicitOriginalTarget.__data__;
-        } catch {
-          curr = d.toElement.__data__;
-        }
+        curr = d.currentTarget.__data__;
+
         // increase the segment height of the one being hovered as well as all others of the same date
         // while decreasing the height of all others accordingly
         if (curr && curr['Done%'] != -1) {
           var clickedId = '#' + d.srcElement.id;
           var cursor = document.querySelector('use#hover');
           cursor?.setAttribute('href', clickedId);
-  
-
-
-          d3.selectAll(
-            '#segment-' +
-              curr.SubDimension.replace(/ /g, '-') +
-              '-' +
-              curr.Level.replaceAll(' ', '-')
-          )
-          .attr('stroke-width', '7')
-          .attr('stroke', 'green');
         }
       })
 
       .on('mouseout', function (d) {
         // console.log(_self.perfNow() + ': mouseout', d);
         _self.console_log_event('mouseout', d);
-        var clickedId;
-        if (d.currentTarget.localName === 'use') {
-          if (d.currentTarget.id === 'selected') {
-            return;
-          }
-          clickedId = d.currentTarget.href.baseVal;
-          curr = document.querySelector(clickedId).__data__;
-          d.currentTarget.setAttribute('href', '');  
-        } else {
-          clickedId = '#' + d.srcElement.id;
-          curr = d.srcElement.__data__;
-        }
-
-        // try {
-        //   curr = d.explicitOriginalTarget.__data__;
-        // } catch {
-        //   curr = d.srcElement.__data__;
-        // }
-
-        if (curr && curr['Done%'] != -1) {
-          d3.selectAll(
-            '#segment-' +
-              curr.SubDimension.replace(/ /g, '-') +
-              '-' +
-              curr.Level.replaceAll(' ', '-')
-          )
-          .attr('stroke-width', '')
-          .attr('stroke', '#252525')
-          // .attr('fill', function (p) {
-          //     var color = d3
-          //     .scaleLinear<string, string>()
-          //     .domain([0, 1])
-          //     .range(['white', 'green']);
-          //   // how to access a function within reusable charts
-          //   //console.log(color(d.Done));
-          //   return color(curr['Done%']);
-          // })
-          ;
-        }
+        var cursor = document.querySelector('use#hover');
+        cursor?.setAttribute('href', '');
       });
     this.reColorHeatmap();
   }
@@ -699,11 +642,13 @@ export class CircularHeatmapComponent implements OnInit {
         cursors
           .append('use')
           .attr('id', 'hover')
+          .attr('pointer-events', 'none')
           .attr('stroke', 'green')
-          .attr('stroke-width', '3');
+          .attr('stroke-width', '7');
         cursors
           .append('use')
           .attr('id', 'selected')
+          .attr('pointer-events', 'none')
           .attr('stroke-width', '5');
 
       });
@@ -855,17 +800,17 @@ export class CircularHeatmapComponent implements OnInit {
         for (var teamname of this.teamVisible) {
           if (activities[i]['teamsImplemented'][teamname]) {
             cntTrue++;
-            console.log(`Counting ${activities[i].activityName}: ${teamname} (${cntTrue})`);
+            // console.log(`Counting ${activities[i].activityName}: ${teamname} (${cntTrue})`);
           }
         }
       }
       
       if (cntAll !== 0) {
         this.ALL_CARD_DATA[index]['Done%'] = cntTrue / cntAll;
-        console.log(`${this.ALL_CARD_DATA[index].SubDimension} ${this.ALL_CARD_DATA[index].Level} Done: ${cntTrue}/${cntAll} = ${(cntTrue / cntAll*100).toFixed(1)}%`);
+        // console.log(`${this.ALL_CARD_DATA[index].SubDimension} ${this.ALL_CARD_DATA[index].Level} Done: ${cntTrue}/${cntAll} = ${(cntTrue / cntAll*100).toFixed(1)}%`);
       } else {
         this.ALL_CARD_DATA[index]['Done%'] = -1;
-        console.log(`${this.ALL_CARD_DATA[index].SubDimension} ${this.ALL_CARD_DATA[index].Level} None`);
+        // console.log(`${this.ALL_CARD_DATA[index].SubDimension} ${this.ALL_CARD_DATA[index].Level} None`);
       }
       var color = d3
         .scaleLinear<string, string>()
@@ -917,11 +862,11 @@ export class CircularHeatmapComponent implements OnInit {
   }
 
   console_log_event(type:string, event:any) {
-    console.log(this.perfNow() + ': ' + type);
-    console.log(this.perfNow() + ': ' + type + this.event_to_str('explicitOriginalTarget', event));
+    console.log(this.perfNow() + ': --- ' + type + ' ---');
     console.log(this.perfNow() + ': ' + type + this.event_to_str('currentTarget', event));
-    // console.log(this.perfNow() + ': ' + type + this.event_to_str('originalTarget', event));
+    console.log(this.perfNow() + ': ' + type + this.event_to_str('explicitOriginalTarget', event));
     console.log(this.perfNow() + ': ' + type + this.event_to_str('relatedTarget', event));
+    // console.log(this.perfNow() + ': ' + type + this.event_to_str('originalTarget', event));
     // console.log(this.perfNow() + ': ' + type + this.event_to_str('target', event));
     console.log(this.perfNow() + ': ' + type + this.event_to_str('srcElement', event));
     console.log(this.perfNow() + ': ' + type + this.event_to_str('toElement', event));
