@@ -442,34 +442,18 @@ export class CircularHeatmapComponent implements OnInit {
 
     svg
       .selectAll('path')
-      .on('touchstart', function (d) {
-        _self.console_log_event('touchstart', d);
-      })
-      .on('touchend', function (d) {
-        _self.console_log_event('touchend', d);
-      })
       .on('click', function (d) {
-        // console.log('click: ', d);
         _self.console_log_event('click', d);
-        curr = d.currentTarget.__data__;
-        var clickedId = '#' + d.currentTarget.id;
+        _self.setSectorCursor(svg, '#hover', '');
 
-        var index = 0;
-        var cnt = 0;
-        for (var i = 0; i < _self.ALL_CARD_DATA.length; i++) {
-          if (
-            _self.ALL_CARD_DATA[i]['SubDimension'] === curr.SubDimension &&
-            _self.ALL_CARD_DATA[i]['Level'] === curr.Level
-          ) {
-            index = i;
-            break;
-          }
-        }
-        console.log('index', _self.ALL_CARD_DATA[index]['Activity']);
-        var cursor = document.querySelector('use#selected');
-        if (_self.ALL_CARD_DATA[index]['Done%'] == -1) {
+        var clickedId = d.currentTarget.id;
+        var index = parseInt(clickedId.replace('index-', ''));
+        curr = _self.ALL_CARD_DATA[index];
+        console.log('index', curr['Activity']);
+
+        if (curr['Done%'] == -1) {
           _self.showActivityCard = false;          
-          cursor?.setAttribute('href', '');  
+          _self.setSectorCursor(svg, '#selected', '');
         } else {
           _self.showActivityCard = true;
           _self.currentDimension = curr.Dimension;
@@ -477,28 +461,22 @@ export class CircularHeatmapComponent implements OnInit {
           _self.activityData = curr.Activity;
           _self.cardHeader = curr.SubDimension;
           
-          cursor?.setAttribute('href', clickedId);  
-        }
+          _self.setSectorCursor(svg, '#selected', clickedId);
+          }
       })
       .on('mouseover', function (d) {
-        // console.log(_self.perfNow() + ': mouseover', d);
         _self.console_log_event('mouseover', d);
         curr = d.currentTarget.__data__;
 
-        // increase the segment height of the one being hovered as well as all others of the same date
-        // while decreasing the height of all others accordingly
         if (curr && curr['Done%'] != -1) {
-          var clickedId = '#' + d.srcElement.id;
-          var cursor = document.querySelector('use#hover');
-          cursor?.setAttribute('href', clickedId);
+          var clickedId = d.srcElement.id;
+          _self.setSectorCursor(svg, '#hover', clickedId);
         }
       })
 
       .on('mouseout', function (d) {
-        // console.log(_self.perfNow() + ': mouseout', d);
         _self.console_log_event('mouseout', d);
-        var cursor = document.querySelector('use#hover');
-        cursor?.setAttribute('href', '');
+        _self.setSectorCursor(svg, '#hover', '');
       });
     this.reColorHeatmap();
   }
@@ -561,13 +539,8 @@ export class CircularHeatmapComponent implements OnInit {
           .attr('class', function (d: any) {
             return 'segment-' + d.SubDimension.replace(/ /g, '-');
           })
-          .attr('id', function (d: any) {
-            return (
-              'segment-' +
-              d.SubDimension.replace(/ /g, '-') +
-              '-' +
-              d.Level.replaceAll(' ', '-')
-            );
+          .attr('id', function (d: any, i: number) {
+            return 'index-' + i;
           })
           .attr(
             'd',
@@ -636,16 +609,19 @@ export class CircularHeatmapComponent implements OnInit {
               ')'
           );
         cursors
-          .append('use')
+          .append('path')
           .attr('id', 'hover')
           .attr('pointer-events', 'none')
           .attr('stroke', 'green')
-          .attr('stroke-width', '7');
+          .attr('stroke-width', '7')
+          .attr('fill', 'transparent');
         cursors
-          .append('use')
+          .append('path')
           .attr('id', 'selected')
           .attr('pointer-events', 'none')
-          .attr('stroke-width', '5');
+          .attr('stroke', '#232323')
+          .attr('stroke-width', '4')
+          .attr('fill', 'transparent');
 
       });
     }
@@ -734,15 +710,21 @@ export class CircularHeatmapComponent implements OnInit {
     return chart;
   }
 
+  setSectorCursor(svg:any, cursor:string, targetId:string): void {
+    let element = svg.select(cursor);
+    let path:string = '';
+    if (targetId) {
+      if (targetId[0] != '#') targetId = '#' + targetId;
+      path = svg.select(targetId).attr('d');
+    }
+
+    svg.select(cursor).attr('d', path);
+  }
+
   noActivitytoGrey(): void {
     for (var x = 0; x < this.ALL_CARD_DATA.length; x++) {
       if (this.ALL_CARD_DATA[x]['Done%'] == -1) {
-        d3.selectAll(
-          '#segment-' +
-            this.ALL_CARD_DATA[x]['SubDimension'].replace(/ /g, '-') +
-            '-' +
-            this.ALL_CARD_DATA[x]['Level'].replace(' ', '-')
-        ).attr('fill', '#DCDCDC');
+        d3.select('#index-'+ x).attr('fill', '#DCDCDC');
       }
     }
   }
@@ -800,29 +782,25 @@ export class CircularHeatmapComponent implements OnInit {
           }
         }
       }
-      
-      if (cntAll !== 0) {
-        this.ALL_CARD_DATA[index]['Done%'] = cntTrue / cntAll;
-        // console.log(`${this.ALL_CARD_DATA[index].SubDimension} ${this.ALL_CARD_DATA[index].Level} Done: ${cntTrue}/${cntAll} = ${(cntTrue / cntAll*100).toFixed(1)}%`);
-      } else {
-        this.ALL_CARD_DATA[index]['Done%'] = -1;
-        // console.log(`${this.ALL_CARD_DATA[index].SubDimension} ${this.ALL_CARD_DATA[index].Level} None`);
-      }
-      var color = d3
+
+      var colorSector = d3
         .scaleLinear<string, string>()
         .domain([0, 1])
         .range(['white', 'green']);
 
-      d3.selectAll(
-        '#segment-' +
-          this.ALL_CARD_DATA[index]['SubDimension'].replace(/ /g, '-') +
-          '-' +
-          this.ALL_CARD_DATA[index]['Level'].replace(' ', '-')
-      ).attr('fill', function (p) {
-        return color(_self.ALL_CARD_DATA[index]['Done%']);
-      });
+
+      if (cntAll !== 0) {
+        this.ALL_CARD_DATA[index]['Done%'] = cntTrue / cntAll;
+        // console.log(`${this.ALL_CARD_DATA[index].SubDimension} ${this.ALL_CARD_DATA[index].Level} Done: ${cntTrue}/${cntAll} = ${(cntTrue / cntAll*100).toFixed(1)}%`);
+        d3.select('#index-' + index).attr('fill', function (p) {
+          return colorSector(_self.ALL_CARD_DATA[index]['Done%']);
+        });
+      } else {
+        this.ALL_CARD_DATA[index]['Done%'] = -1;
+        // console.log(`${this.ALL_CARD_DATA[index].SubDimension} ${this.ALL_CARD_DATA[index].Level} None`);
+        d3.select('#index-'+ index).attr('fill', '#DCDCDC');
+      }
     }
-    this.noActivitytoGrey();
   }
 
   ResetIsImplemented() {
@@ -860,6 +838,7 @@ export class CircularHeatmapComponent implements OnInit {
   console_log_event(type:string, event:any) {
     console.log(this.perfNow() + ': --- ' + type + ' ---');
     console.log(this.perfNow() + ': ' + type + this.event_to_str('currentTarget', event));
+    console.log(this.perfNow() + ': data:' + event?.currentTarget?.__data__);
     console.log(this.perfNow() + ': ' + type + this.event_to_str('explicitOriginalTarget', event));
     console.log(this.perfNow() + ': ' + type + this.event_to_str('relatedTarget', event));
     // console.log(this.perfNow() + ': ' + type + this.event_to_str('originalTarget', event));

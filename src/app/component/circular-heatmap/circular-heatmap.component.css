@@ -120,13 +120,14 @@
 }
 button.filter-toggle {
   position: absolute;
-  top: -6px;
-  right: 0;
+  top: 2px;
+  right: 2px;
   border: 0;
   background-color: transparent;
   z-index: 1;
   padding: 0;
   min-width: 0;
+  line-height: 24px;
 }
 
 
@@ -144,14 +145,17 @@ button.filter-toggle {
   .heatmapClass {
       grid-template-rows: auto auto 1fr auto;
       grid-template-columns: 1fr;
-    }
+  }
+  
   .team-filter, .heatmapChart, .footer-buttons {
       grid-column: 1;
   }
+  
   .team-filter {
       grid-row: 1;
       padding: 0.4rem;
   }
+  
   .mat-chip-list {
       padding: 0.4rem;
   }
@@ -163,7 +167,9 @@ button.filter-toggle {
   #chart {
       max-width: max(60vh, 60vw);
   }
+  
   .overlay-details {
     width: 100%;
   }  
+
 }
