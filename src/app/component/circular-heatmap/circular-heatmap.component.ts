@@ -583,10 +583,6 @@ export class CircularHeatmapComponent implements OnInit {
             return color(accessor(d));
           });
 
-        // Unique id so that the text path defs are unique - is there a better way to do this?
-        // console.log(d3.selectAll(".circular-heat")["_groups"][0].length)
-        var id = 1;
-
         //Segment labels
         var segmentLabelFontSize = segmentLabelHeight * 2/3;
         var segmentLabelOffset = segmentLabelHeight * 1/3;
@@ -610,7 +606,7 @@ export class CircularHeatmapComponent implements OnInit {
         labels
           .append('def')
           .append('path')
-          .attr('id', 'segment-label-path-' + id)
+          .attr('id', 'segment-label-path')
           .attr('d', 'm0 -' + r + ' a' + r + ' ' + r + ' 0 1 1 -1 0');
 
         labels
@@ -620,7 +616,7 @@ export class CircularHeatmapComponent implements OnInit {
           .append('text')
           .append('textPath')
           .attr('text-anchor', 'middle')
-          .attr('xlink:href', '#segment-label-path-' + id)
+          .attr('xlink:href', '#segment-label-path')
           .style('font-size', segmentLabelFontSize)
           .attr('startOffset', function (d, i) {
             return ((i+.5) * 100) / numSegments + '%';   // shift ½ segment to center
