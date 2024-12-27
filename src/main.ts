@@ -6,17 +6,18 @@ import { environment } from './environments/environment';
 import { getWebInstrumentations, initializeFaro, LogLevel } from '@grafana/faro-web-sdk';
 import { TracingInstrumentation } from '@grafana/faro-web-tracing';
 
+const localDevelopment:boolean = (window.location.hostname == 'localhost');
 if (environment.production) {
   enableProdMode();
 }
 
-if (environment?.experimental) {
+if (environment?.experimental && !localDevelopment) {
   initializeFaro({
     url: 'https://faro-collector-prod-eu-north-0.grafana.net/collect/a7eda57dbf6b581662f2bf43a70c7508',
     app: {
       name: 'dsomm',
       version: '1.0.0',
-      environment: (window.location.hostname == 'localhost') ? 'development' : 'experimental',
+      environment: localDevelopment ? 'development' : 'experimental',
     },
     sessionTracking: {
       samplingRate: 1,
