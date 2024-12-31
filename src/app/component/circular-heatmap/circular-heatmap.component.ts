@@ -10,6 +10,7 @@ import * as d3 from 'd3';
 import * as yaml from 'js-yaml';
 import { Router } from '@angular/router';
 import { MatChip } from '@angular/material/chips';
+import * as md from 'markdown-it';
 
 export interface activitySchema {
   uuid: string;
@@ -56,6 +57,7 @@ export class CircularHeatmapComponent implements OnInit {
   segment_labels: string[] = [];
   activityDetails: any;
   showOverlay: boolean;
+  markdown: md = md();
 
   constructor(
     private yaml: ymlService,
@@ -66,11 +68,16 @@ export class CircularHeatmapComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    console.log(`${this.perfNow()}s: ngOnInit`);
     // Ensure that Levels and Teams load before MaturityData
     // using promises, since ngOnInit does not support async/await
     this.LoadMaturityLevels()
       .then(() => this.LoadTeamsFromMetaYaml())
-      .then(() => this.LoadMaturityDataFromGeneratedYaml());
+      .then(() => this.LoadMaturityDataFromGeneratedYaml())
+      .then(() => {
+        console.log(`${this.perfNow()}s: set filters: ${this.chips?.length}`);
+        this.matChipsArray = this.chips.toArray();
+      });
   }
 
   @ViewChildren(MatChip) chips!: QueryList<MatChip>;
@@ -253,7 +260,6 @@ export class CircularHeatmapComponent implements OnInit {
         this.teamList = this.YamlObject['teams'];
         this.teamGroups = this.YamlObject['teamGroups'];
         this.teamVisible = [...this.teamList];
-        console.log(`${this.perfNow()}s: LoadTeamsFromMetaYaml End`);
         resolve();
       });
     });
@@ -274,7 +280,6 @@ export class CircularHeatmapComponent implements OnInit {
           this.radial_labels.push('Level ' + y);
           this.maxLevelOfActivities = y;
         }
-        console.log(`${this.perfNow()}s: LoadMaturityLevels End`);
         resolve();
       });
     });
@@ -282,7 +287,7 @@ export class CircularHeatmapComponent implements OnInit {
 
   toggleTeamGroupSelection(chip: MatChip) {
     chip.toggleSelected();
-    let currChipValue = chip.value.replace(/\s/g, '');
+    let currChipValue = chip.value.trim();
 
     if (chip.selected) {
       this.selectedTeamChips = [currChipValue];
@@ -315,7 +320,7 @@ export class CircularHeatmapComponent implements OnInit {
 
   toggleTeamSelection(chip: MatChip) {
     chip.toggleSelected();
-    let currChipValue = chip.value.replace(/\s/g, '');
+    let currChipValue = chip.value.trim();
     let prevSelectedChip = this.selectedTeamChips;
     if (chip.selected) {
       this.teamVisible.push(currChipValue);
@@ -332,21 +337,11 @@ export class CircularHeatmapComponent implements OnInit {
     this.updateChips(prevSelectedChip);
   }
 
-  ngAfterViewInit() {
-    // Putting all the chips inside an array
-
-    setTimeout(() => {
-      this.matChipsArray = this.chips.toArray();
-      this.updateChips(true);
-      this.reColorHeatmap();
-    }, 100);
-  }
-
   updateChips(fromTeamGroup: any) {
     console.log('updating chips', fromTeamGroup);
     // Re select chips
     this.matChipsArray.forEach(chip => {
-      let currChipValue = chip.value.replace(/\s/g, '');
+      let currChipValue = chip.value.trim();
 
       if (this.teamVisible.includes(currChipValue)) {
         console.log(currChipValue);

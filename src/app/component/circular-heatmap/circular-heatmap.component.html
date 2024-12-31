@@ -45,7 +45,19 @@
                   </mat-panel-title>
                 </mat-expansion-panel-header>
                 <ng-template matExpansionPanelContent>
-                  <p [innerHTML]="activityDetails.description"></p>
+                  <div
+                    *ngIf="
+                      markdown.render(activityDetails.description);
+                      else ifFileIsNotAMarkdown
+                    ">
+                    <p
+                      [innerHTML]="
+                        markdown.render(activityDetails.description)
+                      "></p>
+                  </div>
+                  <ng-template #ifFileIsNotAMarkdown>
+                    <p [innerHTML]="activityDetails.description"></p>
+                  </ng-template>
                 </ng-template>
               </mat-expansion-panel>
               <mat-expansion-panel
@@ -218,7 +230,8 @@
                 <mat-chip
                   #c="matChip"
                   *ngFor="let team of teamList"
-                  (click)="toggleTeamSelection(c)">
+                  (click)="toggleTeamSelection(c)"
+                  selected>
                   {{ team }}
                 </mat-chip>
               </mat-chip-list>
@@ -235,7 +248,7 @@
                 <mat-expansion-panel-header>
                   <mat-panel-title>
                     <button
-                      class="normal-button"
+                      class="title-button"
                       (click)="
                         $event.preventDefault();
                         navigate(
