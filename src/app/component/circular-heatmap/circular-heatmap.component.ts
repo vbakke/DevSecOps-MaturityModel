@@ -68,11 +68,16 @@ export class CircularHeatmapComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    console.log(`${this.perfNow()}s: ngOnInit`);
     // Ensure that Levels and Teams load before MaturityData
     // Using promises, since ngOnInit does not support async/await
     this.LoadMaturityLevels()
       .then(() => this.LoadTeamsFromMetaYaml())
-      .then(() => this.LoadMaturityDataFromGeneratedYaml());
+      .then(() => this.LoadMaturityDataFromGeneratedYaml())
+      .then(() => {
+        console.log(`${this.perfNow()}s: set filters: ${this.chips?.length}`);
+        this.matChipsArray = this.chips.toArray();
+      });
   }
 
   @ViewChildren(MatChip) chips!: QueryList<MatChip>;
@@ -244,8 +249,9 @@ export class CircularHeatmapComponent implements OnInit {
         this.teamList = this.YamlObject['teams'];
         this.teamGroups = this.YamlObject['teamGroups'];
         this.teamVisible = [...this.teamList];
-        console.log('Teams: ', this.teamList)
-        console.log('Teams vis: ', this.teamVisible)
+        console.log('Teams: ', this.teamList);
+        console.log('Teams vis: ', this.teamVisible);
+        console.log('Teams groups: ', this.teamGroups);
         console.log((performance.now()/1000).toFixed(3) + 's: LoadTeamsFromMetaYaml END');
         resolve();
       });
