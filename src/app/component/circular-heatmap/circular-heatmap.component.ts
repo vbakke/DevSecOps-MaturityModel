@@ -77,6 +77,9 @@ export class CircularHeatmapComponent implements OnInit {
       .then(() => {
         console.log(`${this.perfNow()}s: set filters: ${this.chips?.length}`);
         this.matChipsArray = this.chips.toArray();
+      })
+      .catch((error) => {
+        console.error(error);
       });
   }
 
@@ -85,11 +88,12 @@ export class CircularHeatmapComponent implements OnInit {
 
   private LoadMaturityDataFromGeneratedYaml() {
     return new Promise<void>((resolve, reject) => {
-      console.log((performance.now()/1000).toFixed(3) + 's: LoadMaturityDataFromGeneratedYaml STARTUP');
+      console.log(`${this.perfNow()}s: LoadMaturityDataFromGeneratedYaml Fetch`);
       this.yaml.setURI('./assets/YAML/generated/generated.yaml');
 
-      this.yaml.getJson().subscribe(data => {
-        console.log((performance.now()/1000).toFixed(3) + 's: LoadMaturityDataFromGeneratedYaml RECEIVED');
+      this.yaml.getJson().subscribe(
+        (data) => {
+          console.log(`${this.perfNow()}s: LoadMaturityDataFromGeneratedYaml Downloaded`);
         this.YamlObject = data;
         var allDimensionNames = Object.keys(this.YamlObject);
         var totalTeamsImplemented: number = 0;
@@ -199,8 +203,11 @@ export class CircularHeatmapComponent implements OnInit {
           this.segment_labels
         );
         this.noActivitytoGrey();
-        console.log((performance.now()/1000).toFixed(3) + 's: LoadMaturityDataFromGeneratedYaml END');
+        console.log(`${this.perfNow()}s: LoadMaturityDataFromGeneratedYaml End`);
         resolve();
+      },
+      (error) => {
+        reject(error?.message);
       });
     });
   }
@@ -239,22 +246,26 @@ export class CircularHeatmapComponent implements OnInit {
     return new Promise<void>((resolve, reject) => {
 
       console.log((performance.now()/1000).toFixed(3) + 's: LoadTeamsFromMetaYaml STARTUP');
-      this.yaml.setURI('./assets/YAML/teams.yaml');
-      this.yaml.getJson().subscribe(data => { 
-      console.log('LoadTeamsFromMetaYaml')
-        console.log((performance.now()/1000).toFixed(3) + 's: LoadTeamsFromMetaYaml RECEIVED');
+      this.yaml.setURI('./assets/YAML/vb_teams.yaml');
+      this.yaml.getJson().subscribe(
+        data => { 
+          console.log('LoadTeamsFromMetaYaml')
+          console.log((performance.now()/1000).toFixed(3) + 's: LoadTeamsFromMetaYaml RECEIVED');
+          
+          this.YamlObject = data;
         
-        this.YamlObject = data;
-      
-        this.teamList = this.YamlObject['teams'];
-        this.teamGroups = this.YamlObject['teamGroups'];
-        this.teamVisible = [...this.teamList];
-        console.log('Teams: ', this.teamList);
-        console.log('Teams vis: ', this.teamVisible);
-        console.log('Teams groups: ', this.teamGroups);
-        console.log((performance.now()/1000).toFixed(3) + 's: LoadTeamsFromMetaYaml END');
-        resolve();
-      });
+          this.teamList = this.YamlObject['teams'];
+          this.teamGroups = this.YamlObject['teamGroups'];
+          this.teamVisible = [...this.teamList];
+          console.log('Teams: ', this.teamList);
+          console.log('Teams vis: ', this.teamVisible);
+          console.log('Teams groups: ', this.teamGroups);
+          console.log((performance.now()/1000).toFixed(3) + 's: LoadTeamsFromMetaYaml END');
+          resolve();
+        },
+        (error) => {
+          reject(error.message);
+        });
     });
   }
   
@@ -263,19 +274,23 @@ export class CircularHeatmapComponent implements OnInit {
       console.log((performance.now()/1000).toFixed(3) + 's: LoadMaturityLevels STARTUP');
       this.yaml.setURI('./assets/YAML/meta.yaml');
       // Function sets column header
-      this.yaml.getJson().subscribe(data => { 
-        console.log((performance.now()/1000).toFixed(3) + 's: LoadMaturityLevels RECEIVED');
-        this.YamlObject = data;
+      this.yaml.getJson().subscribe(
+        (data) => { 
+          console.log((performance.now()/1000).toFixed(3) + 's: LoadMaturityLevels RECEIVED');
+          this.YamlObject = data;
 
-        // Levels header
-        for (let x in this.YamlObject['strings']['en']['maturity_levels']) {
-          var y = parseInt(x) + 1;
-          this.radial_labels.push('Level ' + y);
-          this.maxLevelOfActivities = y;
-        }
-        console.log((performance.now()/1000).toFixed(3) + 's: LoadMaturityLevels END');
-        resolve();
-      });
+          // Levels header
+          for (let x in this.YamlObject['strings']['en']['maturity_levels']) {
+            var y = parseInt(x) + 1;
+            this.radial_labels.push('Level ' + y);
+            this.maxLevelOfActivities = y;
+          }
+          console.log((performance.now()/1000).toFixed(3) + 's: LoadMaturityLevels END');
+          resolve();
+        },
+        (error) => {
+          reject(error.message);
+        });
     });
   }
 
@@ -773,8 +788,7 @@ export class CircularHeatmapComponent implements OnInit {
     link.remove();
   }
 
-
-  setTeamsStatus(yamlObject:any, teamList:string[], card_data:any) {
+  setTeamsStatus(yamlObject:any, teamList:string[], card_data:cardSchema[]) {
     // Loop through all activities from the card_data
     for (let card of card_data) {
       for (let activity of card.Activity) {
