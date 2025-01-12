@@ -147,8 +147,7 @@ export class CircularHeatmapComponent implements OnInit {
                     }
 
                     var localStorageData = this.getFromBrowserState();
-
-                  if (localStorageData != null && localStorageData.length > 0) {
+                  if (localStorageData && localStorageData.length > 0) {
                     var combinedTeamsImplemented = Object.assign(
                       {},
                       teamsImplemented,
@@ -878,6 +877,10 @@ export class CircularHeatmapComponent implements OnInit {
 
   perfNow(): string {
     return (performance.now() / 1000).toFixed(3);
+  }
+
+  unsorted() {
+    return 0;
   }
 
   console_log_event(type:string, event:any) {

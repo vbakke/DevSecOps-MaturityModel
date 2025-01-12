@@ -226,7 +226,7 @@
                 </mat-chip>
                 <mat-chip
                   #c="matChip"
-                  *ngFor="let group of teamGroups | keyvalue"
+                  *ngFor="let group of teamGroups | keyvalue: unsorted"
                   (click)="toggleTeamGroupSelection(c)">
                   {{ group.key }}
                 </mat-chip>
