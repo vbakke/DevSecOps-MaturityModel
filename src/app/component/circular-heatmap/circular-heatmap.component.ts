@@ -11,6 +11,7 @@ import * as yaml from 'js-yaml';
 import { Router } from '@angular/router';
 import { MatChip } from '@angular/material/chips';
 import * as md from 'markdown-it';
+import { ModalMessageComponent } from '../modal-message/modal-message.component';
 
 export interface activitySchema {
   uuid: string;
@@ -63,7 +64,7 @@ export class CircularHeatmapComponent implements OnInit {
   constructor(
     private yaml: ymlService,
     private router: Router,
-    private changeDetector: ChangeDetectorRef
+    public modal: ModalMessageComponent,
   ) {
     this.showOverlay = false;
     this.showFilters = true;
@@ -88,6 +89,18 @@ export class CircularHeatmapComponent implements OnInit {
   @ViewChildren(MatChip) chips!: QueryList<MatChip>;
   matChipsArray: MatChip[] = [];
 
+  displayMessage(msg:string) {
+    console.log(msg);
+    // Remove focus from the button that becomes aria unavailable (avoids ugly console error message)
+    const buttonElement = document.activeElement as HTMLElement;
+    buttonElement.blur(); 
+    
+    const dialogRef = this.modal.openDialog(msg);
+    dialogRef.afterClosed().subscribe(data => {
+      console.log('Closed dialog', data);
+    });
+  }
+  
   private LoadMaturityDataFromGeneratedYaml() {
     return new Promise<void>((resolve, reject) => {
       console.log(`${this.perfNow()}s: LoadMaturityDataFromGeneratedYaml Fetch`);
