@@ -23,7 +23,7 @@ import { DependencyGraphComponent } from './component/dependency-graph/dependenc
 import { Teams } from './component/teams/teams.component';
 import { ToStringValuePipe } from './pipe/to-string-value.pipe';
 import { ModalMessageComponent } from './component/modal-message/modal-message.component';
-import { MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @NgModule({
   declarations: [
@@ -53,7 +53,10 @@ import { MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
     ReactiveFormsModule,
     HttpClientModule,
   ],
-  providers: [ymlService, ModalMessageComponent, {provide: MAT_DIALOG_DATA, useValue: {}}],
+  providers: [ymlService, ModalMessageComponent, 
+    {provide: MAT_DIALOG_DATA, useValue: {}}, 
+    {provide: MatDialogRef, useValue: {close: (dialogResult:any) => {} }},
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
