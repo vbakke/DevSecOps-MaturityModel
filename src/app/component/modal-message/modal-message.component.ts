@@ -12,10 +12,17 @@ export class ModalMessageComponent implements OnInit {
   data: DialogInfo;
   markdown: md = md();
 
-  DSOMM_host: string = 'https://raw.githubusercontent.com/devsecopsmaturitymodel';
-  DSOMM_url: string = `${this.DSOMM_host}/DevSecOps-MaturityModel-data/main/src/assets/YAML/generated/generated.yaml`;
-  meassageTemplates: Record<string, string> = {
-    'generated_yaml': `{message}\n\nPlease download the template \`generated.yaml\` from [DSOMM-data](${this.DSOMM_url}) on GitHub`
+  DSOMM_host: string = 'https://github.com/devsecopsmaturitymodel';
+  DSOMM_url: string = `${this.DSOMM_host}/DevSecOps-MaturityModel-data`;
+  meassageTemplates: Record<string, DialogInfo> = {
+    'generated_yaml': new DialogInfo(
+      `{message}\n\n` +
+        `Please download the activity template \`generated.yaml\` ` + 
+        `from [DSOMM-data](${this.DSOMM_url}) on GitHub.\n\n` +
+        'The DSOMM activities are maintained and distributed ' +
+        'separately from the software.',
+      'DSOMM startup problems'
+    )
   };
 
   constructor(
@@ -33,7 +40,9 @@ export class ModalMessageComponent implements OnInit {
       dialogInfo = new DialogInfo(dialogInfo);
     }
     if (dialogInfo.template && this.meassageTemplates.hasOwnProperty(dialogInfo.template)) {
-      dialogInfo.message = this.meassageTemplates[dialogInfo.template]?.replace('{message', dialogInfo.message);
+      let template: DialogInfo = this.meassageTemplates[dialogInfo.template];
+      dialogInfo.title = dialogInfo.title || template?.title;
+      dialogInfo.message = template?.message?.replace('{message}', dialogInfo.message);
     }
 
     dialogInfo.message = this.markdown.render(dialogInfo.message);
@@ -60,7 +69,8 @@ export class DialogInfo {
   buttons: string[] = ['OK'];
 
 
-  constructor(msg: string = '') {
+  constructor(msg: string = '', title: string = '') {
     this.message = msg;
+    this.title = title;
   }
 }

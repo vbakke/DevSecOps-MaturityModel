@@ -83,16 +83,17 @@ export class CircularHeatmapComponent implements OnInit {
       })
       .catch((error) => {
         let dialogInfo:DialogInfo = new DialogInfo();
-        dialogInfo.title = 'DSOMM startup problems';
         if (error?.status == 404) {
           if (error?.url?.endsWith('.yaml')) {
-            dialogInfo.message = `Cannot find [${error.url.substr(error.url.indexOf('/', 10))}](${error.url})`;
+            let short = error.url.substr(error.url.indexOf('/', 10));
+            dialogInfo.message = `Cannot find [${short}](${error.url})`;
             if (error?.url?.endsWith('generated.yaml')) {
               dialogInfo.template = 'generated_yaml';
             }                        
           }
         } else {
-
+          dialogInfo.title = 'Unexpected error';
+          dialogInfo.message = error?.status + ' ' + error?.message;
         }
 
         this.displayMessage(dialogInfo);
