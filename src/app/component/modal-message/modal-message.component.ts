@@ -52,6 +52,7 @@ export class ModalMessageComponent implements OnInit {
     dialogConfig.id = 'modal-message';
     dialogConfig.disableClose = true;
     dialogConfig.data = dialogInfo;
+    dialogConfig.autoFocus = false;
     this.dialogRef = this.dialog.open(ModalMessageComponent,  dialogConfig);
     return this.dialogRef;
   }
