@@ -7,6 +7,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { ymlService } from '../../service/yaml-parser/yaml-parser.service';
 import { Router, NavigationExtras } from '@angular/router';
 import { stringify } from 'qs';
+import { ModalMessageComponent, DialogInfo } from '../modal-message/modal-message.component';
 
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 
@@ -39,7 +40,11 @@ export class MatrixComponent implements OnInit {
   activityVisible: string[] = [];
   allDimensionNames: string[] = [];
 
-  constructor(private yaml: ymlService, private router: Router) {
+  constructor(
+    private yaml: ymlService, 
+    private router: Router,
+    public modal: ModalMessageComponent,
+  ) {
     this.filteredSubDimension = this.rowCtrl.valueChanges.pipe(
       startWith(null),
       map((row: string | null) =>
@@ -141,6 +146,22 @@ export class MatrixComponent implements OnInit {
       this.dataSource.data = JSON.parse(JSON.stringify(this.MATRIX_DATA));
       this.createSubDimensionList();
       this.createActivityTags(activitySet);
+    },
+    error => {
+      let dialogInfo:DialogInfo = new DialogInfo();
+      if (error?.status == 404) {
+          let short = error.url.substr(error.url.indexOf('/', 10));
+          dialogInfo.template = 'generated_yaml';
+          dialogInfo.message = `Cannot find [${short}](${error.url})`;
+      } else {
+        dialogInfo.title = 'Unexpected error';
+        dialogInfo.message = error?.status + ' ' + error?.message;
+      }
+  
+      const buttonElement = document.activeElement as HTMLElement;
+      buttonElement.blur(); 
+      
+      this.modal.openDialog(dialogInfo);  
     });
     this.dataSource.data = JSON.parse(JSON.stringify(this.MATRIX_DATA));
     this.createSubDimensionList();

@@ -11,6 +11,7 @@ import * as yaml from 'js-yaml';
 import { Router } from '@angular/router';
 import { MatChip } from '@angular/material/chips';
 import * as md from 'markdown-it';
+import { ModalMessageComponent, DialogInfo } from '../modal-message/modal-message.component';
 
 export interface activitySchema {
   uuid: string;
@@ -63,7 +64,7 @@ export class CircularHeatmapComponent implements OnInit {
   constructor(
     private yaml: ymlService,
     private router: Router,
-    private changeDetector: ChangeDetectorRef
+    public modal: ModalMessageComponent,
   ) {
     this.showOverlay = false;
     this.showFilters = true;
@@ -72,7 +73,7 @@ export class CircularHeatmapComponent implements OnInit {
   ngOnInit(): void {
     console.log(`${this.perfNow()}s: ngOnInit`);
     // Ensure that Levels and Teams load before MaturityData
-    // Using promises, since ngOnInit does not support async/await
+    // using promises, since ngOnInit does not support async/await
     this.LoadMaturityLevels()
       .then(() => this.LoadTeamsFromMetaYaml())
       .then(() => this.LoadMaturityDataFromGeneratedYaml())
@@ -81,13 +82,35 @@ export class CircularHeatmapComponent implements OnInit {
         this.matChipsArray = this.chips.toArray();
       })
       .catch((error) => {
-        console.error(error);
+        let dialogInfo:DialogInfo = new DialogInfo();
+        if (error?.status == 404) {
+          if (error?.url?.endsWith('.yaml')) {
+            let short = error.url.substr(error.url.indexOf('/', 10));
+            dialogInfo.message = `Cannot find [${short}](${error.url})`;
+            if (error?.url?.endsWith('generated.yaml')) {
+              dialogInfo.template = 'generated_yaml';
+            }                        
+          }
+        } else {
+          dialogInfo.title = 'Unexpected error';
+          dialogInfo.message = error?.status + ' ' + error?.message;
+        }
+
+        this.displayMessage(dialogInfo);
       });
   }
 
   @ViewChildren(MatChip) chips!: QueryList<MatChip>;
   matChipsArray: MatChip[] = [];
 
+  displayMessage(dialogInfo:DialogInfo) {
+    // Remove focus from the button that becomes aria unavailable (avoids ugly console error message)
+    const buttonElement = document.activeElement as HTMLElement;
+    buttonElement.blur(); 
+    
+    this.modal.openDialog(dialogInfo);
+  }
+  
   private LoadMaturityDataFromGeneratedYaml() {
     return new Promise<void>((resolve, reject) => {
       console.log(`${this.perfNow()}s: LoadMaturityDataFromGeneratedYaml Fetch`);
@@ -208,7 +231,7 @@ export class CircularHeatmapComponent implements OnInit {
         resolve();
       },
       (error) => {
-        reject(error?.message);
+        reject(error);
       });
     });
   }
@@ -265,7 +288,7 @@ export class CircularHeatmapComponent implements OnInit {
           resolve();
         },
         (error) => {
-          reject(error.message);
+          reject(error);
         });
     });
   }
@@ -290,7 +313,7 @@ export class CircularHeatmapComponent implements OnInit {
           resolve();
         },
         (error) => {
-          reject(error.message);
+          reject(error);
         });
     });
   }
@@ -465,7 +488,7 @@ export class CircularHeatmapComponent implements OnInit {
     svg
       .selectAll('path')
       .on('click', function (d) {
-        _self.console_log_event('click', d);
+        // _self.console_log_event('click', d);
         _self.setSectorCursor(svg, '#hover', '');
 
         var clickedId = d.currentTarget.id;
@@ -487,7 +510,7 @@ export class CircularHeatmapComponent implements OnInit {
           }
       })
       .on('mouseover', function (d) {
-        _self.console_log_event('mouseover', d);
+        // _self.console_log_event('mouseover', d);
         curr = d.currentTarget.__data__;
 
         if (curr && curr['Done%'] != -1) {
@@ -497,7 +520,7 @@ export class CircularHeatmapComponent implements OnInit {
       })
 
       .on('mouseout', function (d) {
-        _self.console_log_event('mouseout', d);
+        // _self.console_log_event('mouseout', d);
         _self.setSectorCursor(svg, '#hover', '');
       });
     this.reColorHeatmap();
@@ -751,6 +774,17 @@ export class CircularHeatmapComponent implements OnInit {
     }
   }
 
+  defineStringValues(
+    dataToCheck: string,
+    valueOfDataIfUndefined: string
+  ): string {
+    try {
+      return this.markdown.render(dataToCheck);
+    } catch {
+      return valueOfDataIfUndefined;
+    }
+  }
+
   openActivityDetails(dim: string, subdim: string, activityName: string) {
     let navigationExtras = {
       dimension: dim,
@@ -761,7 +795,18 @@ export class CircularHeatmapComponent implements OnInit {
       {},
       this.YamlObject[dim][subdim][activityName]
     );
-
+    this.activityDetails.description = this.defineStringValues(
+      this.activityDetails.description,
+      this.activityDetails.description
+    );
+    this.activityDetails.risk = this.defineStringValues(
+      this.activityDetails.risk,
+      this.activityDetails.risk
+    );
+    this.activityDetails.measure = this.defineStringValues(
+      this.activityDetails.measure,
+      this.activityDetails.measure
+    );
     if (this.activityDetails) {
       this.activityDetails.navigationExtras = navigationExtras;
     }
@@ -848,8 +893,19 @@ export class CircularHeatmapComponent implements OnInit {
   }
 
   ResetIsImplemented() {
-    localStorage.removeItem('dataset');
-    this.loadState();
+    // Remove focus from the button that becomes aria unavailable (avoids ugly console error message)
+    const buttonElement = document.activeElement as HTMLElement;
+    buttonElement.blur(); 
+
+    let title: string = "Delete local browser data";
+    let message: string = "Do you want to delete all progress for each team?";
+    let buttons: string[] = ['Cancel', 'Delete'];
+    this.modal.openDialog({title, message, buttons, template: ''}).afterClosed().subscribe(data => {
+      if (data === 'Delete') {
+        localStorage.removeItem('dataset');
+        location.reload();  // Make sure all load routines are initialized properly
+      }
+    });
   }
 
   saveState() {
@@ -886,7 +942,7 @@ export class CircularHeatmapComponent implements OnInit {
   console_log_event(type:string, event:any) {
     console.log(this.perfNow() + ': --- ' + type + ' ---');
     console.log(this.perfNow() + ': ' + type + this.event_to_str('currentTarget', event));
-    console.log(this.perfNow() + ': data:' + event?.currentTarget?.__data__);
+    // console.log(this.perfNow() + ': data:' + event?.currentTarget?.__data__);
     console.log(this.perfNow() + ': ' + type + this.event_to_str('explicitOriginalTarget', event));
     console.log(this.perfNow() + ': ' + type + this.event_to_str('relatedTarget', event));
     // console.log(this.perfNow() + ': ' + type + this.event_to_str('originalTarget', event));
