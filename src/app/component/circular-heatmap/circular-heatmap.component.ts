@@ -73,7 +73,7 @@ export class CircularHeatmapComponent implements OnInit {
   ngOnInit(): void {
     console.log(`${this.perfNow()}s: ngOnInit`);
     // Ensure that Levels and Teams load before MaturityData
-    // Using promises, since ngOnInit does not support async/await
+    // using promises, since ngOnInit does not support async/await
     this.LoadMaturityLevels()
       .then(() => this.LoadTeamsFromMetaYaml())
       .then(() => this.LoadMaturityDataFromGeneratedYaml())
@@ -774,6 +774,17 @@ export class CircularHeatmapComponent implements OnInit {
     }
   }
 
+  defineStringValues(
+    dataToCheck: string,
+    valueOfDataIfUndefined: string
+  ): string {
+    try {
+      return this.markdown.render(dataToCheck);
+    } catch {
+      return valueOfDataIfUndefined;
+    }
+  }
+
   openActivityDetails(dim: string, subdim: string, activityName: string) {
     let navigationExtras = {
       dimension: dim,
@@ -784,7 +795,18 @@ export class CircularHeatmapComponent implements OnInit {
       {},
       this.YamlObject[dim][subdim][activityName]
     );
-
+    this.activityDetails.description = this.defineStringValues(
+      this.activityDetails.description,
+      this.activityDetails.description
+    );
+    this.activityDetails.risk = this.defineStringValues(
+      this.activityDetails.risk,
+      this.activityDetails.risk
+    );
+    this.activityDetails.measure = this.defineStringValues(
+      this.activityDetails.measure,
+      this.activityDetails.measure
+    );
     if (this.activityDetails) {
       this.activityDetails.navigationExtras = navigationExtras;
     }
