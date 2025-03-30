@@ -1,26 +1,20 @@
 ---
+checkForDsommUpdates: true
+teams: 
+  $ref: teams.yaml
+$teamsRef: teams.yaml
+$activityRef:
+    - default/activities.yaml 
+    - custom/custom-activities.yaml  # For customizing your own activities
+
+
+
 #
 # Various strings and messages
 #
+lang: en
 strings:
-  en: &en
-    references:
-      samm2:
-        label: OWASP SAMM VERSION 2
-        description: |-
-          Software Assurance Maturity Model
-          The Software Assurance Maturity Model (SAMM) is an open framework to help organizations formulate
-          and implement a strategy for software security that is tailored
-          to the specific risks facing the organization.
-          https://owaspsamm.org/blog/2020/01/31/samm2-release/
-      iso27001-2017:
-        label: ISO 27001:2017
-        description: |-
-          ISO 27001:2017
-      iso27001-2022:
-        label: ISO 27001:2022
-        description: |-
-          ISO 27001:2022
+  en:
     labels: ['Very Low', 'Low', 'Medium', 'High', 'Very High']
     KnowledgeLabels:
       [
@@ -39,7 +33,6 @@ strings:
         'Level 4: Very high adoption of security practices',
         'Level 5: Advanced deployment of security practices at scale',
       ]
-# Default team
 teams: ['Default', 'B', 'C']
 teamGroups:
   GroupA: ['Default', 'B']

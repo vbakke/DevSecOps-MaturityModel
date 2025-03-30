@@ -1,0 +1,23 @@
+Level 5: 
+
+Build and Deployment:
+  Build:
+    Building and testing of artifacts in virtual environments:
+      uuid: a340f46b-6360-4cb8-847b-a0d3483d09d3
+      description: >-
+        My CUSTOM description.
+    Defined build process:
+      description: >
+        CUSTOM description without UUID
+    CUSTOM Pinning of artifacts:
+      uuid: f3c4971e-9f4d-4e59-8ed0-f0bdb6262477
+      description:
+        NEW description, where name is different
+      level: 4
+    SBOM of components:
+      ignore: true
+    Signing of code:
+      uuid: 9f107927-61e9-4574-85ad-3f2b4bca8665
+      ignore: true
+  Deployment:
+    ignore: true

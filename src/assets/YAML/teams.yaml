@@ -2,8 +2,9 @@
 #
 # Teams
 #
-teams: ['A', 'B', 'C']
+teams: ['A', 'B', 'C', 'Team D']
 teamGroups:
+  'Custom TEAMS loader': ['B', 'C', 'Team D']
   AB: ['A', 'B']
   BC: ['B', 'C']
   AC: ['A', 'C']
