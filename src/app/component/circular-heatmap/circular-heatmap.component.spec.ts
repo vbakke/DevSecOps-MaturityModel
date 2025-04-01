@@ -1,6 +1,7 @@
 import { HttpClient, HttpHandler } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ymlService } from 'src/app/service/yaml-parser/yaml-parser.service';
+import { loaderService } from 'src/app/service/loader/data-loader.service';
 import { CircularHeatmapComponent } from './circular-heatmap.component';
 import { RouterTestingModule } from '@angular/router/testing';
 import { MatChip } from '@angular/material/chips';
@@ -16,6 +17,7 @@ describe('CircularHeatmapComponent', () => {
       imports: [RouterTestingModule],
       providers: [
         ymlService,
+        loaderService,
         HttpClient,
         HttpHandler,
         { provide: ModalMessageComponent, useValue: {} },

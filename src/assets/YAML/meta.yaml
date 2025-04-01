@@ -1,6 +1,10 @@
 ---
 checkForDsommUpdates: true
-teams: 
+progress:
+  Planned: 10%
+  Started: 30%
+  Implemented: 100% 
+teams_w_ref: 
   $ref: teams.yaml
 $teamsRef: teams.yaml
 $activityRef:
