@@ -12,7 +12,7 @@ import { SidenavButtonsComponent } from './component/sidenav-buttons/sidenav-but
 import { TopHeaderComponent } from './component/top-header/top-header.component';
 import { ActivityDescriptionComponent } from './component/activity-description/activity-description.component';
 import { ymlService } from './service/yaml-parser/yaml-parser.service';
-import { loaderService } from './service/loader/data-loader.service';
+import { LoaderService } from './service/loader/data-loader.service';
 import { HttpClientModule } from '@angular/common/http';
 import { CircularHeatmapComponent } from './component/circular-heatmap/circular-heatmap.component';
 import { MappingComponent } from './component/mapping/mapping.component';
@@ -60,7 +60,7 @@ import {
   ],
   providers: [
     ymlService,
-    loaderService,
+    LoaderService,
     ModalMessageComponent,
     { provide: MAT_DIALOG_DATA, useValue: {} },
     { provide: MatDialogRef, useValue: { close: (dialogResult: any) => {} } },

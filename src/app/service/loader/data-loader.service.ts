@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { YamlService } from '../yaml-loader/yaml-loader.service';
 import { parse } from 'yamljs';
 
 export interface MetaSchema {
@@ -11,10 +12,10 @@ export interface MetaSchema {
 }
 
 @Injectable({ providedIn: 'root' })
-export class loaderService {
+export class LoaderService {
   public meta: MetaSchema | null;
 
-  constructor() {
+  constructor(private yamlService: YamlService) {
     this.meta = null;
   }
 
@@ -24,7 +25,8 @@ export class loaderService {
   }
 
   async loadMeta(): Promise<MetaSchema> {
-    const yaml: any = await this.loadYaml('./assets/YAML/meta.yaml');
+    const yaml: any = await this.yamlService.load('./assets/YAML/meta.yaml');
+    await this.fetchYamlRefs(yaml);
 
     return yaml;
   }
@@ -38,5 +40,9 @@ export class loaderService {
     const yamlText: string = await response.text();
 
     return parse(yamlText);
+  }
+
+  async fetchYamlRefs(yaml: any): Promise<any> {
+    return yaml;
   }
 }

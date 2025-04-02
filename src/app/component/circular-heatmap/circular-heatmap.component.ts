@@ -6,7 +6,7 @@ import {
   ChangeDetectorRef,
 } from '@angular/core';
 import { ymlService } from '../../service/yaml-parser/yaml-parser.service';
-import { loaderService } from '../../service/loader/data-loader.service';
+import { LoaderService } from '../../service/loader/data-loader.service';
 import * as d3 from 'd3';
 import * as yaml from 'js-yaml';
 import { Router } from '@angular/router';
@@ -67,7 +67,7 @@ export class CircularHeatmapComponent implements OnInit {
 
   constructor(
     private yaml: ymlService,
-    private loader: loaderService,
+    private loader: LoaderService,
     private router: Router,
     public modal: ModalMessageComponent
   ) {

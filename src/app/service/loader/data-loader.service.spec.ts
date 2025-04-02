@@ -1,21 +1,15 @@
-// import { HttpClient, HttpHandler } from '@angular/common/http';
-// import {
-//   HttpClientTestingModule,
-//   HttpTestingController,
-// } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { loaderService } from './data-loader.service';
-// import { ymlService } from '../yaml-parser/yaml-parser.service';
+import { LoaderService } from './data-loader.service';
+import { YamlService } from '../yaml-loader/yaml-loader.service';
 
 describe('DataLoaderService', () => {
-  let service: loaderService;
+  let service: LoaderService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [loaderService],
-      // providers: [HttpClientTestingModule, loaderService, HttpClient, HttpHandler],
+      providers: [LoaderService, YamlService],
     });
-    service = TestBed.inject(loaderService);
+    service = TestBed.inject(LoaderService);
   });
 
   it('should be created', () => {
