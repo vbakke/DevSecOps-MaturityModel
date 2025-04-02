@@ -5,6 +5,7 @@
 // } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { loaderService } from './data-loader.service';
+// import { ymlService } from '../yaml-parser/yaml-parser.service';
 
 describe('DataLoaderService', () => {
   let service: loaderService;

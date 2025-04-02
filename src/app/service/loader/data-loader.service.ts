@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { parse } from 'yamljs';
-import { ymlService } from '../yaml-parser/yaml-parser.service';
 
 export interface MetaSchema {
   checkForDsommUpdates: boolean;
@@ -11,15 +10,13 @@ export interface MetaSchema {
   $activityRef: string[];
 }
 
-
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class loaderService {
   public meta: MetaSchema | null;
 
-  constructor(private yaml: ymlService) {
+  constructor() {
     this.meta = null;
   }
-
 
   public async load(): Promise<any> {
     this.meta = await this.loadMeta();
@@ -38,8 +35,8 @@ export class loaderService {
     if (!response.ok) {
       throw new Error(`Failed to fetch the YAML file: ${response.statusText}`);
     }
-    const yamlText: string = await response.text(); 
-    
+    const yamlText: string = await response.text();
+
     return parse(yamlText);
   }
 }
