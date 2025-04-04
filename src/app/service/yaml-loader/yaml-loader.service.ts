@@ -16,8 +16,8 @@ export class YamlService {
    * @param url The relative path to the yaml file
    * @returns The yaml object
    */
-  public async load(url: string): Promise<any> {
-    let yaml = await this.loadYaml(url);
+  public async loadYaml(url: string): Promise<any> {
+    let yaml = await this.loadYamlUnresolvedRefs(url);
 
     const referenceUrl = url;
     await this.substituteYamlRefs(yaml, referenceUrl);
@@ -28,7 +28,7 @@ export class YamlService {
   /**
    *  Load a yaml file, and convert it to an object
    */
-  async loadYaml(url: string): Promise<any> {
+  public async loadYamlUnresolvedRefs(url: string): Promise<any> {
     console.log(this.perfNow() + ': Fetching ' + url);
     const response: Response = await fetch(url);
 

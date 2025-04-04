@@ -25,24 +25,10 @@ export class LoaderService {
   }
 
   async loadMeta(): Promise<MetaSchema> {
-    const yaml: any = await this.yamlService.load('./assets/YAML/meta.yaml');
-    await this.fetchYamlRefs(yaml);
+    const yaml: any = await this.yamlService.loadYaml('./assets/YAML/meta.yaml');
+
 
     return yaml;
   }
 
-  async loadYaml(url: string): Promise<any> {
-    const response: Response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch the YAML file: ${response.statusText}`);
-    }
-    const yamlText: string = await response.text();
-
-    return parse(yamlText);
-  }
-
-  async fetchYamlRefs(yaml: any): Promise<any> {
-    return yaml;
-  }
 }
