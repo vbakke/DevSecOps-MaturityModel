@@ -29,7 +29,7 @@ export class YamlService {
    *  Load a yaml file, and convert it to an object
    */
   public async loadYamlUnresolvedRefs(url: string): Promise<any> {
-    console.log(this.perfNow() + ': Fetching ' + url);
+    // console.log(this.perfNow() + ': Fetching ' + url);
     const response: Response = await fetch(url);
 
     if (!response.ok) {
@@ -105,7 +105,6 @@ export class YamlService {
     let [file, yPath] = this.parseRef(ref);
 
     let refObj: any = file ? await this.loadRef(file, referencePath) : orgYaml;
-    console.log(`Obj '${file}': '${JSON.stringify(refObj)}'`);
 
     try {
       return yPath ? this.getYPath(refObj, yPath) : refObj;
@@ -119,14 +118,13 @@ export class YamlService {
   /**
    * Load a reference, and cache it to avoid reloading the same file multiple times.
    */
-  async loadRef(url: string, referencePath: string): Promise<any> {
-    const absUrl = new URL(url, 'https://dummy.org/' + referencePath).pathname;
+  async loadRef(filepath: string, referencePath: string): Promise<any> {
+    const absUrl = this.makeFullPath(filepath, referencePath);
 
-    if (!this._refs[absUrl]) {
+    if (absUrl && !this._refs[absUrl]) {
       this._refs[absUrl] = await this.loadYaml(absUrl);
     }
 
-    console.log(`Returning referenced object '${url}' (${absUrl})`);
     return this._refs[absUrl];
   }
 
@@ -142,7 +140,6 @@ export class YamlService {
     try {
       return this._getYPath(obj, path, 1);
     } catch {
-      console.log(`Cannot find '${yPath}'`);
       throw Error(`Cannot find '${yPath}'`);
     }
   }
@@ -173,6 +170,20 @@ export class YamlService {
     yPath = yPath ? yPath.trim() : '';
 
     return [file, yPath];
+  }
+
+  public makeFullPath(relativePath: string, relativeTo: string) {
+    let fullPath = new URL(relativePath, 'https://example.org/.' + relativeTo)
+      .pathname;
+
+    // Make sure the new path does not escape its cage
+    let i = relativeTo.lastIndexOf('/');
+    if (fullPath.substring(0, i) == relativeTo.substring(0, i)) {
+      return fullPath;
+    } else {
+      console.log(`The ${relativePath} is not allowed outside its root folder`);
+      return '';
+    }
   }
 
   perfNow(): string {

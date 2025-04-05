@@ -86,9 +86,8 @@ export class CircularHeatmapComponent implements OnInit {
       .then(() => {
         console.log(`${this.perfNow()}s: set filters: ${this.chips?.length}`);
         this.matChipsArray = this.chips.toArray();
-        console.log(this.loader.meta?.$teamsRef);
       })
-      .catch((err) => {        
+      .catch(err => {
         this.displayMessage(new DialogInfo(err.message, 'An error occurred'));
       });
   }

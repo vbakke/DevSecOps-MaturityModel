@@ -1,6 +1,6 @@
 # version: 1.52.1
-meta:
-  version: 1.52.1  
+#meta:
+#  version: 1.52.1  
 Build and Deployment:
   Build:
     Building and testing of artifacts in virtual environments:

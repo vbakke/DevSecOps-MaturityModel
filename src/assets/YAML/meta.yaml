@@ -4,10 +4,13 @@ progress:
   Planned: 10%
   Started: 30%
   Implemented: 100% 
-teams_w_ref: 
-  $ref: teams.yaml
-$teamsRef: teams.yaml
-$activityRef:
+$teams: 
+  $ref: 'default/teams.yaml#/teams'
+$teamsGroups:
+  $ref: 'default/teams.yaml#/teamGroups'
+teamProgressFile: 'teamprogress.yaml' 
+
+activityFiles:
     - default/activities.yaml 
     - custom/custom-activities.yaml  # For customizing your own activities
 
