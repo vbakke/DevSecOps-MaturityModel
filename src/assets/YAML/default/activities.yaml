@@ -1,33 +1,44 @@
-##Level 5: 
-
+# version: 1.52.1
+#meta:
+#  version: 1.52.1  
+Ignore this Category:
+  ignore: true
 Build and Deployment:
-  Ignore:
+  Ignore this dimension:
     ignore: true
   Build:
     Building and testing of artifacts in virtual environments:
       uuid: a340f46b-6360-4cb8-847b-a0d3483d09d3
       description: >-
-        My CUSTOM description.
-      level: 1
+        A DSOMM description.
+      level: 3
     Defined build process:
+      uuid: f6f7737f-25a9-4317-8de2-09bf59f29b5b
       description: >
-        CUSTOM description without UUID
+        DSOMM description without UUID
       level: 1
-    CUSTOM Pinning of artifacts:
+    Pinning of artifacts:
       uuid: f3c4971e-9f4d-4e59-8ed0-f0bdb6262477
       description:
-        NEW description, where name is different
+        DSOMM description, where uuid is different
       level: 2
     SBOM of components:
-      ignore: true
+      uuid: 2858ac12-0179-40d9-9acf-1b839c030473
       level: 3
     Signing of code:
       level: 4
       uuid: 9f107927-61e9-4574-85ad-3f2b4bca8665
       ignore: true
   Deployment:
-    ignore: true
-
+    Ignore this Activity:
+      ignore: true
+    Defined deployment process:
+      uuid: 74938a3f-1269-49b9-9d0f-c43a79a1985a
+      level: 1
+      description:
+    Handover of confidential parameters:
+      uuid: 94a96f79-8bd6-4904-97c0-994ff88f176a              
+      level: 2
 Test and Verification:
   Application tests:
     High coverage of security related module and integration tests:

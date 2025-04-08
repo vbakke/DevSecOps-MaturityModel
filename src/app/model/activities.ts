@@ -1,8 +1,10 @@
 import { E, Y } from "@angular/cdk/keycodes";
 
-export type Category = Record<string, Dimension>;
-export type Dimension = Record<string, Activity>;
+export type Data = Record<string, Categories>;
+export type Categories = Record<string, Dimensions>;
+export type Dimensions = Record<string, Activity>;
 export interface Activity {
+  ignore: boolean;
   uuid: string;
   category: string;
   dimension: string;
@@ -49,48 +51,173 @@ export interface Activity {
 
 
 export class Activities {
-  public data: Category[] = [];
+  public data: Data = {};
+  private _activityList: Activity[] = [];
+  private _activityByUuid: Record<string, Activity> = {};
+  private _activityByName: Record<string, Activity> = {};
 
-  // constructor(yaml:any) {
-  // }
-  addActivityFile(yaml:any) {
-    this.data = this._build(yaml);
+  public addActivityFile(yaml:any, errors: string[]) {
+    let requireUuid: boolean = this._activityList.length == 0;
+    let activityList: Activity[] = this.prepareActivities(yaml, requireUuid, errors);
+    if (this._activityList.length == 0) {
+      //this._ensureNoDuplicateIds(...)
+      this._activityList = activityList;
+      this.buildLookups(activityList, this._activityByName, this._activityByUuid, errors);
+      this.data = yaml;
+    } else {
+      let activityByName: Record<string, Activity> = {};
+      let activityByUuid: Record<string, Activity> = {};
+      //this._ensureNoDuplicateIds(...)
+      //this.buildLookups(activityList, activityByName, activityByUuid, errors);
+      this.mergeActivities(activityList, this._activityList, errors);
+      // TODO: Remove ignored activities, dimension, categories and levels
+
+      // Reset lookup tables after merge
+      this._activityByName = {};
+      this._activityByUuid = {};
+      this.buildLookups(this._activityList, this._activityByName, this._activityByUuid, errors);
+      this.buildDataHierarchy(this._activityList);
+    }
+    
   }
 
-  _build(yaml: Category[]): Category[] {
-    // let data: Category[] = yaml;
-    let errors: string[] = [];
+
+  buildDataHierarchy(activityList: Activity[]) {
+    this.data = {};
+    let data: Data = this.data;
+    let categories: Categories;
+    let dimensions: Dimensions;
+
+    for (let activity of activityList) {
+      if (!data.hasOwnProperty(activity.category)) 
+        data[activity.category] = {};
+
+      categories = data[activity.category];
+      if (!categories.hasOwnProperty(activity.dimension)) 
+        categories[activity.dimension] = {};
+
+      dimensions = categories[activity.dimension];
+
+      dimensions[activity.name] = activity;
+
+    }
+  }
+
+  prepareActivities(yaml: Data, requireUuid:boolean, errors: string[]): Activity[] {
+    let activityList: Activity[] = [];
 
     for (let categoryName in yaml) {
       let category = yaml[categoryName];
       if (categoryName == 'ignore') { continue; }
       for (let dimName in category) {
         if (dimName == 'ignore') { continue; }
-        let dimension: Dimension = category[dimName];
+        let dimension: Dimensions = category[dimName];
         for (let activityName in dimension) {
-          if (activityName == 'ignore') { continue; }
-          console.log(`${categoryName} -- ${dimName} -- ${activityName}`);
           let activity: Activity = dimension[activityName];
+          if (activityName == 'ignore' || activity.ignore) { continue; }
+
+          console.log(`${categoryName} -- ${dimName} -- ${activityName}`);
           activity.category = categoryName;
           activity.dimension = dimName;
+          activity.name = activityName;
 
-          if (!activity.level) errors.push(`Activity '${activityName}' is missing level`);
-          // category[categoryName] = yaml[categoryName];
+          if (requireUuid && !activity.uuid) errors.push(`Activity '${activityName}' is missing the 'uuid' attribute`);
+          else if (requireUuid && !activity.level) errors.push(`Activity '${activityName}' is missing the 'level' attribute`);
+          else activityList.push(activity);
         }
       }
     }
+    return activityList;
+  }
 
-    if (errors.length) {
-      for (let error of errors)
-        console.error(error);
-      throw Error(errors.toString());
+  buildLookups(activityList: Activity[],
+    activityByName: Record<string, Activity>,
+    activityByUuid: Record<string, Activity>,
+    errors: string[]
+  ) {
+    for (let activity of activityList) {
+      this.addActivityLookup(activity, activityByName, activityByUuid, errors);
     }
-
-    return yaml;
   }
 
-  _buildActivityByName() {
+  addActivityLookup(
+    activity: Activity,
+    activityByName: Record<string, Activity>,
+    activityByUuid: Record<string, Activity>,
+    errors: string[]
+  ): boolean {
+    let nameExists = activityByName.hasOwnProperty(activity.name);
+    let uuidExists = activityByUuid.hasOwnProperty(activity.uuid);
+
+    if (nameExists && uuidExists) {
+      errors.push(`Duplicate activity '${activity.name}' (${activity.uuid}). Please remove one from your activity yaml files.`)
+    } else if (nameExists) {
+      errors.push(`Duplicate activity name '${activity.name}' (${activity.uuid} and ${activityByName[activity.name].uuid}).`)
+    } else if (uuidExists) {
+      errors.push(`Duplicate activity uuid '${activity.uuid}' ('${activity.name}' and '${activityByUuid[activity.uuid].name}').`)
+    } else {
+      activityByName[activity.name] = activity;
+      activityByUuid[activity.uuid] = activity;
+      return true;
+    }
+    return false;
   }
-  _buildActivityByUuid() {
+
+  mergeActivities(newActivities: Activity[], existingData: Activity[], errors: string[]) {
+    for (let newActivity of newActivities) {
+      /*  name  uuid
+          name + no uuid: Lookup previous uuid
+               - No uuid: Add
+               - Has uuid: Update
+          name + uuid match: Override
+          !name, uuid: Override uuid activity, using new name          
+          name, !uuid: Error
+          !name, !uuid: New activity
+
+      */  
+
+      let existingActivity: Activity | null = null;
+      // If newActivity lacks uuid, identify by name
+      if (!newActivity.uuid) {
+        if (this._activityByName.hasOwnProperty(newActivity.name)) {
+          existingActivity = this._activityByName[newActivity.name];
+        }
+      } else {
+        if (this._activityByUuid.hasOwnProperty(newActivity.uuid)) {
+          existingActivity = this._activityByUuid[newActivity.uuid];
+        } else {
+          // The UUID is new, but verify that the name is also new
+          if (this._activityByName.hasOwnProperty(newActivity.name)) {
+            errors.push(`The activity '${newActivity.name} is exists with different uuids (${newActivity.uuid} and ${this._activityByName[newActivity.name].uuid})`);
+          }
+        }
+      }
+
+      if (existingActivity == null) {
+        this.addActivity(newActivity, existingData);
+      } else {
+        this.updateActivity(newActivity, existingActivity);
+      }
+    }
+  }
+
+  addActivity(newActivity: Activity, existingData: Activity[]) {
+    this._activityByName[newActivity.name] = newActivity;
+    this._activityByUuid[newActivity.uuid] = newActivity;
+
+    existingData.push(newActivity);
+  }
+  updateActivity(newActivity: Activity, existingActivity: Activity) {
+    if (newActivity.name != existingActivity.name)
+      this._activityByName[newActivity.name] = existingActivity;
+    if (newActivity.uuid != existingActivity.uuid)
+      this._activityByUuid[newActivity.uuid] = existingActivity;
+
+    Object.assign(existingActivity, newActivity);
+  }
+
+  public getActivityByName() {
+  }
+  public getActivityByUuid() {
   }
 }

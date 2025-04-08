@@ -3,8 +3,8 @@ import { parse } from 'yamljs';
 import { YamlService } from '../yaml-loader/yaml-loader.service';
 import { Meta } from '../../model/meta';
 import {
-  Category,
-  Dimension,
+  Categories,
+  Dimensions,
   Activity,
   Activities,
 } from '../../model/activities';
@@ -12,14 +12,13 @@ import {
 @Injectable({ providedIn: 'root' })
 export class LoaderService {
   private META_FILE: string = '/assets/YAML/meta.yaml';
-  public meta: Meta | null;
-  public activities: Category[];
   private debug: boolean = true;
+  public meta: Meta | null;
+  public activities: Activities;
 
   constructor(private yamlService: YamlService) {
     this.meta = null;
-    this.activities = [];
-    // this._lookupNameToUuid = {};
+    this.activities = new Activities();
   }
 
   public async load(): Promise<any> {
@@ -46,18 +45,28 @@ export class LoaderService {
     return meta;
   }
 
-  async loadActivities(meta: Meta): Promise<string> {
-    let activities: Activities = new Activities();
+  async loadActivities(meta: Meta): Promise<Activities> {
+    let errors: string[] = [];
+    // let activities: Activities = new Activities();
     for (let filename of meta.activityFiles) {
       console.log(`LOADING: ${filename}`);
-      let data: Category[] = await this.loadActivityFile(filename);
-      activities.addActivityFile(data);
-      console.log(activities);
+      let data: Categories = await this.loadActivityFile(filename);      
+      // console.log(activities);
+      this.activities.addActivityFile(data, errors);
+      // return this.activities; // REMOVEME
+
+      if (errors.length) {
+        for (let error of errors)
+          console.error(error);
+        throw Error('Load error!\n\n----\n\nLoading: ' + filename + '\n\n----\n\n' +  errors.join('\n\n'));
+      }
+  
+  
     }
-    return '';
+    return this.activities;
   }
 
-  async loadActivityFile(filename: string): Promise<Category[]> {
+  async loadActivityFile(filename: string): Promise<Categories> {
     let yaml: any = this.yamlService.loadYamlUnresolvedRefs(filename);
     return yaml;
   }
