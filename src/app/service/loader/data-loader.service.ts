@@ -50,18 +50,20 @@ export class LoaderService {
     // let activities: Activities = new Activities();
     for (let filename of meta.activityFiles) {
       console.log(`LOADING: ${filename}`);
-      let data: Categories = await this.loadActivityFile(filename);      
+      let data: Categories = await this.loadActivityFile(filename);
       // console.log(activities);
       this.activities.addActivityFile(data, errors);
       // return this.activities; // REMOVEME
 
       if (errors.length) {
-        for (let error of errors)
-          console.error(error);
-        throw Error('Load error!\n\n----\n\nLoading: ' + filename + '\n\n----\n\n' +  errors.join('\n\n'));
+        for (let error of errors) console.error(error);
+        throw Error(
+          'Load error!\n\n----\n\nLoading: ' +
+            filename +
+            '\n\n----\n\n' +
+            errors.join('\n\n')
+        );
       }
-  
-  
     }
     return this.activities;
   }
