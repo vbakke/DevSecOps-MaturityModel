@@ -59,7 +59,7 @@ export class ActivityStore {
     return this._activityByName[uuid];
   }
 
-  public addActivityFile(yaml: any, errors: string[]) {
+  public addActivityFile(yaml: Data, errors: string[]) {
     // let requireUuid: boolean = this._activityList.length == 0;
     let activityList: Activity[] = [];
     let ignoreList: IgnoreList = new IgnoreList();

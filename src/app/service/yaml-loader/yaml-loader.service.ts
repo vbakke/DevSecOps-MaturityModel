@@ -1,6 +1,7 @@
 import { K, Y } from '@angular/cdk/keycodes';
 import { Injectable } from '@angular/core';
 import { parse } from 'yamljs';
+import { perfNow } from 'src/app/util/util';
 
 @Injectable({ providedIn: 'root' })
 export class YamlService {
@@ -29,7 +30,7 @@ export class YamlService {
    *  Load a yaml file, and convert it to an object
    */
   public async loadYamlUnresolvedRefs(url: string): Promise<any> {
-    // console.log(this.perfNow() + ': Fetching ' + url);
+    // console.log(perfNow() + ': Fetching ' + url);
     const response: Response = await fetch(url);
 
     if (!response.ok) {
@@ -184,9 +185,5 @@ export class YamlService {
       console.log(`The ${relativePath} is not allowed outside its root folder`);
       return '';
     }
-  }
-
-  perfNow(): string {
-    return (performance.now() / 1000).toFixed(3) + 'sec';
   }
 }

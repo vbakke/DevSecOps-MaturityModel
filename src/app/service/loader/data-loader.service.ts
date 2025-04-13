@@ -1,13 +1,8 @@
 import { Injectable } from '@angular/core';
 import { perfNow } from 'src/app/util/util';
 import { YamlService } from '../yaml-loader/yaml-loader.service';
-import { Meta } from '../../model/meta';
-import {
-  Categories,
-  Dimensions,
-  Activity,
-  ActivityStore,
-} from '../../model/activity-store';
+import { Meta } from 'src/app/model/meta';
+import { ActivityStore, Data } from 'src/app/model/activity-store';
 
 @Injectable({ providedIn: 'root' })
 export class LoaderService {
@@ -53,10 +48,9 @@ export class LoaderService {
     // let activities: Activities = new Activities();
     for (let filename of meta.activityFiles) {
       console.log(`${perfNow()}s: Loading activity file: ${filename}`);
-      let data: Categories = await this.loadActivityFile(filename);
+      let data: Data = await this.loadActivityFile(filename);
       // console.log(activities);
       this.activities.addActivityFile(data, errors);
-      // return this.activities; // REMOVEME
 
       if (errors.length) {
         for (let error of errors) console.error(error);
@@ -71,7 +65,7 @@ export class LoaderService {
     return this.activities;
   }
 
-  async loadActivityFile(filename: string): Promise<Categories> {
+  async loadActivityFile(filename: string): Promise<Data> {
     let yaml: any = this.yamlService.loadYamlUnresolvedRefs(filename);
     return yaml;
   }
