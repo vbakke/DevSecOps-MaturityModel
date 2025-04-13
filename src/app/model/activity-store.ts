@@ -44,7 +44,7 @@ export interface Activity {
 //   description: string;
 // }
 
-export class Activities {
+export class ActivityStore {
   public data: Data = {};
   private _activityList: Activity[] = [];
   private _activityByUuid: Record<string, Activity> = {};
