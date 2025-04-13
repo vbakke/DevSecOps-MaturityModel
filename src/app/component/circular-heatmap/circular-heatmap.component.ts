@@ -82,20 +82,20 @@ export class CircularHeatmapComponent implements OnInit {
     // using promises, since ngOnInit does not support async/await
     this.LoadMaturityLevels()
       .then(() => this.LoadTeamsFromMetaYaml())
-      .then(() => this.LoadMaturityDataFromGeneratedYaml())
       .then(() => this.loader.load())
+      .then(() => this.LoadMaturityDataFromGeneratedYaml())
       .then(() => {
         console.log(`${this.perfNow()}s: set filters: ${this.chips?.length}`);
         this.matChipsArray = this.chips.toArray();
-        console.log('--- LOADED ---');
-        let data:any = this.loader.activities.data;
+        console.log('--- LOADED COMPLETE (old & new) ---');
+        let data: any = this.loader.activities.data;
         this.YamlObject = data;
         for (let c in data) {
           console.log(' - ' + c);
           for (let d in data[c]) {
             console.log('    - ' + d);
             for (let a in data[c][d]) {
-              console.log('       - ' + a);
+              console.log(`       - (${data[c][d][a]?.level}) ${a}`);
             }
           }
         }
@@ -125,10 +125,9 @@ export class CircularHeatmapComponent implements OnInit {
       this.yaml.setURI('./assets/YAML/generated/generated.yaml');
       this.yaml.getJson().subscribe(data => {
         console.log(`${this.perfNow()}s: LoadMaturityData Downloaded`);
-        if (hasData(this.loader?.activities?.data))
-          this.YamlObject = this.loader.activities.data;
-        else 
-          this.YamlObject = data;
+        this.YamlObject = hasData(this.loader?.activities?.data)
+          ? this.loader.activities.data
+          : data;
         this.AddSegmentLabels(this.YamlObject);
         const localStorageData = this.getDatasetFromBrowserStorage();
 

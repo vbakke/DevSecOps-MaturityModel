@@ -22,14 +22,16 @@ export class LoaderService {
   }
 
   public async load(): Promise<any> {
-    console.log(`${perfNow()}s: ----- New Load Service -----`);
+    console.log(`${perfNow()}s: ----- New Load Service Begin -----`);
     this.meta = await this.loadMeta();
     await this.loadActivities(this.meta);
+    console.log(`${perfNow()}s: ----- New Load Service End-----`);
   }
 
   async loadMeta(): Promise<Meta> {
-    if (this.debug)
+    if (this.debug) {
       console.log(`${perfNow()} s: Load meta: ${this.META_FILE}`);
+    }
     let meta: Meta = await this.yamlService.loadYaml(this.META_FILE);
 
     if (!meta.activityFiles) {
@@ -73,6 +75,4 @@ export class LoaderService {
     let yaml: any = this.yamlService.loadYamlUnresolvedRefs(filename);
     return yaml;
   }
-
-
 }

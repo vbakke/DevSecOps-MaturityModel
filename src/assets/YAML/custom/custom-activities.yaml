@@ -15,22 +15,14 @@ Build and Deployment:
     #   uuid: f3c4971e-9f4d-4e59-8ed0-f0bdb6111111
     #   description:
     #     This activity has a two different UUIDs
-    NEW SBOM title as level 5:
-      uuid: 2858ac12-0179-40d9-9acf-1b839c030473
-      level: 5
-    Signing of code:
-      level: 4
-      uuid: 9f107927-61e9-4574-85ad-3f2b4bca8665
-      ignore: true
-  Deployment:
-    Ignore this Activity:
-      ignore: true
-    Ignore:
-      uuid: 94a96f79-8bd6-4904-97c0-994ff88f176a   
-      ignore: true
+
 
 New test category:
   Custom tests:
+    NEW SBOM in NEW dimension:
+      uuid: 2858ac12-0179-40d9-9acf-1b839c030473
+      level: 2
+  Custom tests2:
     High coverage of security related module and integration tests:
       uuid: 67667c97-c33e-4306-a4e5-e7b1d8e10c5a
       level: 1

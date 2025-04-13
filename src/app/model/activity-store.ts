@@ -1,3 +1,5 @@
+import { IgnoreList } from './ignore-list';
+
 export type Data = Record<string, Categories>;
 export type Categories = Record<string, Dimensions>;
 export type Dimensions = Record<string, Activity>;
@@ -50,31 +52,35 @@ export class ActivityStore {
   private _activityByUuid: Record<string, Activity> = {};
   private _activityByName: Record<string, Activity> = {};
 
-  public getActivityByName() {
+  public getActivityByName(name: string): Activity {
+    return this._activityByName[name];
   }
-  public getActivityByUuid() {
+  public getActivityByUuid(uuid: string): Activity {
+    return this._activityByName[uuid];
   }
 
-  public addActivityFile(yaml:any, errors: string[]) {
-    let requireUuid: boolean = this._activityList.length == 0;
-    let activityList: Activity[] = this.prepareActivities(yaml, requireUuid, errors);
+  public addActivityFile(yaml: any, errors: string[]) {
+    // let requireUuid: boolean = this._activityList.length == 0;
+    let activityList: Activity[] = [];
+    let ignoreList: IgnoreList = new IgnoreList();
+    this.prepareActivities(yaml, activityList, ignoreList);
     if (this._activityList.length == 0) {
-      //this._ensureNoDuplicateIds(...)
       this._activityList = activityList;
       this.buildLookups(
         activityList,
         this._activityByName,
-        this._activityByUuid, errors
+        this._activityByUuid,
+        errors
       );
       this.data = yaml;
       this.buildDataHierarchy(this._activityList);
     } else {
+      this.removeIgnoredActivities(ignoreList, this._activityList);
       // let activityByName: Record<string, Activity> = {};
       // let activityByUuid: Record<string, Activity> = {};
       //this._ensureNoDuplicateIds(...)
       //this.buildLookups(activityList, activityByName, activityByUuid,errors);
       this.mergeActivities(activityList, this._activityList, errors);
-      // TODO: Remove ignored activities, dimension, categories and levels
 
       // Reset lookup tables after merge
       this._activityByName = {};
@@ -82,13 +88,12 @@ export class ActivityStore {
       this.buildLookups(
         this._activityList,
         this._activityByName,
-        this._activityByUuid, errors
+        this._activityByUuid,
+        errors
       );
       this.buildDataHierarchy(this._activityList);
     }
-
   }
-
 
   buildDataHierarchy(activityList: Activity[]) {
     this.data = {};
@@ -97,48 +102,81 @@ export class ActivityStore {
     let dimensions: Dimensions;
 
     for (let activity of activityList) {
-      if (!data.hasOwnProperty(activity.category))
+      if (!data.hasOwnProperty(activity.category)) {
         data[activity.category] = {};
+      }
 
       categories = data[activity.category];
-      if (!categories.hasOwnProperty(activity.dimension))
+      if (!categories.hasOwnProperty(activity.dimension)) {
         categories[activity.dimension] = {};
+      }
 
       dimensions = categories[activity.dimension];
-
       dimensions[activity.name] = activity;
-
     }
   }
 
-  prepareActivities(yaml: Data, requireUuid:boolean, errors: string[]): Activity[] {
-    let activityList: Activity[] = [];
-
+  /**
+   * Prepare activities loaded from a YAML file.
+   *  - Add category, dimension and activity name to activity object
+   *  - unless ignored, then add it to the ignoreList
+   */
+  prepareActivities(
+    yaml: Data,
+    activityList: Activity[],
+    ignoreList: IgnoreList
+  ): void {
     for (let categoryName in yaml) {
       let category = yaml[categoryName];
-      if (categoryName == 'ignore') { continue; }
       for (let dimName in category) {
-        if (dimName == 'ignore') { continue; }
+        if (dimName == 'ignore') {
+          ignoreList.add('category', categoryName);
+          continue;
+        }
+
         let dimension: Dimensions = category[dimName];
         for (let activityName in dimension) {
+          if (activityName == 'ignore') {
+            ignoreList.add('dimension', dimName);
+            continue;
+          }
           let activity: Activity = dimension[activityName];
-          if (activityName == 'ignore' || activity.ignore) { continue; }
+          if (activity.ignore === true) {
+            if (activity.uuid) {
+              ignoreList.add('uuid', activity.uuid);
+            } else {
+              ignoreList.add('name', activityName);
+            }
+            continue;
+          }
 
-          console.log(`${categoryName} -- ${dimName} -- ${activityName}`);
+          console.log(`  - ${categoryName} -- ${dimName} -- ${activityName}`);
           activity.category = categoryName;
           activity.dimension = dimName;
           activity.name = activityName;
 
-          if (requireUuid && !activity.uuid) errors.push(`Activity '${activityName}' is missing the 'uuid' attribute`);         // eslint-disable-line
-          else if (requireUuid && !activity.level) errors.push(`Activity '${activityName}' is missing the 'level' attribute`);  // eslint-disable-line
-          else activityList.push(activity);
+          activityList.push(activity);
         }
       }
     }
-    return activityList;
   }
 
-  buildLookups(activityList: Activity[],
+  removeIgnoredActivities(ignoreList: IgnoreList, activityList: Activity[]) {
+    if (ignoreList.isEmpty()) return;
+
+    let i: number = activityList.length - 1;
+
+    // Loop backwards to not tamper with index when removing items
+    while (i >= 0) {
+      if (ignoreList.hasActivity(activityList[i])) {
+        activityList.splice(i, 1); // Remove item from list
+      }
+      i--;
+    }
+  }
+
+  buildLookups(
+    activityList: Activity[],
     activityByName: Record<string, Activity>,
     activityByUuid: Record<string, Activity>,
     errors: string[]
@@ -174,34 +212,32 @@ export class ActivityStore {
     return false;
   }
 
+  /**
+   * Merge new activities into list of existing activities.
+   * Override property by property if the new activity already exists.
+   * Identify existing by UUID (if present), otherwise by Name.
+   *
+   * If any errors are detected, return this by the error list.
+   */
   mergeActivities(
     newActivities: Activity[],
     existingData: Activity[],
     errors: string[]
   ) {
     for (let newActivity of newActivities) {
-      /*  name  uuid
-          name + no uuid: Lookup previous uuid
-               - No uuid: Add
-               - Has uuid: Update
-          name + uuid match: Override
-          !name, uuid: Override uuid activity, using new name
-          name, !uuid: Error
-          !name, !uuid: New activity
+      let foundExistingActivity: Activity | null = null;
 
-      */
-
-      let existingActivity: Activity | null = null;
       // If newActivity lacks uuid, identify by name
       if (!newActivity.uuid) {
         if (this._activityByName.hasOwnProperty(newActivity.name)) {
-          existingActivity = this._activityByName[newActivity.name];
+          foundExistingActivity = this._activityByName[newActivity.name];
         }
       } else {
+        // Identify by uuid
         if (this._activityByUuid.hasOwnProperty(newActivity.uuid)) {
-          existingActivity = this._activityByUuid[newActivity.uuid];
+          foundExistingActivity = this._activityByUuid[newActivity.uuid];
         } else {
-          // The UUID is new, but verify that the name is also new
+          // The uuid is new, but verify that the name does not exist (i.e. double uuids)
           if (this._activityByName.hasOwnProperty(newActivity.name)) {
             errors.push(
               `The activity '${newActivity.name} is exists with different uuids ` +          // eslint-disable-line
@@ -211,10 +247,10 @@ export class ActivityStore {
         }
       }
 
-      if (existingActivity == null) {
+      if (foundExistingActivity == null) {
         this.addActivity(newActivity, existingData);
       } else {
-        this.updateActivity(newActivity, existingActivity);
+        this.updateActivity(newActivity, foundExistingActivity);
       }
     }
   }
@@ -225,6 +261,7 @@ export class ActivityStore {
 
     existingData.push(newActivity);
   }
+
   updateActivity(newActivity: Activity, existingActivity: Activity) {
     if (newActivity.name != existingActivity.name)
       this._activityByName[newActivity.name] = existingActivity;
