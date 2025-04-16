@@ -1,12 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivityStore, Data, Activity } from './activity-store';
-// import { LoaderService } from 'src/app/service/data-loader.service';
-// import { YamlService } from '../yaml-loader/yaml-loader.service';
-
 
 describe('ActivityStore', () => {
   let store: ActivityStore;
   let errors: string[];
+
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [ActivityStore],
@@ -63,25 +61,26 @@ describe('ActivityStore', () => {
     
     // Add a Duplicate activity
     yamlCopy['Category 2']['Dimension 21']['Activity 111'] = activity111;
-
+    
     // Duplicate an uuid
     yamlCopy['Category 2']['Dimension 21']['Activity 211'].uuid = activity111.uuid;
-
+    
     // Duplicate an activity name (but not the uuid)
     yamlCopy['Category 2']['Dimension 21']['Activity 121'] = deepCopy(activity111);
     yamlCopy['Category 2']['Dimension 21']['Activity 121'].uuid = 'fake-uuid';
-
-
+    
+    
     store.addActivityFile(yamlCopy, errors);
-
+    
     expectArrayContainSubstring(errors, "Duplicate activity '");    
     expectArrayContainSubstring(errors, 'Duplicate activity uuid');
     expectArrayContainSubstring(errors, 'Duplicate activity name');
-
+    
     // If all errors have been handled, expect the remaining errors to be empty
     expect(errors).toHaveSize(0);
   });
 
+  // prettier-ignore
   it('produce error messages when merging yaml', () =>  {
     let yamlCopy: Data = deepCopy(baseYaml);
     let extraCopy: Data = deepCopy(extraYaml);
@@ -120,7 +119,6 @@ function expectArrayContainSubstring(errors: string[], substr: string) {
 
   expect('errors').toContain(substr);
 }
-
 
 // -----------
 //  Test data
