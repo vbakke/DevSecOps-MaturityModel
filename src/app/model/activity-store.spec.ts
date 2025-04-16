@@ -37,7 +37,9 @@ describe('ActivityStore', () => {
 
   // prettier-ignore
   it('override base yaml', () => {
-    store.addActivityFile(baseYaml, errors);
+    let yamlCopy: Data = deepCopy(baseYaml);
+
+    store.addActivityFile(yamlCopy, errors);
     store.addActivityFile(extraYaml, errors);
     
     expect(errors.length).toBe(0);
