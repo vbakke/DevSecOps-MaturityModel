@@ -1,9 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { ActivityStore, Data } from './activity-store';
+import { ActivityStore, Data, Activity } from './activity-store';
 // import { LoaderService } from 'src/app/service/data-loader.service';
 // import { YamlService } from '../yaml-loader/yaml-loader.service';
 
-let baseYaml: Data;
 
 describe('ActivityStore', () => {
   let store: ActivityStore;
@@ -14,7 +13,6 @@ describe('ActivityStore', () => {
     });
     store = TestBed.inject(ActivityStore);
     errors = [];
-    baseYaml = JSON.parse(JSON.stringify(baseYaml_original));
   });
 
   afterEach(() => {
@@ -43,23 +41,91 @@ describe('ActivityStore', () => {
   it('override base yaml', () => {
     store.addActivityFile(baseYaml, errors);
     store.addActivityFile(extraYaml, errors);
-
+    
     expect(errors.length).toBe(0);
     expect(store.getActivityByName('Activity 111')).toBeUndefined(); // Changed name, to:
     expect(store.getActivityByName('OVERRIDE 111')?.uuid).toBe('00000000-1111-1111-1111-000000000000');
     expect(store.getActivityByName('OVERRIDE 111')?.description).toBe('OVERRIDE DESC AND LEVEL');
     expect(store.getActivityByName('OVERRIDE 111')?.level).toBe(2);
-
+    
     expect(store.getActivityByName('Activity 112')?.description).toBe('OVERRIDE: BASED ON NAME'); 
     expect(store.getActivityByName('Activity 121')).toBeUndefined(); // Ignored
+    expect(store.getActivityByName('Activity 211')).toBeUndefined(); // Ignored    
     expect(store.getActivityByName('New Activity 311')).toBeTruthy();
   });
+
+  // prettier-ignore
+  it('produce error messages when loading a yaml', () =>  {
+    let yamlCopy: Data = deepCopy(baseYaml);
+    let activity111: Activity = yamlCopy['Category 1']['Dimension 11']['Activity 111'];
+    let activity112: Activity = yamlCopy['Category 1']['Dimension 11']['Activity 112'];
+    let activity121: Activity = yamlCopy['Category 1']['Dimension 12']['Activity 121'];
+    
+    // Add a Duplicate activity
+    yamlCopy['Category 2']['Dimension 21']['Activity 111'] = activity111;
+
+    // Duplicate an uuid
+    yamlCopy['Category 2']['Dimension 21']['Activity 211'].uuid = activity111.uuid;
+
+    // Duplicate an activity name (but not the uuid)
+    yamlCopy['Category 2']['Dimension 21']['Activity 121'] = deepCopy(activity111);
+    yamlCopy['Category 2']['Dimension 21']['Activity 121'].uuid = 'fake-uuid';
+
+
+    store.addActivityFile(yamlCopy, errors);
+
+    expectArrayContainSubstring(errors, "Duplicate activity '");    
+    expectArrayContainSubstring(errors, 'Duplicate activity uuid');
+    expectArrayContainSubstring(errors, 'Duplicate activity name');
+
+    // If all errors have been handled, expect the remaining errors to be empty
+    expect(errors).toHaveSize(0);
+  });
+
+  it('produce error messages when merging yaml', () =>  {
+    let yamlCopy: Data = deepCopy(baseYaml);
+    let extraCopy: Data = deepCopy(extraYaml);
+
+    let activity111: Activity = yamlCopy['Category 1']['Dimension 11']['Activity 111'];
+    // let activity112: Activity = yamlCopy['Category 1']['Dimension 11']['Activity 112'];
+
+    // Duplicate an activity name (but not the uuid), in the yaml to merge
+    extraCopy['Category 2']['Dimension 21']['Activity 121'] = deepCopy(activity111);
+    extraCopy['Category 2']['Dimension 21']['Activity 121'].uuid = 'fake-uuid';
+
+    store.addActivityFile(yamlCopy, errors);
+    expect(errors).toHaveSize(0);
+    store.addActivityFile(extraCopy, errors);
+
+    expectArrayContainSubstring(errors, 'exists with different uuids');
+
+    // If all errors have been handled, expect the remaining errors to be empty
+    expect(errors).toHaveSize(0);
+  });
 });
+
+function deepCopy(obj: any): any {
+  return JSON.parse(JSON.stringify(obj));
+}
+function expectArrayContainSubstring(errors: string[], substr: string) {
+  for (let i: number = 0; i < errors.length; i++) {
+    let err = errors[i];
+    if (err.includes(substr)) {
+      console.log('Handling error: ' + errors[i]);
+      expect(errors[i]).toContain(substr);
+      errors.splice(i, 1);
+      return;
+    }
+  }
+
+  expect('errors').toContain(substr);
+}
+
 
 // -----------
 //  Test data
 // -----------
-const baseYaml_original: any = {
+const baseYaml: any = {
   'Category 1': {
     'Dimension 11': {
       'Activity 111': {
