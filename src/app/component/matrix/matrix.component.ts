@@ -4,7 +4,7 @@ import { FormControl } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { MatTableDataSource } from '@angular/material/table';
-import { ymlService } from '../../service/yaml-parser/yaml-parser.service';
+import { LoaderService } from 'src/app/service/loader/data-loader.service';
 import { Router, NavigationExtras } from '@angular/router';
 import { stringify } from 'qs';
 
@@ -39,7 +39,7 @@ export class MatrixComponent implements OnInit {
   activityVisible: string[] = [];
   allDimensionNames: string[] = [];
 
-  constructor(private yaml: ymlService, private router: Router) {
+  constructor(private loader: LoaderService, private router: Router) {
     this.filteredSubDimension = this.rowCtrl.valueChanges.pipe(
       startWith(null),
       map((row: string | null) =>
@@ -61,28 +61,25 @@ export class MatrixComponent implements OnInit {
   // function to initialize if level columns exists
 
   ngOnInit(): void {
-    this.yaml.setURI('./assets/YAML/meta.yaml');
     // Function sets column header
-    this.yaml.getJson().subscribe(data => {
-      this.YamlObject = data;
+    this.loader.load().then(() => {
+      this.YamlObject = this.loader.activities.data;
       // Levels header
-      this.levels = this.YamlObject['strings']['en']['maturity_levels'];
+      this.levels = this.loader.meta?.strings['en']['maturity_levels'];
       // pushes Levels in displayed column
       for (let k = 1; k <= this.levels.length; k++) {
         this.displayedColumns.push('level' + k);
         this.lvlColumn.push('level' + k);
       }
-    });
 
-    var activitySet = new Set();
+      var activitySet = new Set();
 
-    //gets value from generated folder
-    this.yaml.setURI('./assets/YAML/generated/generated.yaml');
-    // Function sets data
-    this.yaml.getJson().subscribe(data => {
-      this.YamlObject = data;
+      //gets value from generated folder
+      // Function sets data
+      this.YamlObject = this.loader.activities.data;
 
       this.allDimensionNames = Object.keys(this.YamlObject);
+
       for (let i = 0; i < this.allDimensionNames.length; i++) {
         var subdimensionsInCurrentDimension = Object.keys(
           this.YamlObject[this.allDimensionNames[i]]

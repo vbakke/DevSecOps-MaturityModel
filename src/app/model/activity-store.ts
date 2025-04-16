@@ -11,6 +11,7 @@ export interface Activity {
   level: number;
   name: string;
   description: string;
+  tags: string[];
 }
 
 // export interface activityDescription {
