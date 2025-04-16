@@ -56,7 +56,7 @@ export class ActivityStore {
     return this._activityByName[name];
   }
   public getActivityByUuid(uuid: string): Activity {
-    return this._activityByName[uuid];
+    return this._activityByUuid[uuid];
   }
 
   public addActivityFile(yaml: Data, errors: string[]) {
