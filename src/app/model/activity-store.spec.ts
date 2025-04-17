@@ -28,19 +28,25 @@ describe('ActivityStore', () => {
   it('load base yaml', () => {
     store.addActivityFile(baseYaml, errors);
 
-    expect(errors.length).toBe(0);
+    expect(errors).toHaveSize(0);
+    expect(store.getAllDimensionNames()).toHaveSize(3);
     expect(store.getActivityByUuid('00000000-1111-1111-1111-000000000000')).toBeTruthy();
     expect(store.getActivityByUuid('00000000-1111-1111-1111-000000000000')?.name).toBe('Activity 111');
     expect(store.getActivityByName('Activity 111')?.level).toBe(1);
     expect(store.getActivityByName('Activity 121')?.uuid).toBe('00000000-1111-2222-1111-000000000000');
+    expect(store.getActivities('Category 1', 'Dimension 11', 1)).toHaveSize(2);
+    expect(store.getActivities('Category 1', 'Dimension 11', 1)?.map(a => a.name)).toContain('Activity 112');
   });
 
   // prettier-ignore
   it('override base yaml', () => {
-    store.addActivityFile(baseYaml, errors);
+    let yamlCopy: Data = deepCopy(baseYaml);
+
+    store.addActivityFile(yamlCopy, errors);
     store.addActivityFile(extraYaml, errors);
     
-    expect(errors.length).toBe(0);
+    expect(errors).toHaveSize(0);
+    expect(store.getAllDimensionNames()).toHaveSize(3);
     expect(store.getActivityByName('Activity 111')).toBeUndefined(); // Changed name, to:
     expect(store.getActivityByName('OVERRIDE 111')?.uuid).toBe('00000000-1111-1111-1111-000000000000');
     expect(store.getActivityByName('OVERRIDE 111')?.description).toBe('OVERRIDE DESC AND LEVEL');

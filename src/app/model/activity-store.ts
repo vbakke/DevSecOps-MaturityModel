@@ -1,8 +1,9 @@
 import { IgnoreList } from './ignore-list';
 
-export type Data = Record<string, Categories>;
-export type Categories = Record<string, Dimensions>;
-export type Dimensions = Record<string, Activity>;
+export type Data = Record<string, Category>;
+export type Category = Record<string, Dimension>;
+export type Dimension = Record<string, Activity>;
+
 export interface Activity {
   ignore: boolean;
   uuid: string;
@@ -12,6 +13,8 @@ export interface Activity {
   name: string;
   description: string;
   tags: string[];
+  risk: string;
+  measure: string;
 }
 
 // export interface activityDescription {
@@ -50,18 +53,36 @@ export interface Activity {
 export class ActivityStore {
   public data: Data = {};
   private _activityList: Activity[] = [];
-  private _activityByUuid: Record<string, Activity> = {};
   private _activityByName: Record<string, Activity> = {};
+  private _activityByUuid: Record<string, Activity> = {};
+  private _dimensionNames: string[] = [];
+
+  public getAllActivities(): Activity[] {
+    return this._activityList;
+  }
+
+  public getAllDimensionNames(): string[] {
+    return this._dimensionNames;
+  }
 
   public getActivityByName(name: string): Activity {
     return this._activityByName[name];
   }
+
   public getActivityByUuid(uuid: string): Activity {
     return this._activityByUuid[uuid];
   }
 
+  public getActivities(
+    category: string,
+    dimension: string,
+    level: number
+  ): Activity[] {
+    let dim: Dimension = this.data[category][dimension];
+    return Object.values(dim).filter(a => (a.level = level));
+  }
+
   public addActivityFile(yaml: Data, errors: string[]) {
-    // let requireUuid: boolean = this._activityList.length == 0;
     let activityList: Activity[] = [];
     let ignoreList: IgnoreList = new IgnoreList();
     this.prepareActivities(yaml, activityList, ignoreList);
@@ -74,7 +95,6 @@ export class ActivityStore {
         errors
       );
       this.data = yaml;
-      this.buildDataHierarchy(this._activityList);
     } else {
       this.removeIgnoredActivities(ignoreList, this._activityList);
       // let activityByName: Record<string, Activity> = {};
@@ -92,15 +112,23 @@ export class ActivityStore {
         this._activityByUuid,
         errors
       );
-      this.buildDataHierarchy(this._activityList);
     }
+    this.buildDataHierarchy(this._activityList);
+    this.buildDimensionList(this._activityList);
+  }
+
+  buildDimensionList(activityList: Activity[]) {
+    let dimensions = new Set<string>();
+    for (let activity of activityList) {
+      dimensions.add(activity.dimension);
+    }
+    this._dimensionNames = Array.from(dimensions.keys());
   }
 
   buildDataHierarchy(activityList: Activity[]) {
-    this.data = {};
-    let data: Data = this.data;
-    let categories: Categories;
-    let dimensions: Dimensions;
+    let data: Data = {};
+    let categories: Category;
+    let dimensions: Dimension;
 
     for (let activity of activityList) {
       if (!data.hasOwnProperty(activity.category)) {
@@ -115,6 +143,7 @@ export class ActivityStore {
       dimensions = categories[activity.dimension];
       dimensions[activity.name] = activity;
     }
+    this.data = data;
   }
 
   /**
@@ -135,7 +164,7 @@ export class ActivityStore {
           continue;
         }
 
-        let dimension: Dimensions = category[dimName];
+        let dimension: Dimension = category[dimName];
         for (let activityName in dimension) {
           if (activityName == 'ignore') {
             ignoreList.add('dimension', dimName);
