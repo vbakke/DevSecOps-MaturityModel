@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { perfNow } from 'src/app/util/util';
 import { YamlService } from '../yaml-loader/yaml-loader.service';
-import { Meta } from 'src/app/model/meta';
+import { Meta, MetaStrings } from 'src/app/model/meta';
 import { ActivityStore, Data } from 'src/app/model/activity-store';
 
 @Injectable({ providedIn: 'root' })
@@ -23,6 +23,23 @@ export class LoaderService {
     console.log(`${perfNow()}s: ----- New Load Service End-----`);
   }
 
+  public getLevels(): string[] {
+    return this.getMetaStrings().labels;
+  }
+
+  getMetaStrings(): MetaStrings {
+    if (this.meta == null) {
+      throw Error('Meta yaml has not yet been loaded successfully');
+    }
+
+    let lang: string = this.meta.lang || 'en';
+    if (!this.meta.strings?.hasOwnProperty(lang)) {
+      lang = Object(this.meta?.strings).keys()[0];
+      this.meta.lang = lang;
+    }
+    return this.meta?.strings[lang];
+  }
+  
   async loadMeta(): Promise<Meta> {
     if (this.debug) {
       console.log(`${perfNow()} s: Load meta: ${this.META_FILE}`);
