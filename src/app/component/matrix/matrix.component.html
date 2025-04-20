@@ -5,7 +5,7 @@
     <mat-chip-list #chipList selectable multiple>
       <mat-chip
         #c="matChip"
-        *ngFor="let subDimension of listSubDimension"
+        *ngFor="let subDimension of allDimensionNames"
         (click)="toggleSubDimensionSelection(c)"
         [value]="subDimension"
         selected>
@@ -57,53 +57,29 @@
       </td>
     </ng-container>
 
-    <div *ngFor="let lvl of lvlColumn; index as i">
-      <ng-container matColumnDef="{{ lvl }}">
-        <th mat-header-cell *matHeaderCellDef>{{ levels[i] }}</th>
+    <div *ngFor="let level of levels | keyvalue">
+      <ng-container matColumnDef="{{ level.key }}">
+        <th mat-header-cell *matHeaderCellDef>{{ level.value }}</th>
         <td mat-cell *matCellDef="let element">
           <ul class="activity-list">
             <li
               class="mat-cell-activity"
-              *ngFor="let activity of element[lvl]; index as j">
+              *ngFor="let activity of element[level.key]">
               <div>
                 <div>
                   <a
                     class="activity-title"
-                    href=" {{
-                      navigate(
-                        YamlObject[element.Dimension][element.SubDimension][
-                          activity
-                        ].uuid,
-                        element.Dimension,
-                        element.SubDimension,
-                        i + 1,
-                        activity
-                      )
-                    }}"
-                    >{{ activity }}</a
+                    href=" {{navigate(activity.uuid)}}"
+                    >{{ activity.name }}</a
                   >
                 </div>
                 <span class="tags-activity">
-                  [
-                  <span
+                  [<span
                     *ngFor="
-                      let tag of YamlObject[element.Dimension][
-                        element.SubDimension
-                      ][activity].tags;
+                      let tag of activity.tags;
                       let i = index
-                    ">
-                    {{ tag }}
-                    <span
-                      *ngIf="
-                        i + 1 <
-                        YamlObject[element.Dimension][element.SubDimension][
-                          activity
-                        ].tags.length
-                      ">
-                      ,
-                    </span>
-                  </span>
-                  ]
+                    "><span *ngIf="i > 0">,
+                    </span>{{ tag }}</span>]
                 </span>
               </div>
             </li>
@@ -111,7 +87,7 @@
         </td>
       </ng-container>
     </div>
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    <tr mat-header-row *matHeaderRowDef="columnNames"></tr>
+    <tr mat-row *matRowDef="let row; columns: columnNames"></tr>
   </table>
 </div>

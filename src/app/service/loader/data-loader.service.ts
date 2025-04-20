@@ -16,15 +16,9 @@ export class LoaderService {
     this.activities = new ActivityStore();
   }
 
-  public async load(): Promise<any> {
-    console.log(`${perfNow()}s: ----- New Load Service Begin -----`);
-    this.meta = await this.loadMeta();
-    await this.loadActivities(this.meta);
-    console.log(`${perfNow()}s: ----- New Load Service End-----`);
-  }
-
   public getLevels(): string[] {
-    return this.getMetaStrings().labels;
+    let maxLvl: number = this.activities.getMaxLevel();
+    return this.getMetaStrings().maturity_levels.slice(0, maxLvl);
   }
 
   getMetaStrings(): MetaStrings {
@@ -40,6 +34,14 @@ export class LoaderService {
     return this.meta?.strings[lang];
   }
   
+  public async load(): Promise<ActivityStore> {
+    console.log(`${perfNow()}s: ----- New Load Service Begin -----`);
+    this.meta = await this.loadMeta();
+    await this.loadActivities(this.meta);
+    console.log(`${perfNow()}s: ----- New Load Service End-----`);
+    return this.activities;
+  }
+
   async loadMeta(): Promise<Meta> {
     if (this.debug) {
       console.log(`${perfNow()} s: Load meta: ${this.META_FILE}`);

@@ -1,14 +1,20 @@
 # ToDo
 
 ## Doing
-
+- Matrix: ngInit
+- Matrix: updateActivitesBeingDisplayed() 
+- dataloader.getLevels(): Return only max levels 
 ## Next
-- Substitute Circular Heatmap
 
 ## Later
-- Move META_FILE constant from data service to main app
+- Make sure loader.load() only runs once (even with navigations)
+- Load TeamProgress yaml
 - Sort linear list of activities (sorted by level, dim)
-- Substitute Matrix
+- Substitute Circular Heatmap
+- Store TeamProgress
+- Load localStorage TeamProgress
+- Move META_FILE constant from data service to main app
+
 - Substitute Activity Detail
 
 # Done
