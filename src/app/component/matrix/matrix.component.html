@@ -21,8 +21,7 @@
         *ngFor="let tag of filtersTag | keyvalue"
         (click)="toggleTagFilters(c)"
         [value]="tag.key"
-        [selected]="tag.value" 
-        >
+        [selected]="tag.value">
         {{ tag.key }}
       </mat-chip>
     </mat-chip-list>
@@ -84,17 +83,14 @@
                 <div>
                   <a
                     class="activity-title"
-                    href=" {{navigate(activity.uuid)}}"
+                    href=" {{ navigate(activity.uuid) }}"
                     >{{ activity.name }}</a
                   >
                 </div>
-                <span class="tags-activity">
-                  [<span
-                    *ngFor="
-                      let tag of activity.tags;
-                      let i = index
-                    "><span *ngIf="i > 0">,
-                    </span>{{ tag }}</span>]
+                <span *ngIf="activity.tags" class="tags-activity">
+                  <span *ngFor="let tag of activity.tags; let i = index">
+                    <span *ngIf="i > 0">, </span>[{{ tag }}]</span
+                  >
                 </span>
               </div>
             </li>

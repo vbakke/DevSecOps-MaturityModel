@@ -1,21 +1,15 @@
 import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
-import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { FormControl } from '@angular/forms';
-import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router, NavigationExtras } from '@angular/router';
 import { stringify } from 'qs';
 import { LoaderService } from 'src/app/service/loader/data-loader.service';
 import { Activity, ActivityStore, Data } from 'src/app/model/activity-store';
-
-
-import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
-
+import { UntilDestroy } from '@ngneat/until-destroy';
 import { MatChip, MatChipList } from '@angular/material/chips';
 import { deepCopy } from 'src/app/util/util';
 
-export interface MatrixElement {
+export interface MatrixRow {
   Category: string;
   Dimension: string;
   level1: Activity[];
@@ -24,7 +18,10 @@ export interface MatrixElement {
   level4: Activity[];
   level5: Activity[];
 }
-type LevelKey = keyof Pick<MatrixElement, 'level1' | 'level2' | 'level3' | 'level4' | 'level5'>;
+type LevelKey = keyof Pick<
+  MatrixRow,
+  'level1' | 'level2' | 'level3' | 'level4' | 'level5'
+>;
 
 @UntilDestroy()
 @Component({
@@ -33,39 +30,19 @@ type LevelKey = keyof Pick<MatrixElement, 'level1' | 'level2' | 'level3' | 'leve
   styleUrls: ['./matrix.component.css'],
 })
 export class MatrixComponent implements OnInit {
-  // OLD_MATRIX_DATA: MatrixElement[] = [];
-
   Routing: string = '/activity-description';
-
-  // OLD_YamlObject: any;
-
-  // OLD_displayedColumns: string[] = ['Dimension', 'SubDimension'];
-  // OLD_displayedColumns: string[] = Object(new MatrixElement()).keys;
-
-
-  OLD_lvlColumn: string[] = [];
-  OLD_allRows: string[] = [];
-  // OLD_dataSource: any = new MatTableDataSource<MatrixElement>(this.OLD_MATRIX_DATA);
-  OLD_subDimensionVisible: string[] = [];
-  OLD_activityVisible: string[] = [];
-  OLD_allDimensionNames: string[] = [];
-  OLD_listSubDimension:  string[] = [];
-  OLD_listTags: string[] = [];
-  
   activities: ActivityStore = new ActivityStore();
   data: Data = {};
   levels: Partial<Record<LevelKey, string>> = {};
-  filtersTag:  Record<string, boolean> = {};
+  filtersTag: Record<string, boolean> = {};
   filtersDim: Record<string, boolean> = {};
-  columnNames:  string[] = [];
-  allCategoryNames:  string[] = [];
-  allDimensionNames:  string[] = [];
-  MATRIX_DATA: MatrixElement[] = [];
-  matrix_data: MatrixElement[] = [];
-  dataSource: any = new MatTableDataSource<MatrixElement>(this.MATRIX_DATA);
+  columnNames: string[] = [];
+  allCategoryNames: string[] = [];
+  allDimensionNames: string[] = [];
+  MATRIX_DATA: MatrixRow[] = [];
+  dataSource: any = new MatTableDataSource<MatrixRow>(this.MATRIX_DATA);
 
-  constructor(private loader: LoaderService, private router: Router) {
-  }
+  constructor(private loader: LoaderService, private router: Router) {}
 
   reset() {
     for (let dim in this.filtersDim) {
@@ -78,14 +55,13 @@ export class MatrixComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Function sets column header
     this.loader.load().then((activityStore: ActivityStore) => {
       this.activities = activityStore;
       this.data = this.activities.getData();
       this.allCategoryNames = this.activities.getAllCategoryNames();
       this.allDimensionNames = this.activities.getAllDimensionNames();
       console.log('getAllDimensionNames()', this.allDimensionNames);
-      
+
       this.MATRIX_DATA = this.buildMatrixData(this.activities);
       this.levels = this.buildLevels(this.loader.getLevels());
       this.filtersTag = this.buildTags(this.activities.getAllActivities());
@@ -117,14 +93,14 @@ export class MatrixComponent implements OnInit {
     }
     return levels;
   }
-  
-  buildMatrixData(activityStore: ActivityStore): MatrixElement[] {
-    let matrixData: MatrixElement[] = [];
-    for (let dimName of this.allDimensionNames) {
-      let matrixRow:any = {};
+
+  buildMatrixData(activityStore: ActivityStore): MatrixRow[] {
+    let matrixData: MatrixRow[] = [];
+    for (let dim of this.allDimensionNames) {
+      let matrixRow: Partial<MatrixRow> = {};
       for (let level = 1; level <= 5; level++) {
-        let activities: Activity[] = activityStore.getActivities(dimName, level);
-        let levelLabel = `level${level}`;
+        let activities: Activity[] = activityStore.getActivities(dim, level);
+        let levelLabel: LevelKey = `level${level}` as LevelKey;
         matrixRow[levelLabel] = activities;
 
         if (activities.length > 0 && !matrixRow.Category) {
@@ -132,12 +108,12 @@ export class MatrixComponent implements OnInit {
           matrixRow['Dimension'] = activities[0].dimension;
         }
       }
-      matrixData.push(matrixRow);
+      matrixData.push(matrixRow as MatrixRow);
     }
     return matrixData;
   }
 
-  buildDimensions(matrixData: MatrixElement[]): Record<string, boolean> {
+  buildDimensions(matrixData: MatrixRow[]): Record<string, boolean> {
     let dimensions: Record<string, boolean> = {};
     for (let item of matrixData) {
       if (item.Dimension) {
@@ -163,15 +139,6 @@ export class MatrixComponent implements OnInit {
     this.updateActivitiesBeingDisplayed();
   }
 
-  //chips
-  separatorKeysCodes: number[] = [ENTER, COMMA];
-  rowCtrl = new FormControl('');
-  rowCtrlActivity = new FormControl('');
-  // filteredSubDimension: Observable<string[]>;
-  // filteredActivities: Observable<string[]>;
-  autoCompeteResults: string[] = [];
-  autoCompleteActivityResults: string[] = [];
-
   @ViewChild('rowInput') rowInput!: ElementRef<HTMLInputElement>;
   @ViewChild('activityInput') activityInput!: ElementRef<HTMLInputElement>;
 
@@ -185,7 +152,7 @@ export class MatrixComponent implements OnInit {
     }
 
     // Apply filters
-    let items: MatrixElement[] = [];
+    let items: MatrixRow[] = [];
     for (let srcItem of this.MATRIX_DATA) {
       // Skip dimension that are not selected
       if (hasDimFilter && !this.filtersDim[srcItem.Dimension]) {
@@ -193,26 +160,30 @@ export class MatrixComponent implements OnInit {
       }
 
       // Include activities withing each level, that match the tag filter
-      let trgItem: Partial<MatrixElement> = {};
-      
+      let trgItem: Partial<MatrixRow> = {};
+
       // If tag filter is active, filter activities by tags
-      for (let lvl of (Object.keys(this.levels) as LevelKey[])) {
-        trgItem[lvl] = hasTagFilter ? 
-          srcItem[lvl].filter(activity => this.hasTag(activity)) :
-          srcItem[lvl];
+      for (let lvl of Object.keys(this.levels) as LevelKey[]) {
+        trgItem[lvl] = hasTagFilter
+          ? srcItem[lvl].filter(activity => this.hasTag(activity))
+          : srcItem[lvl];
       }
 
       // Only include the row if it has any activities after tag filtering
-      if (hasTagFilter && Object.keys(this.levels).every(lvl => (trgItem[lvl as LevelKey] as Activity[]).length === 0)) {
+      if (
+        hasTagFilter &&
+        Object.keys(this.levels).every(
+          lvl => (trgItem[lvl as LevelKey] as Activity[]).length === 0
+        )
+      ) {
         continue;
       }
 
       // Copy metadata, since the element has remaining activities after filtering
       trgItem.Category = srcItem.Category;
       trgItem.Dimension = srcItem.Dimension;
-      // trgItem.Dimension = srcItem.Dimension;
 
-      items.push(trgItem as MatrixElement);
+      items.push(trgItem as MatrixRow);
     }
 
     this.dataSource.data = deepCopy(items);
@@ -239,34 +210,10 @@ export class MatrixComponent implements OnInit {
     return false;
   }
 
-  private filterDimension(value: string): string[] {
-    return this.autoCompeteResults.filter(
-      row => row.toLowerCase().indexOf(value.toLowerCase()) === 0
-    );
-  }
-  private filterActivity(value: string): string[] {
-    return this.autoCompleteActivityResults.filter(
-      activity => activity.toLowerCase().indexOf(value.toLowerCase()) === 0
-    );
-  }
-
   // activity description routing + providing parameters
-
-  navigate(
-    uuid: string,
-    // dim: string,
-    // subdim: string,
-    // lvl: Number,
-    // activityName: string
-  ) {
+  navigate(uuid: string) {
     let navigationExtras: NavigationExtras = {
-      queryParams: {
-        uuid: uuid,
-        // dimension: dim,
-        // subDimension: subdim,
-        // level: lvl,
-        // activityName: activityName,
-      },
+      queryParams: { uuid: uuid },
     };
     return `${this.Routing}?${stringify(navigationExtras.queryParams)}`;
   }
