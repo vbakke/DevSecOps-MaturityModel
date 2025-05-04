@@ -72,3 +72,35 @@
   border-radius: 16px;
   font: 500 14px / 20px Roboto, 'Helvetica Neue', sans-serif;
 }
+
+.mat-mdc-row .mat-mdc-cell {
+  border-bottom: 1px solid transparent;
+  border-top: 1px solid transparent;
+  cursor: pointer;
+}
+
+.mat-mdc-row:hover .mat-mdc-cell {
+  border-color: currentColor;
+}
+
+.mat-mdc-header-cell {
+  font-weight: bold;
+  font-size: medium;
+}
+
+.matrix-table {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+/* No data message styling */
+.mat-no-data-row {
+  height: 100px;
+}
+
+.mat-no-data-row td {
+  text-align: center;
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.54);
+  padding: 24px;
+}
