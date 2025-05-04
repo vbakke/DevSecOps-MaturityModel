@@ -43,6 +43,10 @@ export class ModalMessageComponent implements OnInit {
   openDialog(
     dialogInfo: DialogInfo | string
   ): MatDialogRef<ModalMessageComponent> {
+    // Remove focus from the button that becomes aria unavailable (avoids ugly console error message)
+    const buttonElement = document.activeElement as HTMLElement;
+    if (buttonElement) buttonElement.blur();
+
     if (typeof dialogInfo === 'string') {
       dialogInfo = new DialogInfo(dialogInfo);
     }

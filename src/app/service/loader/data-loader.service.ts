@@ -4,6 +4,12 @@ import { YamlService } from '../yaml-loader/yaml-loader.service';
 import { Meta, MetaStrings } from 'src/app/model/meta';
 import { ActivityStore, Data } from 'src/app/model/activity-store';
 
+export class DataValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+  }
+}
+
 @Injectable({ providedIn: 'root' })
 export class LoaderService {
   private META_FILE: string = '/assets/YAML/meta.yaml';
@@ -68,17 +74,22 @@ export class LoaderService {
     for (let filename of meta.activityFiles) {
       console.log(`${perfNow()}s: Loading activity file: ${filename}`);
       let data: Data = await this.loadActivityFile(filename);
-      // console.log(activities);
+      
       this.activities.addActivityFile(data, errors);
-
       if (errors.length) {
         for (let error of errors) console.error(error);
-        throw Error(
-          'Load error!\n\n----\n\nLoading: ' +
-            filename +
-            '\n\n----\n\n' +
-            errors.join('\n\n')
-        );
+
+        // Don't throw validation errors for the old `generated.yaml`.
+        // For backwards compatibility. 
+        // Console error message have to suffice in those cases.
+        if (!filename.endsWith('generated/generated.yaml')) {
+          throw new DataValidationError(
+            'Data validation error in: ' +
+              filename +
+              '\n\n----\n\n' +
+              errors.join('\n\n')
+          );
+        }
       }
     }
     return this.activities;

@@ -1,12 +1,9 @@
 # ToDo
 
 ## Doing
- - Filter: Make filters for subdimensions
-    - Fix: toggleSubDimensionSelection()
-    - Add subdimensions to updateActivitesBeingDisplayed()
- - Filter: tags: Fix update on SPACE key
 
 ## Next
+-  Filter: tags: Fix update on SPACE key
 
 
 ## Later
@@ -21,6 +18,8 @@
 - Substitute Activity Detail
 
 # Done
+- Handle parsing errors, like Circular Heatmap
+- Filter: Make filters for subdimensions
 - Matrix: toggle chips
 - Matrix: updateActivitesBeingDisplayed()
 - Matrix: dataloader.getLevels(): Return only max levels from yaml

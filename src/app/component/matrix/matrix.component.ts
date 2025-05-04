@@ -8,6 +8,10 @@ import { Activity, ActivityStore, Data } from 'src/app/model/activity-store';
 import { UntilDestroy } from '@ngneat/until-destroy';
 import { MatChip, MatChipList } from '@angular/material/chips';
 import { deepCopy } from 'src/app/util/util';
+import {
+  ModalMessageComponent,
+  DialogInfo,
+} from '../modal-message/modal-message.component';
 
 export interface MatrixRow {
   Category: string;
@@ -42,7 +46,11 @@ export class MatrixComponent implements OnInit {
   MATRIX_DATA: MatrixRow[] = [];
   dataSource: any = new MatTableDataSource<MatrixRow>(this.MATRIX_DATA);
 
-  constructor(private loader: LoaderService, private router: Router) {}
+  constructor(
+    private loader: LoaderService,
+    private router: Router,
+    public modal: ModalMessageComponent
+  ) {}
 
   reset() {
     for (let dim in this.filtersDim) {
@@ -55,22 +63,34 @@ export class MatrixComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loader.load().then((activityStore: ActivityStore) => {
-      this.activities = activityStore;
-      this.data = this.activities.getData();
-      this.allCategoryNames = this.activities.getAllCategoryNames();
-      this.allDimensionNames = this.activities.getAllDimensionNames();
-      console.log('getAllDimensionNames()', this.allDimensionNames);
+    this.loader
+      .load()
+      .then((activityStore: ActivityStore) => {
+        this.activities = activityStore;
+        this.data = this.activities.getData();
+        this.allCategoryNames = this.activities.getAllCategoryNames();
+        this.allDimensionNames = this.activities.getAllDimensionNames();
+        console.log('getAllDimensionNames()', this.allDimensionNames);
 
-      this.MATRIX_DATA = this.buildMatrixData(this.activities);
-      this.levels = this.buildLevels(this.loader.getLevels());
-      this.filtersTag = this.buildTags(this.activities.getAllActivities());
-      this.filtersDim = this.buildDimensions(this.MATRIX_DATA);
-      this.columnNames = ['Category', 'Dimension'];
-      this.columnNames.push(...Object.keys(this.levels));
+        this.MATRIX_DATA = this.buildMatrixData(this.activities);
+        this.levels = this.buildLevels(this.loader.getLevels());
+        this.filtersTag = this.buildTags(this.activities.getAllActivities());
+        this.filtersDim = this.buildDimensions(this.MATRIX_DATA);
+        this.columnNames = ['Category', 'Dimension'];
+        this.columnNames.push(...Object.keys(this.levels));
 
-      this.dataSource.data = deepCopy(this.MATRIX_DATA);
-    });
+        this.dataSource.data = deepCopy(this.MATRIX_DATA);
+      })
+      .catch(err => {
+        this.displayMessage(new DialogInfo(err.message, 'An error occurred'));
+        if (err.hasOwnProperty('stack')) {
+          console.warn(err);
+        }
+      });
+  }
+
+  displayMessage(dialogInfo: DialogInfo) {
+    this.modal.openDialog(dialogInfo);
   }
 
   buildTags(activities: Activity[]): Record<string, boolean> {

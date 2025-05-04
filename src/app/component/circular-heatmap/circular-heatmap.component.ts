@@ -103,7 +103,7 @@ export class CircularHeatmapComponent implements OnInit {
       .catch(err => {
         this.displayMessage(new DialogInfo(err.message, 'An error occurred'));
         if (err.hasOwnProperty('stack')) {
-          console.log(err);
+          console.warn(err);
         }
       });
   }
@@ -112,10 +112,6 @@ export class CircularHeatmapComponent implements OnInit {
   matChipsArray: MatChip[] = [];
 
   displayMessage(dialogInfo: DialogInfo) {
-    // Remove focus from the button that becomes aria unavailable (avoids ugly console error message)
-    const buttonElement = document.activeElement as HTMLElement;
-    buttonElement.blur();
-
     this.modal.openDialog(dialogInfo);
   }
 
