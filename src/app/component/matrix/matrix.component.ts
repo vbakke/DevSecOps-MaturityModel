@@ -220,7 +220,7 @@ export class MatrixComponent implements OnInit {
         }
       }
     }
-    this.dataSource.data = deepCopy(itemsStage2);
+    this.dataSource.data = itemsStage2;
   }
 
   hasTag(activity: Activity): boolean {
