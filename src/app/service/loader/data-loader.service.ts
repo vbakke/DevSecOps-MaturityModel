@@ -70,10 +70,14 @@ export class LoaderService {
 
   async loadActivities(meta: Meta): Promise<ActivityStore> {
     let errors: string[] = [];
-    // let activities: Activities = new Activities();
+    let useBackwardsCompatibility: boolean = false;
     for (let filename of meta.activityFiles) {
       console.log(`${perfNow()}s: Loading activity file: ${filename}`);
       let data: Data = await this.loadActivityFile(filename);
+      
+      if (filename.endsWith('generated/generated.yaml')) {
+        useBackwardsCompatibility = true;
+      }
       
       this.activities.addActivityFile(data, errors);
       if (errors.length) {
@@ -82,9 +86,9 @@ export class LoaderService {
         // Don't throw validation errors for the old `generated.yaml`.
         // For backwards compatibility. 
         // Console error message have to suffice in those cases.
-        if (!filename.endsWith('generated/generated.yaml')) {
+        if (!useBackwardsCompatibility) {
           throw new DataValidationError(
-            'Data validation error in: ' +
+            'Data validation error after loading: ' +
               filename +
               '\n\n----\n\n' +
               errors.join('\n\n')

@@ -3,7 +3,8 @@
 ## Doing
 
 ## Next
--  Filter: tags: Fix update on SPACE key
+- Filter: tags: Fix update on SPACE key
+- Show Latest info i activity-description modal view
 
 
 ## Later
