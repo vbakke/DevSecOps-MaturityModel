@@ -1,10 +1,13 @@
 # ToDo
 
 ## Doing
-- Matrix: ngInit
-- Matrix: updateActivitesBeingDisplayed() 
-- dataloader.getLevels(): Return only max levels 
+ - Filter: Make filters for subdimensions
+    - Fix: toggleSubDimensionSelection()
+    - Add subdimensions to updateActivitesBeingDisplayed()
+ - Filter: tags: Fix update on SPACE key
+
 ## Next
+
 
 ## Later
 - Make sure loader.load() only runs once (even with navigations)
@@ -18,6 +21,10 @@
 - Substitute Activity Detail
 
 # Done
+- Matrix: toggle chips
+- Matrix: updateActivitesBeingDisplayed()
+- Matrix: dataloader.getLevels(): Return only max levels from yaml
+- Matrix: ngInit
 - Make unittest for activity-store
 - Make unittest for ignore
 - Handle 'ignore:true' on Category and Dimension

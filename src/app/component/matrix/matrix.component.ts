@@ -13,17 +13,20 @@ import { Activity, ActivityStore, Data } from 'src/app/model/activity-store';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 
 import { MatChip, MatChipList } from '@angular/material/chips';
+import { deepCopy } from 'src/app/util/util';
 
 export interface MatrixElement {
   Category: string;
   Dimension: string;
   SubDimension: string;
-  level1: string[];
-  level2: string[];
-  level3: string[];
-  level4: string[];
-  level5: string[];
+  level1: Activity[];
+  level2: Activity[];
+  level3: Activity[];
+  level4: Activity[];
+  level5: Activity[];
 }
+type LevelKey = keyof Pick<MatrixElement, 'level1' | 'level2' | 'level3' | 'level4' | 'level5'>;
+
 @UntilDestroy()
 @Component({
   selector: 'app-matrix',
@@ -48,11 +51,12 @@ export class MatrixComponent implements OnInit {
   OLD_activityVisible: string[] = [];
   OLD_allDimensionNames: string[] = [];
   OLD_listSubDimension:  string[] = [];
+  OLD_listTags: string[] = [];
   
   activities: ActivityStore = new ActivityStore();
   data: Data = {};
-  levels: Record<string, string> = {};
-  listTags: string[] = [];
+  levels: Partial<Record<LevelKey, string>> = {};
+  filtersTag:  Record<string, boolean> = {};
   columnNames:  string[] = [];
   allCategoryNames:  string[] = [];
   allDimensionNames:  string[] = [];
@@ -76,8 +80,11 @@ export class MatrixComponent implements OnInit {
       )
     );
   }
-  reload() {
-    window.location.reload();
+  reset() {
+    for (let tag in this.filtersTag) {
+      this.filtersTag[tag] = false;
+    }
+    this.updateActivitiesBeingDisplayed();
   }
   // function to initialize if level columns exists
 
@@ -92,24 +99,24 @@ export class MatrixComponent implements OnInit {
       
       this.MATRIX_DATA = this.buildMatrixData(this.activities);
       this.levels = this.buildLevels(this.loader.getLevels());
-      this.listTags = this.buildTags(this.activities.getAllActivities());
+      this.filtersTag = this.buildTags(this.activities.getAllActivities());
       this.columnNames = ['Dimension', 'SubDimension'];
       this.columnNames.push(...Object.keys(this.levels));
 
-      this.dataSource.data = JSON.parse(JSON.stringify(this.MATRIX_DATA));
+      this.dataSource.data = deepCopy(this.MATRIX_DATA);
     });
   }
 
-  buildTags(activities: Activity[]): string[] {
-    let tags: Set<string> = new Set();
+  buildTags(activities: Activity[]): Record<string, boolean> {
+    let tags: Record<string, boolean> = {};
     for (let activity of activities) {
       if (activity.tags) {
         for (let tag of activity.tags) {
-          tags.add(tag);
+          tags[tag] = false;
         }
       }
     }
-    return Array.from(tags).sort();
+    return tags;
   }
 
   buildLevels(levelNames: string[]): Record<string, string> {
@@ -140,7 +147,7 @@ export class MatrixComponent implements OnInit {
     return matrixData;
   }
 
-
+/*
   OLD_ngOnInit(): void {
     this.loader.load().then(() => {
   //     this.OLD_YamlObject = this.loader.activities.data;
@@ -229,45 +236,39 @@ export class MatrixComponent implements OnInit {
     this.createSubDimensionList();
 
   }
+    */
 
   @ViewChild(MatChipList)
   chipsControl = new FormControl(['chipsControl']);
   chipList!: MatChipList;
 
   // @ViewChild(MatChip)
-  currentTags: string[] = [];
-  createActivityTags(activitySet: Set<any>): void {
-    activitySet.forEach(tag => {
-      this.listTags.push(tag);
-      this.OLD_activityVisible.push(tag);
-      this.currentTags.push(tag);
-    });
-    this.updateActivitesBeingDisplayed();
-  }
+  // currentTags: string[] = [];
+  // createActivityTags(activitySet: Set<any>): void {
+  //   activitySet.forEach(tag => {
+  //     // this.listTags.push(tag);
+  //     this.OLD_activityVisible.push(tag);
+  //     this.currentTags.push(tag);
+  //   });
+  //   this.updateActivitesBeingDisplayed();
+  // }
 
-  toggleTagSelection(chip: MatChip) {
+  toggleTagFilters(chip: MatChip) {
     chip.toggleSelected();
-    if (chip.selected) {
-      this.currentTags = [...this.currentTags, chip.value];
-      this.OLD_activityVisible = this.currentTags;
-      this.updateActivitesBeingDisplayed();
-    } else {
-      this.currentTags = this.currentTags.filter(o => o !== chip.value);
-      this.OLD_activityVisible = this.currentTags;
-      this.updateActivitesBeingDisplayed();
-    }
+    this.filtersTag[chip.value] = chip.selected;
+    this.updateActivitiesBeingDisplayed();
   }
 
   // OLD_listSubDimension: string[] = [];
-  currentSubDimensions: string[] = [];
-  createSubDimensionList(): void {
+  oLD_currentSubDimensions: string[] = [];
+  OLD_createSubDimensionList(): void {
     let i = 0;
     while (i < this.OLD_MATRIX_DATA.length) {
       if (!this.OLD_allRows.includes(this.OLD_MATRIX_DATA[i].SubDimension)) {
         this.OLD_allRows.push(this.OLD_MATRIX_DATA[i].SubDimension);
         this.OLD_subDimensionVisible.push(this.OLD_MATRIX_DATA[i].SubDimension);
         // this.OLD_listSubDimension.push(this.MATRIX_DATA[i].SubDimension);
-        this.currentSubDimensions.push(this.OLD_MATRIX_DATA[i].SubDimension);
+        this.oLD_currentSubDimensions.push(this.OLD_MATRIX_DATA[i].SubDimension);
       }
       i++;
     }
@@ -277,15 +278,15 @@ export class MatrixComponent implements OnInit {
   toggleSubDimensionSelection(chip: MatChip) {
     chip.toggleSelected();
     if (chip.selected) {
-      this.currentSubDimensions = [...this.currentSubDimensions, chip.value];
-      this.OLD_subDimensionVisible = this.currentSubDimensions;
-      this.selectedSubDimension(chip.value);
+      this.oLD_currentSubDimensions = [...this.oLD_currentSubDimensions, chip.value];
+      this.OLD_subDimensionVisible = this.oLD_currentSubDimensions;
+      this.OLD_selectedSubDimension(chip.value);
     } else {
-      this.currentSubDimensions = this.currentSubDimensions.filter(
+      this.oLD_currentSubDimensions = this.oLD_currentSubDimensions.filter(
         o => o !== chip.value
       );
-      this.OLD_subDimensionVisible = this.currentSubDimensions;
-      this.removeSubDimensionFromFilter(chip.value);
+      this.OLD_subDimensionVisible = this.oLD_currentSubDimensions;
+      this.OLD_removeSubDimensionFromFilter(chip.value);
     }
   }
 
@@ -301,7 +302,51 @@ export class MatrixComponent implements OnInit {
   @ViewChild('rowInput') rowInput!: ElementRef<HTMLInputElement>;
   @ViewChild('activityInput') activityInput!: ElementRef<HTMLInputElement>;
 
-  updateActivitesBeingDisplayed(): void {
+  updateActivitiesBeingDisplayed(): void {
+    let hasFilter:Boolean = this.hasFilterValues(this.filtersTag);
+    if (!hasFilter) {
+      this.dataSource.data = this.MATRIX_DATA;
+    } else {
+      let items: MatrixElement[] = [];
+
+      for (let srcItem of this.MATRIX_DATA) {
+        let trgItem: Partial<MatrixElement> = {};
+        for (let lvl of (Object.keys(this.levels) as LevelKey[])) {
+          trgItem[lvl] = srcItem[lvl].filter(activity => this.hasTag(activity))
+        }
+        trgItem.Category = srcItem.Category;
+        trgItem.Dimension = srcItem.Dimension;
+        trgItem.SubDimension = srcItem.SubDimension;
+
+        items.push(trgItem as MatrixElement);
+      }
+
+      this.dataSource.data = deepCopy(items);
+    }
+  }
+
+  hasTag(activity: Activity): boolean {
+    if (activity.tags) {
+      for (let tagName of activity.tags) {
+        if (this.filtersTag[tagName]) return true;
+      }
+    }
+    return false;
+  }
+
+  hasFilterValues(filter: Record<string, boolean>): boolean {
+    let lastValue: boolean | null = null;
+    for (let value of Object.values(filter)) {
+      if (lastValue == null) {
+        lastValue = value;
+      } else {
+        if (value != lastValue) return true;
+      }
+    }
+    return false;
+  }
+
+  OLD_updateActivitesBeingDisplayed(): void {
     // Iterate over all objects and create new MATRIX_DATA
     var updatedActivities: any = [];
 
@@ -366,19 +411,19 @@ export class MatrixComponent implements OnInit {
     this.OLD_dataSource.data = JSON.parse(JSON.stringify(updatedActivities));
   }
 
-  removeSubDimensionFromFilter(row: string): void {
+  OLD_removeSubDimensionFromFilter(row: string): void {
     let index = this.OLD_subDimensionVisible.indexOf(row);
     if (index >= 0) {
       this.OLD_subDimensionVisible.splice(index, 1);
     }
     this.autoCompeteResults.push(row);
-    this.updateActivitesBeingDisplayed();
+    this.OLD_updateActivitesBeingDisplayed();
   }
 
   //Add chips
-  selectedSubDimension(value: string): void {
+  OLD_selectedSubDimension(value: string): void {
     this.OLD_subDimensionVisible.push(value);
-    this.updateActivitesBeingDisplayed();
+    this.OLD_updateActivitesBeingDisplayed();
   }
 
   private filterSubDimension(value: string): string[] {
