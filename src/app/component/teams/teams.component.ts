@@ -13,7 +13,7 @@ export class TeamsComponent implements OnInit {
   teamGroups: Map<string, string[]> = new Map();
 
   constructor(private yaml: ymlService) {}
-  
+
   ngOnInit(): void {
     this.yaml.setURI('./assets/YAML/meta.yaml');
     // Function sets column header
@@ -28,7 +28,12 @@ export class TeamsComponent implements OnInit {
       console.log('teamGroups', this.teamGroups);
     });
   }
+
   getTeamArray(key: string): string[] {
     return this.teamGroups.get(key) || [];
+  }
+
+  unsorted() {
+    return 0;
   }
 }

@@ -25,7 +25,7 @@ export class SidenavButtonsComponent {
     'school',
   ];
   Routing: string[] = [
-    '/',
+    '/circular-heatmap',
     '/matrix',
     '/mapping',
     '/usage',

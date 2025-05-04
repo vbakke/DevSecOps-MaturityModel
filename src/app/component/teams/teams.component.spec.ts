@@ -8,7 +8,7 @@ import { MatChip } from '@angular/material/chips';
 
 import { TeamsComponent } from './teams.component';
 
-describe('Teams', () => {
+describe('TeamsComponent', () => {
   let component: TeamsComponent;
   let fixture: ComponentFixture<TeamsComponent>;
 

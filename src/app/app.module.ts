@@ -12,6 +12,7 @@ import { SidenavButtonsComponent } from './component/sidenav-buttons/sidenav-but
 import { TopHeaderComponent } from './component/top-header/top-header.component';
 import { ActivityDescriptionComponent } from './component/activity-description/activity-description.component';
 import { ymlService } from './service/yaml-parser/yaml-parser.service';
+import { LoaderService } from './service/loader/data-loader.service';
 import { HttpClientModule } from '@angular/common/http';
 import { CircularHeatmapComponent } from './component/circular-heatmap/circular-heatmap.component';
 import { MappingComponent } from './component/mapping/mapping.component';
@@ -23,7 +24,11 @@ import { DependencyGraphComponent } from './component/dependency-graph/dependenc
 import { TeamsComponent } from './component/teams/teams.component';
 import { ToStringValuePipe } from './pipe/to-string-value.pipe';
 import { ModalMessageComponent } from './component/modal-message/modal-message.component';
-import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MatDialogModule,
+  MAT_DIALOG_DATA,
+  MatDialogRef,
+} from '@angular/material/dialog';
 
 @NgModule({
   declarations: [
@@ -53,9 +58,12 @@ import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/materia
     ReactiveFormsModule,
     HttpClientModule,
   ],
-  providers: [ymlService, ModalMessageComponent, 
-    {provide: MAT_DIALOG_DATA, useValue: {}}, 
-    {provide: MatDialogRef, useValue: {close: (dialogResult:any) => {} }},
+  providers: [
+    ymlService,
+    LoaderService,
+    ModalMessageComponent,
+    { provide: MAT_DIALOG_DATA, useValue: {} },
+    { provide: MatDialogRef, useValue: { close: (dialogResult: any) => {} } },
   ],
   bootstrap: [AppComponent],
 })

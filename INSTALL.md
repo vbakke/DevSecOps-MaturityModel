@@ -1,52 +1,65 @@
-# Introduction
+# Install DSOMM
+The DSOMM application is frontend only. Data is only stored in server side YAML files, and in the localStorage im the user's browser. 
 
-From a startup to a multinational corporation the software development industry is currently dominated by agile frameworks and product teams and as part of it DevOps strategies. It has been observed that during the implementation, security aspects are usually neglected or are at least not sufficient taken account of. It is often the case that standard safety requirements of the production environment are not utilized or applied to the build pipeline in the continuous integration environment with containerization or concrete docker. Therefore, the docker registry is often not secured which might result in the theft of the entire company’s source code.
+The application can be deployed in many ways.  using a number of  Docker, Amazon AWS and a standalone Angular service.
 
-The OWASP DevSecOps Maturity Model provides opportunities to harden DevOps strategies and shows how these can be prioritized.
+## Configuration
 
-With the help of DevOps strategies security can also be enhanced. For example, each component such as application libraries and operating system libraries in docker images can be tested for known vulnerabilities.
+The DSOMM activities as maintained in a separate GitHub repository. For the latest version, check out 
 
-Attackers are intelligent and creative, equipped with new technologies and purpose. Under the guidance of the forward-looking DevSecOps Maturity Model, appropriate principles and measures are at hand implemented which counteract the attacks.
 
-# Usage
+# Docker
+1. Install [Docker](https://www.docker.com)
+1. Download and run DSOMM: \
+  `docker pull wurstbrot/dsomm:latest` \
+  `docker run --rm -p 8080:8080 wurstbrot/dsomm:latest`
+1. Open DSOMM on http://localhost:8080
 
-Go to https://dsomm.owasp.org.
+If you want to override the default `generated.yaml` you can mount this file when starting the docker command. 
 
-* _matrix_ shows the dimensions, subdimensions and activities are described.
-* _Implementation Levels_ can be used to show the current implementation level by clicking on the specific activities which have been performed (it is recommended to use a gitops-like flow)
-* _Mappings_ Shows mappings to other standards and provides the ability to download an excel sheet
-* _Usage_ describes how to use DSOMM
+`docker run  --rm --volume $PWD/generated.yaml:/srv/assets/YAML/generated/generated.yaml -p 8080:8080 wurstbrot/dsomm`
 
-In this [video](https://www.youtube.com/watch?v=tX9RHZ_O5NU) Timo Pagel describes different strategic approaches for your secure DevOps strategy. The use OWASP DSOMM in combination with [OWASP SAMM](https//owaspsamm.org) is explained.
+**NB!** Note that the docker command requires an absolute path to the local file. (Hence, the use of the `$PWD` variable. On Windows, substitute `$PWD` with `%CD%`.)
 
-In case you have evidence or review questions to gather evidence, you can add the attribute "evidence" to an activity which will be attached to an activity to provide it to your CISO or your customer's CISO.
-You can switch on to show open TODO's for evidence by changing IS_SHOW_EVIDENCE_TODO to true 'bib.php' `define(IS_SHOW_EVIDENCE_TODO, true);`
 
-This page uses the Browser's localStorage to store the state of the circular headmap.
 
-# Changes
-Changes to the application are displayed at the release page of [DevSecOps-MaturityModel](https://github.com/devsecopsmaturitymodel/DevSecOps-MaturityModel-data/releases).
+# Amazon
 
-Changes to the maturity model content are displayed at the release page of [DevSecOps-MaturityModel-data](https://github.com/devsecopsmaturitymodel/DevSecOps-MaturityModel-data/releases).
 
-# Community
-Join #dsomm in [OWASP Slack](https://owasp.slack.com/join/shared_invite/zt-g398htpy-AZ40HOM1WUOZguJKbblqkw#/).
-Create issues or even better Pull Requests in [github](https://github.com/wurstbrot/DevSecOps-MaturityModel/).
 
-# Slides and talks
-* [Video: OWASP (DevSecOps) Projects, 2021-04-28, OWASP Stammtisch Frankfurt](https://www.youtube.com/watch?v=8webiYnF56A)
-* [Video: DSOMM Enhancement Workshop at Open Security Summit, 2021-04-16](https://youtu.be/H2BA6gaeKBE)
-* [Video: Strategic Usage of the OWASP Software Assurance Maturity Model and the OWASP DevSecOps Maturity Model, OWASP Jakarta](https://m.youtube.com/watch?v=lLMLGIzl56M)
-* [Slides: DSOMM Overview](https://docs.google.com/presentation/d/1eQcE_AsR1g6uOVf3B2Ehh1g0cHvPknkdLY4BzMYatSw/edit?usp=sharing)
-* [Video: GitHub practical DSOMM snippet on twitch](https://www.twitch.tv/githubenterprise/clip/EsteemedTriumphantMinkFailFish)
-* [Blog: GitHub on DSOMM](https://github.blog/2020-08-06-achieving-devsecops-maturity-with-a-developer-first-community-driven-approach/) 2020
-* [Video: Benutzung vom OWASP DevSecOps Maturity Model (German)](https://vimeo.com/456523229)
-* [Online: OWASP DevSecOps Maturity Model - Culture (German)](https://www.meetup.com/de-DE/Breaking-Agile/) 2020-08-25
-* [Video: Usage of the OWASP DevSecOps Maturity Model](https://www.youtube.com/watch?v=tX9RHZ_O5NU), [OWASP Ottawa Chapter](https://www.meetup.com/de-DE/OWASP-Ottawa/events/272355636/), 2020-08-17
-* [Continuous Application Security Testing for Enterprise](https://docs.google.com/presentation/d/1dAewXIHgBEKHKwBPpM5N_G2eM6PRpduoGJrp6R6pNUI/edit?usp=sharing), DevOps Meetup Hamburg, 2019-09-26
-* [DevSecOps Maturity Model](https://docs.google.com/presentation/d/1zF7c_0cPYBO7LHcLNtEApQBB_qJugXgRQUyiwBKKtKk/edit?usp=sharing), Open Security Summit, near London, 2018
-* [Security in DevOps-Strategies](https://www.youtube.com/watch?v=gWjGWebWahE&t=448s), 28.09.2017, Hamburg, Germany
-* [DevSecOps Maturity Model](https://docs.google.com/presentation/d/1rrbyXqxy3LXAJNPFrVH99mj_BNaJKymMsXZItYArWEM/edit?usp=sharing), 2017
+
+
+
+
+
+# Angular build - Any web server
+Since this is a frontend application any web server 
+- Clone the DSOMM repo
+
+- **NB!** The DSOMM activities are maintained separately. Download the `generated.yaml` and put it in the required folder
+``` 
+git clone https://github.com/devsecopsmaturitymodel/DevSecOps-MaturityModel.git
+cd DevSecOps-MaturityModel
+npm install
+curl https://raw.githubusercontent.com/devsecopsmaturitymodel/DevSecOps-MaturityModel-data/main/src/assets/YAML/generated/generated.yaml -o src/assets/YAML/generated/generated.yaml
+ng build
+```
+The files that were created in the subfolder `dist` 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Assessment
 
@@ -63,16 +76,11 @@ In case you would like to perform a DevSecOps assessment, the following tools ar
 3. Browse to <http://localhost:8080> (on macOS and Windows browse to <http://192.168.99.100:8080> if you are using docker-machine instead
    of the native docker installation)
 
-For customized DSOMM, take a look at https://github.com/wurstbrot/DevSecOps-MaturityModel-custom. In case you would like to have perform an assessment for multiple teams, iterate from port 8080 to 8XXX, depending of the size of your team.
+For customized DSOMM, take a look at https://github.com/wurstbrot/DevSecOps-MaturityModel-custom. 
 
-You can download your current state from the circular headmap and mount it again via 
+You can download your current state from the circular heatmap and mount it again via 
 
 ```bash
-wget https://raw.githubusercontent.com/devsecopsmaturitymodel/DevSecOps-MaturityModel-data/main/src/assets/YAML/generated/generated.yaml # or go to /circular-heatmap and download edited yaml (bottom right)
-docker run -p 8080:8080 -v /tmp/generated.yaml:/srv/assets/YAML/generated/generated.yaml wurstbrot/dsomm:latest
-```
-
-.
 wget https://raw.githubusercontent.com/devsecopsmaturitymodel/DevSecOps-MaturityModel-data/main/src/assets/YAML/generated/generated.yaml # or go to /circular-heatmap and download edited yaml (bottom right)
 docker run -p 8080:8080 -v /tmp/generated.yaml:/srv/assets/YAML/generated/generated.yaml wurstbrot/dsomm:latest
 ```
@@ -136,7 +144,7 @@ In the corresponding [dimension YAMLs](https://github.com/devsecopsmaturitymodel
         C: |
           The pentest report from 2025 has been split into Jira tasks under
           [TODO-123](https://jira.example.com/issues/TODO-123).
-
+          
           _2025-04-01:_ All fixes of **critical** findings are deployed to production.
 ```
 The `|` is yaml syntax to indicate that the evidence spans multiple lines. Markdown 
@@ -181,3 +189,18 @@ An example attribution by changing the content:
 > This work is based on the [OWASP DevSecOps Maturity Model](https://dsomm.timo-pagel.de).
 
 The OWASP DevSecOps Maturity Model and any contributions are Copyright © by Timo Pagel 2017-2022.
+
+
+
+
+
+
+For customized DSOMM, take a look at https://github.com/wurstbrot/DevSecOps-MaturityModel-custom. 
+
+You can download your current state from the circular heatmap and mount it again via 
+
+```bash
+wget https://raw.githubusercontent.com/devsecopsmaturitymodel/DevSecOps-MaturityModel-data/main/src/assets/YAML/generated/generated.yaml # or go to /circular-heatmap and download edited yaml (bottom right)
+docker run -p 8080:8080 -v /tmp/generated.yaml:/srv/assets/YAML/generated/generated.yaml wurstbrot/dsomm:latest
+```
+

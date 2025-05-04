@@ -96,14 +96,6 @@
 .filter-toggle .hidden {
   display: none;
 }
-
-.team-filter > .mat-form-field {
-  display: block;
-}
-.team-filter > .mat-form-field-wrapper {
-  padding-bottom: 0.75rem;
-}
-
 .team-list {
   list-style-type: none;
   margin: 0;
@@ -129,7 +121,6 @@ button.filter-toggle {
   min-width: 0;
   line-height: 24px;
 }
-
 
 .footer-buttons {
   grid-column: 2/3;

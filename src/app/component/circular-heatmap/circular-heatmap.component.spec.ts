@@ -1,9 +1,11 @@
 import { HttpClient, HttpHandler } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ymlService } from 'src/app/service/yaml-parser/yaml-parser.service';
+import { LoaderService } from 'src/app/service/loader/data-loader.service';
 import { CircularHeatmapComponent } from './circular-heatmap.component';
 import { RouterTestingModule } from '@angular/router/testing';
 import { MatChip } from '@angular/material/chips';
+import { ModalMessageComponent } from '../modal-message/modal-message.component';
 
 describe('CircularHeatmapComponent', () => {
   let component: CircularHeatmapComponent;
@@ -11,19 +13,18 @@ describe('CircularHeatmapComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      providers: [ymlService, HttpClient, HttpHandler],
+      declarations: [CircularHeatmapComponent, MatChip],
       imports: [RouterTestingModule],
-      declarations: [CircularHeatmapComponent],
+      providers: [
+        ymlService,
+        LoaderService,
+        HttpClient,
+        HttpHandler,
+        { provide: ModalMessageComponent, useValue: {} },
+      ],
     }).compileComponents();
-  });
-  beforeEach(async () => {
-    TestBed.configureTestingModule({
-      declarations: [MatChip],
-    }).compileComponents();
-  });
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(CircularHeatmapComponent);
+    fixture = TestBed.createComponent(CircularHeatmapComponent); // Create fixture and component here
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
