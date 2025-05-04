@@ -83,15 +83,12 @@ export class ActivityStore {
   public getActivityByUuid(uuid: string): Activity {
     return this._activityByUuid[uuid];
   }
-  
-  public getActivities(
-    dimension: string,
-    level: number
-  ): Activity[] {
+
+  public getActivities(dimension: string, level: number): Activity[] {
     let activities: Activity[] = this._allDimensions[dimension];
-    return Object.values(activities).filter(a => (a.level == level));
+    return Object.values(activities).filter(a => a.level == level);
   }
-  
+
   public getMaxLevel(): number {
     return this._maxLevel;
   }
