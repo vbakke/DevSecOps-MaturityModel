@@ -1,3 +1,4 @@
+import { appendHashElement } from '../util/ArrayHash';
 import { IgnoreList } from './ignore-list';
 
 export type Data = Record<string, Category>;
@@ -12,6 +13,7 @@ export interface Activity {
   level: number;
   name: string;
   description: string;
+  tags: string[];
   risk: string;
   measure: string;
 }
@@ -54,14 +56,24 @@ export class ActivityStore {
   private _activityList: Activity[] = [];
   private _activityByName: Record<string, Activity> = {};
   private _activityByUuid: Record<string, Activity> = {};
-  private _dimensionNames: string[] = [];
+  private _categoryNames: string[] = [];
+  private _allDimensions: Record<string, Activity[]> = {};
+  private _maxLevel: number = -1;
+
+  public getData(): Data {
+    return this.data;
+  }
 
   public getAllActivities(): Activity[] {
     return this._activityList;
   }
 
+  public getAllCategoryNames(): string[] {
+    return this._categoryNames;
+  }
+
   public getAllDimensionNames(): string[] {
-    return this._dimensionNames;
+    return Object.keys(this._allDimensions);
   }
 
   public getActivityByName(name: string): Activity {
@@ -72,19 +84,20 @@ export class ActivityStore {
     return this._activityByUuid[uuid];
   }
 
-  public getActivities(
-    category: string,
-    dimension: string,
-    level: number
-  ): Activity[] {
-    let dim: Dimension = this.data[category][dimension];
-    return Object.values(dim).filter(a => (a.level = level));
+  public getActivities(dimension: string, level: number): Activity[] {
+    let activities: Activity[] = this._allDimensions[dimension];
+    return Object.values(activities).filter(a => a.level == level);
+  }
+
+  public getMaxLevel(): number {
+    return this._maxLevel;
   }
 
   public addActivityFile(yaml: Data, errors: string[]) {
     let activityList: Activity[] = [];
     let ignoreList: IgnoreList = new IgnoreList();
     this.prepareActivities(yaml, activityList, ignoreList);
+    this._maxLevel = -1;
     if (this._activityList.length == 0) {
       this._activityList = activityList;
       this.buildLookups(
@@ -117,11 +130,14 @@ export class ActivityStore {
   }
 
   buildDimensionList(activityList: Activity[]) {
-    let dimensions = new Set<string>();
+    let categories = new Set<string>();
+    this._allDimensions = {};
     for (let activity of activityList) {
-      dimensions.add(activity.dimension);
+      categories.add(activity.category);
+      appendHashElement(this._allDimensions, activity.dimension, activity);
+      if (activity.level > this._maxLevel) this._maxLevel = activity.level;
     }
-    this._dimensionNames = Array.from(dimensions.keys());
+    this._categoryNames = Array.from(categories.keys());
   }
 
   buildDataHierarchy(activityList: Activity[]) {
@@ -179,7 +195,7 @@ export class ActivityStore {
             continue;
           }
 
-          console.log(`  - ${categoryName} -- ${dimName} -- ${activityName}`);
+          // console.log(`  - ${categoryName} -- ${dimName} -- ${activityName}`);
           activity.category = categoryName;
           activity.dimension = dimName;
           activity.name = activityName;

@@ -1,21 +1,32 @@
 import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
-import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { FormControl } from '@angular/forms';
-import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
 import { MatTableDataSource } from '@angular/material/table';
-import { ymlService } from '../../service/yaml-parser/yaml-parser.service';
 import { Router, NavigationExtras } from '@angular/router';
 import { stringify } from 'qs';
-
-import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
-
+import { LoaderService } from 'src/app/service/loader/data-loader.service';
+import { Activity, ActivityStore, Data } from 'src/app/model/activity-store';
+import { UntilDestroy } from '@ngneat/until-destroy';
 import { MatChip, MatChipList } from '@angular/material/chips';
+import { deepCopy } from 'src/app/util/util';
+import {
+  ModalMessageComponent,
+  DialogInfo,
+} from '../modal-message/modal-message.component';
 
-export interface MatrixElement {
+export interface MatrixRow {
+  Category: string;
   Dimension: string;
-  SubDimension: string;
+  level1: Activity[];
+  level2: Activity[];
+  level3: Activity[];
+  level4: Activity[];
+  level5: Activity[];
 }
+type LevelKey = keyof Pick<
+  MatrixRow,
+  'level1' | 'level2' | 'level3' | 'level4' | 'level5'
+>;
+
 @UntilDestroy()
 @Component({
   selector: 'app-matrix',
@@ -23,308 +34,220 @@ export interface MatrixElement {
   styleUrls: ['./matrix.component.css'],
 })
 export class MatrixComponent implements OnInit {
-  MATRIX_DATA: MatrixElement[] = [];
-
   Routing: string = '/activity-description';
-
-  YamlObject: any;
-  levels: string[] = [];
-
-  displayedColumns: string[] = ['Dimension', 'SubDimension'];
-
-  lvlColumn: string[] = [];
-  allRows: string[] = [];
-  dataSource: any = new MatTableDataSource<MatrixElement>(this.MATRIX_DATA);
-  subDimensionVisible: string[] = [];
-  activityVisible: string[] = [];
+  activities: ActivityStore = new ActivityStore();
+  data: Data = {};
+  levels: Partial<Record<LevelKey, string>> = {};
+  filtersTag: Record<string, boolean> = {};
+  filtersDim: Record<string, boolean> = {};
+  columnNames: string[] = [];
+  allCategoryNames: string[] = [];
   allDimensionNames: string[] = [];
+  MATRIX_DATA: MatrixRow[] = [];
+  dataSource: any = new MatTableDataSource<MatrixRow>(this.MATRIX_DATA);
 
-  constructor(private yaml: ymlService, private router: Router) {
-    this.filteredSubDimension = this.rowCtrl.valueChanges.pipe(
-      startWith(null),
-      map((row: string | null) =>
-        row ? this.filterSubDimension(row) : this.autoCompeteResults.slice()
-      )
-    );
-    this.filteredActivities = this.rowCtrlActivity.valueChanges.pipe(
-      startWith(null),
-      map((activity: string | null) =>
-        activity
-          ? this.filterActivity(activity)
-          : this.autoCompleteActivityResults.slice()
-      )
-    );
+  constructor(
+    private loader: LoaderService,
+    private router: Router,
+    public modal: ModalMessageComponent
+  ) {}
+
+  reset() {
+    for (let dim in this.filtersDim) {
+      this.filtersDim[dim] = false;
+    }
+    for (let tag in this.filtersTag) {
+      this.filtersTag[tag] = false;
+    }
+    this.updateActivitiesBeingDisplayed();
   }
-  reload() {
-    window.location.reload();
-  }
-  // function to initialize if level columns exists
 
   ngOnInit(): void {
-    this.yaml.setURI('./assets/YAML/meta.yaml');
-    // Function sets column header
-    this.yaml.getJson().subscribe(data => {
-      this.YamlObject = data;
-      // Levels header
-      this.levels = this.YamlObject['strings']['en']['maturity_levels'];
-      // pushes Levels in displayed column
-      for (let k = 1; k <= this.levels.length; k++) {
-        this.displayedColumns.push('level' + k);
-        this.lvlColumn.push('level' + k);
-      }
-    });
+    this.loader
+      .load()
+      .then((activityStore: ActivityStore) => {
+        this.setYamlData(activityStore);
+      })
+      .catch(err => {
+        this.displayMessage(new DialogInfo(err.message, 'An error occurred'));
+        if (err.hasOwnProperty('stack')) {
+          console.warn(err);
+        }
+      });
+  }
 
-    var activitySet = new Set();
+  displayMessage(dialogInfo: DialogInfo) {
+    this.modal.openDialog(dialogInfo);
+  }
 
-    //gets value from generated folder
-    this.yaml.setURI('./assets/YAML/generated/generated.yaml');
-    // Function sets data
-    this.yaml.getJson().subscribe(data => {
-      this.YamlObject = data;
+  setYamlData(activityStore: ActivityStore) {
+    this.activities = activityStore;
+    this.data = this.activities.getData();
+    this.allCategoryNames = this.activities.getAllCategoryNames();
+    this.allDimensionNames = this.activities.getAllDimensionNames();
 
-      this.allDimensionNames = Object.keys(this.YamlObject);
-      for (let i = 0; i < this.allDimensionNames.length; i++) {
-        var subdimensionsInCurrentDimension = Object.keys(
-          this.YamlObject[this.allDimensionNames[i]]
-        );
+    this.MATRIX_DATA = this.buildMatrixData(this.activities);
+    this.levels = this.buildLevels(this.loader.getLevels());
+    this.filtersTag = this.buildFiltersForTag(this.activities.getAllActivities());  // eslint-disable-line
+    this.filtersDim = this.buildFiltersForDim(this.MATRIX_DATA);
+    this.columnNames = ['Category', 'Dimension'];
+    this.columnNames.push(...Object.keys(this.levels));
 
-        for (let j = 0; j < subdimensionsInCurrentDimension.length; j++) {
-          var temp: any = {
-            Dimension: this.allDimensionNames[i],
-            SubDimension: subdimensionsInCurrentDimension[j],
-          };
+    this.dataSource.data = deepCopy(this.MATRIX_DATA);
+  }
 
-          for (let k = 0; k < this.levels.length; k++) {
-            temp = {
-              ...temp,
-              [this.lvlColumn[k] as keyof number]: [],
-            };
-          }
-
-          var activityInCurrentSubDimension: string[] = Object.keys(
-            this.YamlObject[this.allDimensionNames[i]][
-              subdimensionsInCurrentDimension[j]
-            ]
-          );
-
-          for (let a = 0; a < activityInCurrentSubDimension.length; a++) {
-            var currentActivityName = activityInCurrentSubDimension[a];
-            var tagsInCurrentActivity: string[] =
-              this.YamlObject[this.allDimensionNames[i]][
-                subdimensionsInCurrentDimension[j]
-              ][currentActivityName].tags;
-            if (tagsInCurrentActivity) {
-              for (let curr = 0; curr < tagsInCurrentActivity.length; curr++) {
-                activitySet.add(tagsInCurrentActivity[curr]);
-              }
-            }
-
-            try {
-              var lvlOfActivity: number =
-                this.YamlObject[this.allDimensionNames[i]][
-                  subdimensionsInCurrentDimension[j]
-                ][currentActivityName]['level'];
-
-              (
-                temp[
-                  this.lvlColumn[lvlOfActivity - 1] as keyof number
-                ] as unknown as string[]
-              ).push(currentActivityName);
-            } catch {
-              console.log('Level for activity does not exist');
-            }
-          }
-
-          this.MATRIX_DATA.push(temp);
+  buildFiltersForTag(activities: Activity[]): Record<string, boolean> {
+    let tags: Record<string, boolean> = {};
+    for (let activity of activities) {
+      if (activity.tags) {
+        for (let tag of activity.tags) {
+          tags[tag] = false;
         }
       }
-      this.dataSource.data = JSON.parse(JSON.stringify(this.MATRIX_DATA));
-      this.createSubDimensionList();
-      this.createActivityTags(activitySet);
-    });
-    this.dataSource.data = JSON.parse(JSON.stringify(this.MATRIX_DATA));
-    this.createSubDimensionList();
+    }
+    return tags;
+  }
+
+  buildFiltersForDim(matrixData: MatrixRow[]): Record<string, boolean> {
+    let dimensions: Record<string, boolean> = {};
+    for (let item of matrixData) {
+      if (item.Dimension) {
+        dimensions[item.Dimension] = false;
+      }
+    }
+    return dimensions;
+  }
+
+  buildLevels(levelNames: string[]): Record<string, string> {
+    let levels: Record<string, string> = {};
+    let i: number = 1;
+    for (let name of levelNames) {
+      levels['level' + i] = name;
+      i++;
+    }
+    return levels;
+  }
+
+  buildMatrixData(activityStore: ActivityStore): MatrixRow[] {
+    let matrixData: MatrixRow[] = [];
+    for (let dim of this.allDimensionNames) {
+      let matrixRow: Partial<MatrixRow> = {};
+      for (let level = 1; level <= 5; level++) {
+        let activities: Activity[] = activityStore.getActivities(dim, level);
+        let levelLabel: LevelKey = `level${level}` as LevelKey;
+        matrixRow[levelLabel] = activities;
+        if (activities.length > 0 && !matrixRow.Category) {
+          matrixRow['Category'] = activities[0].category;
+          matrixRow['Dimension'] = activities[0].dimension;
+        }
+      }
+      matrixData.push(matrixRow as MatrixRow);
+    }
+    return matrixData;
   }
 
   @ViewChild(MatChipList)
   chipsControl = new FormControl(['chipsControl']);
   chipList!: MatChipList;
 
-  // @ViewChild(MatChip)
-  listTags: string[] = [];
-  currentTags: string[] = [];
-  createActivityTags(activitySet: Set<any>): void {
-    activitySet.forEach(tag => {
-      this.listTags.push(tag);
-      this.activityVisible.push(tag);
-      this.currentTags.push(tag);
-    });
-    this.updateActivitesBeingDisplayed();
-  }
-
-  toggleTagSelection(chip: MatChip) {
+  toggleTagFilters(chip: MatChip) {
     chip.toggleSelected();
-    if (chip.selected) {
-      this.currentTags = [...this.currentTags, chip.value];
-      this.activityVisible = this.currentTags;
-      this.updateActivitesBeingDisplayed();
-    } else {
-      this.currentTags = this.currentTags.filter(o => o !== chip.value);
-      this.activityVisible = this.currentTags;
-      this.updateActivitesBeingDisplayed();
-    }
+    this.filtersTag[chip.value] = chip.selected;
+    this.updateActivitiesBeingDisplayed();
   }
 
-  listSubDimension: string[] = [];
-  currentSubDimensions: string[] = [];
-  createSubDimensionList(): void {
-    let i = 0;
-    while (i < this.MATRIX_DATA.length) {
-      if (!this.allRows.includes(this.MATRIX_DATA[i].SubDimension)) {
-        this.allRows.push(this.MATRIX_DATA[i].SubDimension);
-        this.subDimensionVisible.push(this.MATRIX_DATA[i].SubDimension);
-        this.listSubDimension.push(this.MATRIX_DATA[i].SubDimension);
-        this.currentSubDimensions.push(this.MATRIX_DATA[i].SubDimension);
-      }
-      i++;
-    }
-  }
-
-  toggleSubDimensionSelection(chip: MatChip) {
+  toggleDimensionFilters(chip: MatChip) {
     chip.toggleSelected();
-    if (chip.selected) {
-      this.currentSubDimensions = [...this.currentSubDimensions, chip.value];
-      this.subDimensionVisible = this.currentSubDimensions;
-      this.selectedSubDimension(chip.value);
-    } else {
-      this.currentSubDimensions = this.currentSubDimensions.filter(
-        o => o !== chip.value
-      );
-      this.subDimensionVisible = this.currentSubDimensions;
-      this.removeSubDimensionFromFilter(chip.value);
-    }
+    this.filtersDim[chip.value] = chip.selected;
+    this.updateActivitiesBeingDisplayed();
   }
-
-  //chips
-  separatorKeysCodes: number[] = [ENTER, COMMA];
-  rowCtrl = new FormControl('');
-  rowCtrlActivity = new FormControl('');
-  filteredSubDimension: Observable<string[]>;
-  filteredActivities: Observable<string[]>;
-  autoCompeteResults: string[] = [];
-  autoCompleteActivityResults: string[] = [];
 
   @ViewChild('rowInput') rowInput!: ElementRef<HTMLInputElement>;
   @ViewChild('activityInput') activityInput!: ElementRef<HTMLInputElement>;
 
-  updateActivitesBeingDisplayed(): void {
-    // Iterate over all objects and create new MATRIX_DATA
-    var updatedActivities: any = [];
+  updateActivitiesBeingDisplayed(): void {
+    let hasDimFilter = Object.values(this.filtersDim).some(v => v === true);
+    let hasTagFilter = Object.values(this.filtersTag).some(v => v === true);
 
-    for (let i = 0; i < this.allDimensionNames.length; i++) {
-      var subdimensionsInCurrentDimension = Object.keys(
-        this.YamlObject[this.allDimensionNames[i]]
-      );
+    if (!hasTagFilter && !hasDimFilter) {
+      this.dataSource.data = this.MATRIX_DATA;
+      return;
+    }
 
-      for (let j = 0; j < subdimensionsInCurrentDimension.length; j++) {
-        var temp: any = {
-          Dimension: this.allDimensionNames[i],
-          SubDimension: subdimensionsInCurrentDimension[j],
-        };
-        for (let k = 0; k < this.levels.length; k++) {
-          temp = {
-            ...temp,
-            [this.lvlColumn[k] as keyof number]: [],
-          };
-        }
-        var activityInCurrentSubDimension: string[] = Object.keys(
-          this.YamlObject[this.allDimensionNames[i]][
-            subdimensionsInCurrentDimension[j]
-          ]
-        );
-        for (let a = 0; a < activityInCurrentSubDimension.length; a++) {
-          var currentActivityName = activityInCurrentSubDimension[a];
-          var tagsInCurrentActivity: string[] =
-            this.YamlObject[this.allDimensionNames[i]][
-              subdimensionsInCurrentDimension[j]
-            ][currentActivityName].tags;
-          let flag = 0;
-          if (tagsInCurrentActivity) {
-            for (let curr = 0; curr < tagsInCurrentActivity.length; curr++) {
-              if (this.activityVisible.includes(tagsInCurrentActivity[curr])) {
-                flag = 1;
-              }
-            }
-          }
-          if (flag === 1) {
-            try {
-              var lvlOfActivity: number =
-                this.YamlObject[this.allDimensionNames[i]][
-                  subdimensionsInCurrentDimension[j]
-                ][currentActivityName]['level'];
-
-              (
-                temp[
-                  this.lvlColumn[lvlOfActivity - 1] as keyof number
-                ] as unknown as string[]
-              ).push(currentActivityName);
-            } catch {
-              console.log('Level for Activity does not exist');
-            }
-          }
-        }
-        if (this.subDimensionVisible.includes(temp.SubDimension)) {
-          updatedActivities.push(temp);
+    // Apply dimension filters
+    let itemsStage1: MatrixRow[] = [];
+    if (!hasDimFilter) {
+      itemsStage1 = this.MATRIX_DATA;
+    } else {
+      for (let srcItem of this.MATRIX_DATA) {
+        if (this.filtersDim[srcItem.Dimension]) {
+          itemsStage1.push(srcItem as MatrixRow);
         }
       }
     }
 
-    this.dataSource.data = JSON.parse(JSON.stringify(updatedActivities));
-  }
+    // Apply tag filters
+    let itemsStage2: MatrixRow[];
+    if (!hasTagFilter) {
+      itemsStage2 = itemsStage1;
+    } else {
+      itemsStage2 = [];
+      for (let srcItem of itemsStage1) {
+        let hasContent = false;
 
-  removeSubDimensionFromFilter(row: string): void {
-    let index = this.subDimensionVisible.indexOf(row);
-    if (index >= 0) {
-      this.subDimensionVisible.splice(index, 1);
+        let trgItem: Partial<MatrixRow> = {};
+        if (hasTagFilter) {
+          // Include activities withing each level, that match the tag filter
+
+          // If tag filter is active, filter activities by tags
+          for (let lvl of Object.keys(this.levels) as LevelKey[]) {
+            let tmp: Activity[];
+            tmp = srcItem[lvl].filter(activity => this.hasTag(activity));
+            if (tmp.length > 0) {
+              trgItem[lvl] = tmp;
+              hasContent = true;
+            }
+          }
+
+          // Only include the row if it has any activities after tag filtering
+          if (hasContent) {
+            // Copy metadata, since the element has remaining activities after filtering
+            trgItem.Category = srcItem.Category;
+            trgItem.Dimension = srcItem.Dimension;
+
+            itemsStage2.push(trgItem as MatrixRow);
+          }
+        }
+      }
     }
-    this.autoCompeteResults.push(row);
-    this.updateActivitesBeingDisplayed();
+    this.dataSource.data = itemsStage2;
   }
 
-  //Add chips
-  selectedSubDimension(value: string): void {
-    this.subDimensionVisible.push(value);
-    this.updateActivitesBeingDisplayed();
+  hasTag(activity: Activity): boolean {
+    if (activity.tags) {
+      for (let tagName of activity.tags) {
+        if (this.filtersTag[tagName]) return true;
+      }
+    }
+    return false;
   }
 
-  private filterSubDimension(value: string): string[] {
-    return this.autoCompeteResults.filter(
-      row => row.toLowerCase().indexOf(value.toLowerCase()) === 0
-    );
-  }
-  private filterActivity(value: string): string[] {
-    return this.autoCompleteActivityResults.filter(
-      activity => activity.toLowerCase().indexOf(value.toLowerCase()) === 0
-    );
+  hasFilterValues(filter: Record<string, boolean>): boolean {
+    let lastValue: boolean | null = null;
+    for (let value of Object.values(filter)) {
+      if (lastValue == null) {
+        lastValue = value;
+      } else {
+        if (value != lastValue) return true;
+      }
+    }
+    return false;
   }
 
   // activity description routing + providing parameters
-
-  navigate(
-    uuid: String,
-    dim: string,
-    subdim: string,
-    lvl: Number,
-    activityName: string
-  ) {
+  navigate(uuid: string) {
     let navigationExtras: NavigationExtras = {
-      queryParams: {
-        uuid: uuid,
-        dimension: dim,
-        subDimension: subdim,
-        level: lvl,
-        activityName: activityName,
-      },
+      queryParams: { uuid: uuid },
     };
     return `${this.Routing}?${stringify(navigationExtras.queryParams)}`;
   }

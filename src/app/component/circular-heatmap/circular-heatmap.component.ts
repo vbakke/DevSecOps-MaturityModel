@@ -17,6 +17,7 @@ import {
   ModalMessageComponent,
   DialogInfo,
 } from '../modal-message/modal-message.component';
+import { ActivityStore } from 'src/app/model/activity-store';
 
 export interface activitySchema {
   uuid: string;
@@ -82,13 +83,13 @@ export class CircularHeatmapComponent implements OnInit {
     // using promises, since ngOnInit does not support async/await
     this.LoadMaturityLevels()
       .then(() => this.LoadTeamsFromMetaYaml())
-      .then(() => this.loader.load())
       .then(() => this.LoadMaturityDataFromGeneratedYaml())
-      .then(() => {
+      .then(() => this.loader.load())
+      .then((activityStore: ActivityStore) => {
         console.log(`${this.perfNow()}s: set filters: ${this.chips?.length}`);
         this.matChipsArray = this.chips.toArray();
         console.log('--- LOADED COMPLETE (old & new) ---');
-        let data: any = this.loader.activities.data;
+        let data: any = activityStore.data;
         this.YamlObject = data;
         for (let c in data) {
           console.log(' - ' + c);
@@ -103,7 +104,7 @@ export class CircularHeatmapComponent implements OnInit {
       .catch(err => {
         this.displayMessage(new DialogInfo(err.message, 'An error occurred'));
         if (err.hasOwnProperty('stack')) {
-          console.log(err);
+          console.warn(err);
         }
       });
   }
@@ -112,10 +113,6 @@ export class CircularHeatmapComponent implements OnInit {
   matChipsArray: MatChip[] = [];
 
   displayMessage(dialogInfo: DialogInfo) {
-    // Remove focus from the button that becomes aria unavailable (avoids ugly console error message)
-    const buttonElement = document.activeElement as HTMLElement;
-    buttonElement.blur();
-
     this.modal.openDialog(dialogInfo);
   }
 
@@ -123,11 +120,10 @@ export class CircularHeatmapComponent implements OnInit {
     return new Promise<void>((resolve, reject) => {
       console.log(`${this.perfNow()}s: LoadMaturityData Fetch`);
       this.yaml.setURI('./assets/YAML/generated/generated.yaml');
-      this.yaml.getJson().subscribe(data => {
+      this.yaml.getJson().subscribe(async (data) => {
         console.log(`${this.perfNow()}s: LoadMaturityData Downloaded`);
-        this.YamlObject = hasData(this.loader?.activities?.data)
-          ? this.loader.activities.data
-          : data;
+        const activityStore: ActivityStore = await this.loader.load();
+        this.YamlObject = activityStore.data;
         this.AddSegmentLabels(this.YamlObject);
         const localStorageData = this.getDatasetFromBrowserStorage();
 

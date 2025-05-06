@@ -3,15 +3,28 @@
 ## Doing
 
 ## Next
-- Substitute Circular Heatmap
+- Filter: tags: Fix update on SPACE key
+- Show Latest info i activity-description modal view
+
 
 ## Later
-- Move META_FILE constant from data service to main app
+- Make sure loader.load() only runs once (even with navigations)
+- Load TeamProgress yaml
 - Sort linear list of activities (sorted by level, dim)
-- Substitute Matrix
+- Substitute Circular Heatmap
+- Store TeamProgress
+- Load localStorage TeamProgress
+- Move META_FILE constant from data service to main app
+
 - Substitute Activity Detail
 
 # Done
+- Handle parsing errors, like Circular Heatmap
+- Filter: Make filters for subdimensions
+- Matrix: toggle chips
+- Matrix: updateActivitesBeingDisplayed()
+- Matrix: dataloader.getLevels(): Return only max levels from yaml
+- Matrix: ngInit
 - Make unittest for activity-store
 - Make unittest for ignore
 - Handle 'ignore:true' on Category and Dimension

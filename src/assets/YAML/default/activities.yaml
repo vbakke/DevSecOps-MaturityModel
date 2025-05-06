@@ -31,17 +31,25 @@ Build and Deployment:
       uuid: a340f46b-6360-4cb8-847b-a0d3483d09d3
       description: >-
         A DSOMM description.
+      tags:
+        - ci-cd
+        - build
       level: 3
     Defined build process:
       uuid: f6f7737f-25a9-4317-8de2-09bf59f29b5b
       description: >
         DSOMM description without UUID
       level: 1
+      tags:
+        - ci-cd
+        - build
     Pinning of artifacts:
       uuid: f3c4971e-9f4d-4e59-8ed0-f0bdb6262477
       description:
         DSOMM description, where uuid is different
       level: 2
+      tags:
+        - ci-cd
     SBOM of components:
       uuid: 2858ac12-0179-40d9-9acf-1b839c030473
       level: 3
@@ -56,6 +64,8 @@ Build and Deployment:
       uuid: 74938a3f-1269-49b9-9d0f-c43a79a1985a
       level: 1
       description:
+      tags:
+        - ci-cd
     Handover of confidential parameters:
       uuid: 94a96f79-8bd6-4904-97c0-994ff88f176a              
       level: 2
@@ -66,8 +76,12 @@ Test and Verification:
       level: 5
       description: 
         This is the description for *High coverage*
+      tags:
+        - test
     Security integration tests for important components:
       uuid: f57d55f2-dc05-4b34-9d1f-f8ce5bfb0715
       level: 3
       description: 
         This is the description for *Security integration tests*
+      tags:
+        - test

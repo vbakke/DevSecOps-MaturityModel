@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivityStore, Data, Activity } from './activity-store';
+import { deepCopy } from '../util/util';
 
 describe('ActivityStore', () => {
   let store: ActivityStore;
@@ -34,8 +35,8 @@ describe('ActivityStore', () => {
     expect(store.getActivityByUuid('00000000-1111-1111-1111-000000000000')?.name).toBe('Activity 111');
     expect(store.getActivityByName('Activity 111')?.level).toBe(1);
     expect(store.getActivityByName('Activity 121')?.uuid).toBe('00000000-1111-2222-1111-000000000000');
-    expect(store.getActivities('Category 1', 'Dimension 11', 1)).toHaveSize(2);
-    expect(store.getActivities('Category 1', 'Dimension 11', 1)?.map(a => a.name)).toContain('Activity 112');
+    expect(store.getActivities('Dimension 11', 1)).toHaveSize(2);
+    expect(store.getActivities('Dimension 11', 1)?.map(a => a.name)).toContain('Activity 112');
   });
 
   // prettier-ignore
@@ -109,9 +110,6 @@ describe('ActivityStore', () => {
   });
 });
 
-function deepCopy(obj: any): any {
-  return JSON.parse(JSON.stringify(obj));
-}
 function expectArrayContainSubstring(errors: string[], substr: string) {
   for (let i: number = 0; i < errors.length; i++) {
     let err = errors[i];
