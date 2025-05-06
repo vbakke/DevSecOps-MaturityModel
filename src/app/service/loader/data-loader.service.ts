@@ -14,16 +14,16 @@ export class DataValidationError extends Error {
 export class LoaderService {
   private META_FILE: string = '/assets/YAML/meta.yaml';
   private debug: boolean = true;
-  public meta: Meta | null;
-  public activities: ActivityStore;
+  private cachedActivityStore: ActivityStore | null = null;
+  public meta: Meta | null = null;
 
-  constructor(private yamlService: YamlService) {
-    this.meta = null;
-    this.activities = new ActivityStore();
-  }
+  constructor(private yamlService: YamlService) {}
 
   public getLevels(): string[] {
-    let maxLvl: number = this.activities.getMaxLevel();
+    if (!this.cachedActivityStore) {
+      throw new Error('Activities not loaded. Call load() first.');
+    }
+    let maxLvl: number = this.cachedActivityStore.getMaxLevel();
     return this.getMetaStrings().maturity_levels.slice(0, maxLvl);
   }
 
@@ -41,14 +41,30 @@ export class LoaderService {
   }
   
   public async load(): Promise<ActivityStore> {
-    console.log(`${perfNow()}s: ----- New Load Service Begin -----`);
-    this.meta = await this.loadMeta();
-    await this.loadActivities(this.meta);
-    console.log(`${perfNow()}s: ----- New Load Service End-----`);
-    return this.activities;
+    // Return cached data if available
+    if (this.cachedActivityStore) {
+      return this.cachedActivityStore;
+    }
+
+    try {
+      if (this.debug) console.log(`${perfNow()}s: ----- Load Service Begin -----`);
+      
+      // Load meta.yaml first
+      this.meta = await this.loadMeta();
+      
+      // Then load activities
+      this.cachedActivityStore = await this.loadActivities(this.meta);
+      
+      if (this.debug) console.log(`${perfNow()}s: ----- Load Service End -----`);
+      return this.cachedActivityStore;
+    } catch (err) {
+      // Clear cache on error
+      this.clearCache();
+      throw err;
+    }
   }
 
-  async loadMeta(): Promise<Meta> {
+  private async loadMeta(): Promise<Meta> {
     if (this.debug) {
       console.log(`${perfNow()} s: Load meta: ${this.META_FILE}`);
     }
@@ -57,36 +73,33 @@ export class LoaderService {
     if (!meta.activityFiles) {
       throw Error("The meta.yaml has no 'activityFiles' to be loaded");
     }
-    for (let i = 0; i < meta.activityFiles.length; i++) {
-      meta.activityFiles[i] = this.yamlService.makeFullPath(
-        meta.activityFiles[i],
-        this.META_FILE
-      );
-    }
+    
+    // Resolve paths relative to meta.yaml
+    meta.activityFiles = meta.activityFiles.map(file => 
+      this.yamlService.makeFullPath(file, this.META_FILE)
+    );
 
     if (this.debug) console.log(`${perfNow()} s: meta loaded`);
     return meta;
   }
 
-  async loadActivities(meta: Meta): Promise<ActivityStore> {
-    let errors: string[] = [];
-    let useBackwardsCompatibility: boolean = false;
-    for (let filename of meta.activityFiles) {
-      console.log(`${perfNow()}s: Loading activity file: ${filename}`);
-      let data: Data = await this.loadActivityFile(filename);
-      
-      if (filename.endsWith('generated/generated.yaml')) {
-        useBackwardsCompatibility = true;
-      }
-      
-      this.activities.addActivityFile(data, errors);
-      if (errors.length) {
-        for (let error of errors) console.error(error);
+  private async loadActivities(meta: Meta): Promise<ActivityStore> {
+    const activityStore = new ActivityStore();
+    const errors: string[] = [];
 
-        // Don't throw validation errors for the old `generated.yaml`.
-        // For backwards compatibility. 
-        // Console error message have to suffice in those cases.
-        if (!useBackwardsCompatibility) {
+    for (let filename of meta.activityFiles) {
+      if (this.debug) console.log(`${perfNow()}s: Loading activity file: ${filename}`);
+      const data: Data = await this.loadActivityFile(filename);
+      
+      const isGeneratedFile = filename.endsWith('generated/generated.yaml');
+      activityStore.addActivityFile(data, errors);
+
+      // Handle validation errors
+      if (errors.length > 0) {
+        errors.forEach(error => console.error(error));
+
+        // Only throw for non-generated files (backwards compatibility)
+        if (!isGeneratedFile) {
           throw new DataValidationError(
             'Data validation error after loading: ' +
               filename +
@@ -96,11 +109,20 @@ export class LoaderService {
         }
       }
     }
-    return this.activities;
+    return activityStore;
   }
 
-  async loadActivityFile(filename: string): Promise<Data> {
-    let yaml: any = this.yamlService.loadYamlUnresolvedRefs(filename);
-    return yaml;
+  private async loadActivityFile(filename: string): Promise<Data> {
+    return this.yamlService.loadYamlUnresolvedRefs(filename);
+  }
+
+  public clearCache(): void {
+    this.cachedActivityStore = null;
+    this.meta = null;
+  }
+
+  public forceReload(): Promise<ActivityStore> {
+    this.clearCache();
+    return this.load();
   }
 }
