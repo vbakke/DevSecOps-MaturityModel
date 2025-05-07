@@ -13,9 +13,23 @@ export interface Activity {
   level: number;
   name: string;
   description: string;
-  tags: string[];
   risk: string;
   measure: string;
+  tags: string[];
+  implementatonGuide: string;
+  difficultyOfImplementation: DifficultyOfImplementation;
+  usefulness: number;
+  dependsOn: string[];
+  comments: string;
+  implementation: Implementation[];
+  evidence: string;
+  teamsEvidence: Object;
+  assessment: string;  iso: string[];
+  iso22: string[];
+  samm: string[];
+  openCRE: string[];
+  isImplemented: boolean;
+  teamsImplemented: Record<string, any>;
 }
 
 // export interface activityDescription {
@@ -44,12 +58,18 @@ export interface Activity {
 //   // isImplemented: boolean;
 //   // teamsImplemented: Record<string, any>;
 // }
-// export interface Implementation {
-//   name: string;
-//   tags: string[];
-//   url: string;
-//   description: string;
-// }
+export interface Implementation {
+  name: string;
+  tags: string[];
+  url: string;
+  description: string;
+}
+
+export interface DifficultyOfImplementation {
+  knowledge: number;
+  time: number;
+  resources: number;
+}
 
 export class ActivityStore {
   public data: Data = {};
@@ -76,6 +96,14 @@ export class ActivityStore {
     return Object.keys(this._allDimensions);
   }
 
+  public getActivity(uuid: string, name: string): Activity {
+    let activity: Activity = this.getActivityByUuid(uuid);
+    if (!activity) {
+      activity = this.getActivityByName(name);
+    }
+    return activity;
+  }
+  
   public getActivityByName(name: string): Activity {
     return this._activityByName[name];
   }

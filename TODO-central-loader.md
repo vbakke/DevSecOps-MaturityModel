@@ -3,22 +3,24 @@
 ## Doing
 
 ## Next
-- Filter: tags: Fix update on SPACE key
-- Show Latest info i activity-description modal view
+- Refactor Dependecy graph
+- Navigate to activity-description without site reload
 
 
 ## Later
-- Make sure loader.load() only runs once (even with navigations)
 - Load TeamProgress yaml
 - Sort linear list of activities (sorted by level, dim)
 - Substitute Circular Heatmap
 - Store TeamProgress
 - Load localStorage TeamProgress
 - Move META_FILE constant from data service to main app
+- Filter: tags: Fix update on SPACE key (trouble)
 
 - Substitute Activity Detail
 
 # Done
+- Refactor activity-description
+- Make sure loader.load() only runs once (even with navigations)
 - Handle parsing errors, like Circular Heatmap
 - Filter: Make filters for subdimensions
 - Matrix: toggle chips

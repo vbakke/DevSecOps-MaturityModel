@@ -10,7 +10,7 @@ export interface Meta {
 
 export interface MetaStrings {
   labels: string[];
-  maturity_levels: string[];
+  maturityLevels: string[];
   hardness: string[];
   knowledgeLabels: string[];
 }

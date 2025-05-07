@@ -6,6 +6,8 @@ Build and Deployment:
   Ignore this dimension:
     ignore: true
   Build:
+    Defined build process:
+      comments: A nice litte comment at the end
     Signing of code:
       level: 5
       uuid: 9f107927-61e9-4574-85ad-3f2b4bca8665

@@ -24,7 +24,7 @@ export class LoaderService {
       throw new Error('Activities not loaded. Call load() first.');
     }
     let maxLvl: number = this.cachedActivityStore.getMaxLevel();
-    return this.getMetaStrings().maturity_levels.slice(0, maxLvl);
+    return this.getMetaStrings().maturityLevels.slice(0, maxLvl);
   }
 
   getMetaStrings(): MetaStrings {
@@ -86,12 +86,13 @@ export class LoaderService {
   private async loadActivities(meta: Meta): Promise<ActivityStore> {
     const activityStore = new ActivityStore();
     const errors: string[] = [];
-
+    let usingHistoricYamlFile = false;
+    
     for (let filename of meta.activityFiles) {
       if (this.debug) console.log(`${perfNow()}s: Loading activity file: ${filename}`);
       const data: Data = await this.loadActivityFile(filename);
       
-      const isGeneratedFile = filename.endsWith('generated/generated.yaml');
+      usingHistoricYamlFile ||= filename.endsWith('generated/generated.yaml');
       activityStore.addActivityFile(data, errors);
 
       // Handle validation errors
@@ -99,7 +100,7 @@ export class LoaderService {
         errors.forEach(error => console.error(error));
 
         // Only throw for non-generated files (backwards compatibility)
-        if (!isGeneratedFile) {
+        if (!usingHistoricYamlFile) {
           throw new DataValidationError(
             'Data validation error after loading: ' +
               filename +
