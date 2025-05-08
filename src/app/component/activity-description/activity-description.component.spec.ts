@@ -54,11 +54,8 @@ describe('ActivityDescriptionComponent', () => {
     component.currentActivity.description = testDescription;
     fixture.detectChanges();
     const HTMLElement: HTMLElement = fixture.nativeElement;
-    const contentDisplayedinParagraphTag =
-      HTMLElement.querySelector('#description')!;
-    expect(contentDisplayedinParagraphTag.textContent).toContain(
-      testDescription
-    );
+    const contentDisplayedinParagraphTag = HTMLElement.querySelector('#description')!;
+    expect(contentDisplayedinParagraphTag.textContent).toContain(testDescription);
   });
 
   it('check if risk is being generated', () => {
@@ -75,8 +72,7 @@ describe('ActivityDescriptionComponent', () => {
     component.currentActivity.measure = testMeasure;
     fixture.detectChanges();
     const HTMLElement: HTMLElement = fixture.nativeElement;
-    const contentDisplayedinParagraphTag =
-      HTMLElement.querySelector('#measure')!;
+    const contentDisplayedinParagraphTag = HTMLElement.querySelector('#measure')!;
     expect(contentDisplayedinParagraphTag.textContent).toContain(testMeasure);
   });
 
@@ -85,12 +81,8 @@ describe('ActivityDescriptionComponent', () => {
     component.currentActivity.implementatonGuide = testImplementationGuide;
     fixture.detectChanges();
     const HTMLElement: HTMLElement = fixture.nativeElement;
-    const contentDisplayedinParagraphTag = HTMLElement.querySelector(
-      '#implementatonGuide'
-    )!;
-    expect(contentDisplayedinParagraphTag.textContent).toContain(
-      testImplementationGuide
-    );
+    const contentDisplayedinParagraphTag = HTMLElement.querySelector('#implementatonGuide')!;
+    expect(contentDisplayedinParagraphTag.textContent).toContain(testImplementationGuide);
   });
 
   it('check if evidence is being generated', () => {
@@ -102,9 +94,7 @@ describe('ActivityDescriptionComponent', () => {
     console.log('parentElement', parentElement[1].textContent);
     const lengthOfObject = Object.keys(testEvidence).length;
     for (var i = 0; i > lengthOfObject; i++)
-      expect(parentElement[i].textContent).toContain(
-        Object.keys(testEvidence)[i] + Object.values(testEvidence)[i]
-      );
+      expect(parentElement[i].textContent).toContain(Object.keys(testEvidence)[i] + Object.values(testEvidence)[i]);
   });
 
   it('check if assessment is being generated', () => {
@@ -112,11 +102,8 @@ describe('ActivityDescriptionComponent', () => {
     component.currentActivity.assessment = testAssessment;
     fixture.detectChanges();
     const HTMLElement: HTMLElement = fixture.nativeElement;
-    const contentDisplayedinParagraphTag =
-      HTMLElement.querySelector('#assessment')!;
-    expect(contentDisplayedinParagraphTag.textContent).toContain(
-      testAssessment
-    );
+    const contentDisplayedinParagraphTag = HTMLElement.querySelector('#assessment')!;
+    expect(contentDisplayedinParagraphTag.textContent).toContain(testAssessment);
   });
 
   it('check if comments is being generated', () => {
@@ -124,8 +111,7 @@ describe('ActivityDescriptionComponent', () => {
     component.currentActivity.comments = testComments;
     fixture.detectChanges();
     const HTMLElement: HTMLElement = fixture.nativeElement;
-    const contentDisplayedinParagraphTag =
-      HTMLElement.querySelector('#comments')!;
+    const contentDisplayedinParagraphTag = HTMLElement.querySelector('#comments')!;
     expect(contentDisplayedinParagraphTag.textContent).toContain(testComments);
   });
 
@@ -142,8 +128,7 @@ describe('ActivityDescriptionComponent', () => {
 
     fixture.detectChanges();
     const HTMLElement: HTMLElement = fixture.nativeElement;
-    const contentDisplayedinParagraphTag =
-      HTMLElement.querySelectorAll('#references')!;
+    const contentDisplayedinParagraphTag = HTMLElement.querySelectorAll('#references')!;
 
     expect(contentDisplayedinParagraphTag[0].textContent).toContain(
       component.SAMMVersion +

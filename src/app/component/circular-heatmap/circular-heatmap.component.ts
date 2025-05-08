@@ -120,7 +120,7 @@ export class CircularHeatmapComponent implements OnInit {
     return new Promise<void>((resolve, reject) => {
       console.log(`${this.perfNow()}s: LoadMaturityData Fetch`);
       this.yaml.setURI('./assets/YAML/generated/generated.yaml');
-      this.yaml.getJson().subscribe(async (data) => {
+      this.yaml.getJson().subscribe(async data => {
         console.log(`${this.perfNow()}s: LoadMaturityData Downloaded`);
         const activityStore: ActivityStore = await this.loader.load();
         this.YamlObject = activityStore.data;

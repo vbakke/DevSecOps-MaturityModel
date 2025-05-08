@@ -12,7 +12,7 @@ import { Activity, ActivityStore } from '../../model/activity-store';
 })
 export class ActivityDescriptionComponent implements OnInit {
   markdown: md = md();
-  currentActivity: Partial<Activity>  = {};
+  currentActivity: Partial<Activity> = {};
 
   TimeLabel: string = '';
   KnowledgeLabel: string = '';
@@ -22,12 +22,9 @@ export class ActivityDescriptionComponent implements OnInit {
   ISOVersion: string = 'ISO 27001:2017';
   ISO22Version: string = 'ISO 27001:2022';
   openCREVersion: string = 'OpenCRE';
-
   @ViewChildren(MatAccordion) accordion!: QueryList<MatAccordion>;
-  constructor(
-    private route: ActivatedRoute,
-    private loader: LoaderService
-  ) {}
+
+  constructor(private route: ActivatedRoute, private loader: LoaderService) {}
 
   ngOnInit() {
     let name: string, uuid: string;
@@ -37,7 +34,8 @@ export class ActivityDescriptionComponent implements OnInit {
     });
 
     // Load data using the new services
-    this.loader.load()
+    this.loader
+      .load()
       .then((activityStore: ActivityStore) => {
         // Find the activity with matching UUID (or potentially name)
         let activity: Activity = activityStore.getActivity(uuid, name);

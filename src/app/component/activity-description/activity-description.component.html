@@ -52,9 +52,7 @@
           <b>Implementation Guide</b>
         </mat-panel-title>
       </mat-expansion-panel-header>
-      <p
-        id="implementatonGuide"
-        [innerHTML]="currentActivity.implementatonGuide"></p>
+      <p id="implementatonGuide" [innerHTML]="currentActivity.implementatonGuide"></p>
     </mat-expansion-panel>
 
     <mat-expansion-panel>
@@ -63,9 +61,7 @@
           <b>Difficulty of Implementation</b>
         </mat-panel-title>
       </mat-expansion-panel-header>
-      <p>
-        Knowledge: {{ this.KnowledgeLabel }}
-      </p>
+      <p>Knowledge: {{ this.KnowledgeLabel }}</p>
       <p>Time: {{ this.TimeLabel }}</p>
       <p>Resources: {{ this.ResourceLabel }}</p>
     </mat-expansion-panel>
@@ -86,9 +82,7 @@
         </mat-panel-title>
       </mat-expansion-panel-header>
       <mat-accordion multi="true">
-        <mat-expansion-panel
-          id="teamsEvidence"
-          *ngFor="let item of this.currentActivity.teamsEvidence | keyvalue">
+        <mat-expansion-panel id="teamsEvidence" *ngFor="let item of this.currentActivity.teamsEvidence | keyvalue">
           <mat-expansion-panel-header>
             <mat-panel-title>
               <b [innerHTML]="item.key"></b>
@@ -116,8 +110,7 @@
       </mat-expansion-panel-header>
       <p>
         <mat-accordion multi="true">
-          <mat-expansion-panel
-            *ngFor="let implement of this.currentActivity.implementation">
+          <mat-expansion-panel *ngFor="let implement of this.currentActivity.implementation">
             <mat-expansion-panel-header>
               <mat-panel-title>
                 <b [innerHTML]="implement['name']"></b>
@@ -220,12 +213,7 @@
           <b>Implemented By</b>
         </mat-panel-title>
       </mat-expansion-panel-header>
-      <div
-        *ngIf="
-          currentActivity.teamsImplemented;
-          then thenBlock;
-          else elseBlock
-        "></div>
+      <div *ngIf="currentActivity.teamsImplemented; then thenBlock; else elseBlock"></div>
       <ng-template #thenBlock>
         <ul class="teams-implemented-list">
           <li *ngFor="let item of currentActivity.teamsImplemented | keyvalue">
@@ -249,9 +237,7 @@
       <app-dependency-graph
         dimension="{{ currentActivity.category }}"
         subDimension="{{ currentActivity.dimension }}"
-        activityName="{{
-          currentActivity.name
-        }}"></app-dependency-graph>
+        activityName="{{ currentActivity.name }}" />
     </mat-expansion-panel>
 
     <mat-expansion-panel>
