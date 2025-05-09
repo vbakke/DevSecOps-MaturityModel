@@ -234,11 +234,9 @@
           <b>Depends on</b>
         </mat-panel-title>
       </mat-expansion-panel-header>
-      <app-dependency-graph
-        dimension="{{ currentActivity.category }}"
-        subDimension="{{ currentActivity.dimension }}"
-        activityName="{{ currentActivity.name }}">
-      </app-dependency-graph>
+      <div *ngIf="currentActivity && currentActivity.name">
+        <app-dependency-graph [activityName]="currentActivity.name"></app-dependency-graph>
+      </div>
     </mat-expansion-panel>
 
     <mat-expansion-panel>

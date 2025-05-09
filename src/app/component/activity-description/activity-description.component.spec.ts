@@ -15,6 +15,7 @@ describe('ActivityDescriptionComponent', () => {
   let fixture: ComponentFixture<ActivityDescriptionComponent>;
   mockLoaderService = new MockLoaderService({});
 
+  /* eslint-disable */
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       providers: [
@@ -26,6 +27,7 @@ describe('ActivityDescriptionComponent', () => {
       declarations: [ActivityDescriptionComponent],
     }).compileComponents();
   });
+  /* eslint-enable */
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ActivityDescriptionComponent);

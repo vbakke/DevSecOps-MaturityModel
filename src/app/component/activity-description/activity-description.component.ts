@@ -33,7 +33,7 @@ export class ActivityDescriptionComponent implements OnInit {
       name = params['activityName'];
     });
 
-    // Load data using the new services
+    // Load data
     this.loader
       .load()
       .then((activityStore: ActivityStore) => {

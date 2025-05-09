@@ -34,23 +34,21 @@ export class DependencyGraphComponent implements OnInit {
   graphData: graph = { nodes: [], links: [] };
   visited: Set<string> = new Set();
 
-  @Input() dimension: string = '';
-  @Input() subDimension: string = '';
   @Input() activityName: string = '';
 
   constructor(private loader: LoaderService) {}
 
   ngOnInit(): void {
     this.loader.load().then((activityStore: ActivityStore) => {
-      // Find the activity with matching UUID (or potentially name)
       this.activityStore = activityStore;
       let activity: Activity = activityStore.getActivityByName(this.activityName);
-      this.graphData = { nodes: [], links: [] };
-      this.populateGraphWithActivitiesCurrentActivityDependsOn(activity);
-      this.populateGraphWithActivitiesThatDependsOnCurrentActivity(activity);
+      if (activity) {
+        this.graphData = { nodes: [], links: [] };
+        this.populateGraphWithActivitiesCurrentActivityDependsOn(activity);
+        this.populateGraphWithActivitiesThatDependsOnCurrentActivity(activity);
 
-      // console.log({ ...this.graphData });
-      this.generateGraph(this.activityName);
+        this.generateGraph(this.activityName);
+      }
     });
   }
 

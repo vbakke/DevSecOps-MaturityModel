@@ -28,7 +28,7 @@ let mockLoaderService: MockLoaderService;
 describe('MatrixComponent', () => {
   let component: MatrixComponent;
   let fixture: ComponentFixture<MatrixComponent>;
-  
+
   beforeEach(async () => {
     mockLoaderService = new MockLoaderService(MOCK_DATA);
     await TestBed.configureTestingModule({
