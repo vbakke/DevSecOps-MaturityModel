@@ -5,14 +5,23 @@ import { sample } from 'rxjs';
 import { ymlService } from 'src/app/service/yaml-parser/yaml-parser.service';
 
 import { ActivityDescriptionComponent } from './activity-description.component';
+import { LoaderService } from 'src/app/service/loader/data-loader.service';
+import { MockLoaderService } from 'src/app/service/loader/mock-data-loader.service';
+
+let mockLoaderService: MockLoaderService;
 
 describe('ActivityDescriptionComponent', () => {
   let component: ActivityDescriptionComponent;
   let fixture: ComponentFixture<ActivityDescriptionComponent>;
+  mockLoaderService = new MockLoaderService({});
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      providers: [ymlService, HttpClient, HttpHandler],
+      providers: [
+        HttpClient,
+        HttpHandler,
+        { provide: LoaderService, useValue: mockLoaderService },
+      ],
       imports: [RouterTestingModule],
       declarations: [ActivityDescriptionComponent],
     }).compileComponents();
@@ -31,8 +40,8 @@ describe('ActivityDescriptionComponent', () => {
   it('check if header is being generated', () => {
     const testDimension = 'Sample Dimension';
     const testSubDimension = 'Sample subDimension';
-    component.currentActivity.dimension = testDimension;
-    component.currentActivity.subDimension = testSubDimension;
+    component.currentActivity.category = testDimension;
+    component.currentActivity.dimension = testSubDimension;
     fixture.detectChanges();
     const HTMLElement: HTMLElement = fixture.nativeElement;
     const heading = HTMLElement.querySelector('h1')!;
@@ -137,8 +146,7 @@ describe('ActivityDescriptionComponent', () => {
         testISO[0] +
         component.ISO22Version +
         testISO22[0] +
-        component.openCREVersion +
-        uuid
+        component.openCREVersion
     );
   });
 });
