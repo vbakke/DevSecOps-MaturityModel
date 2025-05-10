@@ -19,22 +19,22 @@ import {
 } from '../modal-message/modal-message.component';
 import { ActivityStore } from 'src/app/model/activity-store';
 
-export interface activitySchema {
+export interface old_activitySchema {
   uuid: string;
   activityName: string;
   teamsImplemented: any;
 }
 
-export interface cardSchema {
+export interface old_cardSchema {
   Dimension: string;
   SubDimension: string;
   Level: string;
   'Done%': number;
-  Activity: activitySchema[];
+  Activity: old_activitySchema[];
 }
 
-type ProjectData = {
-  Activity: activitySchema[];
+type old_ProjectData = {
+  Activity: old_activitySchema[];
   Dimension: string;
   Done: number;
   Level: string;
@@ -48,56 +48,53 @@ type ProjectData = {
 })
 export class CircularHeatmapComponent implements OnInit {
   Routing: string = '/activity-description';
-  maxLevelOfMaturity: number = -1;
-  showActivityCard: boolean = false;
-  cardHeader: string = '';
-  cardSubheader: string = '';
-  currentDimension: string = '';
-  activityData: any[] = [];
-  ALL_CARD_DATA: cardSchema[] = [];
-  radial_labels: string[] = [];
-  YamlObject: any;
-  teamList: any;
-  teamGroups: any;
-  selectedTeamChips: string[] = ['All'];
-  teamVisible: string[] = [];
-  segment_labels: string[] = [];
-  activityDetails: any;
-  showOverlay: boolean;
-  showFilters: boolean;
   markdown: md = md();
+  maxLevelOfMaturity: number = -1;
+  showOverlay: boolean = false;
+  showFilters: boolean = true;
+  showActivityCard: boolean = false;
+  old_cardHeader: string = '';
+  old_cardSubheader: string = '';
+  old_currentDimension: string = '';
+  old_activityData: any[] = [];
+  old_ALL_CARD_DATA: old_cardSchema[] = [];
+  old_radial_labels: string[] = [];
+  old_YamlObject: any;
+  old_teamList: any;
+  old_teamGroups: any;
+  old_selectedTeamChips: string[] = ['All'];
+  old_teamVisible: string[] = [];
+  old_segment_labels: string[] = [];
+  old_activityDetails: any;
 
   constructor(
-    private yaml: ymlService,
+    private old_yaml: ymlService,
     private loader: LoaderService,
     private router: Router,
     public modal: ModalMessageComponent
-  ) {
-    this.showOverlay = false;
-    this.showFilters = true;
-  }
+  ) { }
 
   ngOnInit(): void {
     console.log(`${this.perfNow()}s: ngOnInit`);
     // Ensure that Levels and Teams load before MaturityData
     // using promises, since ngOnInit does not support async/await
-    this.LoadMaturityLevels()
-      .then(() => this.LoadTeamsFromMetaYaml())
-      .then(() => this.LoadMaturityDataFromGeneratedYaml())
+    this.OBSOLETE_LoadMaturityLevels()
+      .then(() => this.OBSOLETE_LoadTeamsFromMetaYaml())
+      .then(() => this.OBSOLETE_LoadMaturityDataFromGeneratedYaml())
       .then(() => this.loader.load())
       .then((activityStore: ActivityStore) => {
         console.log(`${this.perfNow()}s: set filters: ${this.chips?.length}`);
         this.matChipsArray = this.chips.toArray();
         console.log('--- LOADED COMPLETE (old & new) ---');
         let data: any = activityStore.data;
-        this.YamlObject = data;
+        this.old_YamlObject = data;
         for (let c in data) {
           console.log(' - ' + c);
           for (let d in data[c]) {
             console.log('    - ' + d);
-            for (let a in data[c][d]) {
-              console.log(`       - (${data[c][d][a]?.level}) ${a}`);
-            }
+            // for (let a in data[c][d]) {
+            //   console.log(`       - (${data[c][d][a]?.level}) ${a}`);
+            // }
           }
         }
       })
@@ -116,31 +113,31 @@ export class CircularHeatmapComponent implements OnInit {
     this.modal.openDialog(dialogInfo);
   }
 
-  private LoadMaturityDataFromGeneratedYaml() {
+  private OBSOLETE_LoadMaturityDataFromGeneratedYaml() {
     return new Promise<void>((resolve, reject) => {
       console.log(`${this.perfNow()}s: LoadMaturityData Fetch`);
-      this.yaml.setURI('./assets/YAML/generated/generated.yaml');
-      this.yaml.getJson().subscribe(async data => {
+      this.old_yaml.setURI('./assets/YAML/generated/generated.yaml');
+      this.old_yaml.getJson().subscribe(async data => {
         console.log(`${this.perfNow()}s: LoadMaturityData Downloaded`);
         const activityStore: ActivityStore = await this.loader.load();
-        this.YamlObject = activityStore.data;
-        this.AddSegmentLabels(this.YamlObject);
+        this.old_YamlObject = activityStore.data;
+        this.AddSegmentLabels(this.old_YamlObject);
         const localStorageData = this.getDatasetFromBrowserStorage();
 
         // Initialize the card array
-        let segmentTotalCount = this.segment_labels.length;
+        let segmentTotalCount = this.old_segment_labels.length;
         let cardTotalCount = segmentTotalCount * this.maxLevelOfMaturity;
-        this.ALL_CARD_DATA = new Array(cardTotalCount).fill(null);
+        this.old_ALL_CARD_DATA = new Array(cardTotalCount).fill(null);
 
         // Process each card / sector
         let subdimCount = -1;
-        for (let dim in this.YamlObject) {
-          for (let subdim in this.YamlObject[dim]) {
+        for (let dim in this.old_YamlObject) {
+          for (let subdim in this.old_YamlObject[dim]) {
             subdimCount++;
             console.log(subdimCount, subdim);
-            let activities: Map<number, activitySchema[]> =
+            let activities: Map<number, old_activitySchema[]> =
               this.processActivities(
-                this.YamlObject[dim][subdim],
+                this.old_YamlObject[dim][subdim],
                 localStorageData
               );
 
@@ -150,7 +147,7 @@ export class CircularHeatmapComponent implements OnInit {
               level++
             ) {
               // Create and store each card (with activities for that level)
-              var cardSchemaData: cardSchema = {
+              var cardSchemaData: old_cardSchema = {
                 Dimension: dim,
                 SubDimension: subdim,
                 Level: 'Level ' + level,
@@ -160,17 +157,17 @@ export class CircularHeatmapComponent implements OnInit {
 
               // Store cards in sequential slots, by dimension then level
               let levelIndex = (level - 1) * segmentTotalCount;
-              this.ALL_CARD_DATA[levelIndex + subdimCount] = cardSchemaData;
+              this.old_ALL_CARD_DATA[levelIndex + subdimCount] = cardSchemaData;
             }
           }
         }
 
-        console.log('ALL CARD DATA', this.ALL_CARD_DATA);
+        console.log('ALL CARD DATA', this.old_ALL_CARD_DATA);
         this.loadCircularHeatMap(
-          this.ALL_CARD_DATA,
+          this.old_ALL_CARD_DATA,
           '#chart',
-          this.radial_labels,
-          this.segment_labels
+          this.old_radial_labels,
+          this.old_segment_labels
         );
         this.noActivitytoGrey();
         console.log(`${this.perfNow()}s: LoadMaturityData End`);
@@ -189,8 +186,8 @@ export class CircularHeatmapComponent implements OnInit {
   private processActivities(
     card: any,
     localStorageData: any
-  ): Map<number, activitySchema[]> {
-    let activities: Map<number, activitySchema[]> = new Map();
+  ): Map<number, old_activitySchema[]> {
+    let activities: Map<number, old_activitySchema[]> = new Map();
     for (let activityName in card) {
       let currentActivity: any = card[activityName];
       let level: number = currentActivity.level;
@@ -198,7 +195,7 @@ export class CircularHeatmapComponent implements OnInit {
 
       // Initialize a status for all genuine teams
       let genuineTeams: any = {};
-      this.teamList.forEach((singleTeam: string) => {
+      this.old_teamList.forEach((singleTeam: string) => {
         genuineTeams[singleTeam] = false;
       });
 
@@ -229,7 +226,7 @@ export class CircularHeatmapComponent implements OnInit {
   }
 
   private getTeamImplementedFromJson(
-    data: ProjectData,
+    data: old_ProjectData,
     activityName: string
   ): any | undefined {
     if (data) {
@@ -253,49 +250,49 @@ export class CircularHeatmapComponent implements OnInit {
   private AddSegmentLabels(yampObject: any[]) {
     for (let dim in yampObject) {
       for (let subdim in yampObject[dim]) {
-        this.segment_labels.push(subdim);
+        this.old_segment_labels.push(subdim);
       }
     }
-    console.log(this.segment_labels);
+    console.log(this.old_segment_labels);
   }
 
-  private LoadTeamsFromMetaYaml() {
+  private OBSOLETE_LoadTeamsFromMetaYaml() {
     return new Promise<void>((resolve, reject) => {
       console.log(`${this.perfNow()}s: LoadTeamsFromMetaYaml Fetch`);
-      this.yaml.setURI('./assets/YAML/meta.yaml');
-      this.yaml.getJson().subscribe(data => {
+      this.old_yaml.setURI('./assets/YAML/meta.yaml');
+      this.old_yaml.getJson().subscribe(data => {
         console.log(`${this.perfNow()}s: LoadTeamsFromMetaYaml Downloaded`);
-        this.YamlObject = data;
+        this.old_YamlObject = data;
 
-        this.teamList = this.YamlObject['teams']; // Genuine teams (the true source)
-        this.teamGroups = this.YamlObject['teamGroups'];
-        this.teamVisible = [...this.teamList];
+        this.old_teamList = this.old_YamlObject['old_teams']; // Genuine teams (the true source)
+        this.old_teamGroups = this.old_YamlObject['old_teamGroups'];
+        this.old_teamVisible = [...this.old_teamList];
 
         // Ensure that all team names in the groups are genuine team names
-        for (let team in this.teamGroups) {
-          this.teamGroups[team] = this.teamGroups[team].filter((t: string) =>
-            this.teamList.includes(t)
+        for (let team in this.old_teamGroups) {
+          this.old_teamGroups[team] = this.old_teamGroups[team].filter((t: string) =>
+            this.old_teamList.includes(t)
           );
-          if (this.teamGroups[team].length == 0) delete this.teamGroups[team];
+          if (this.old_teamGroups[team].length == 0) delete this.old_teamGroups[team];
         }
         resolve();
       });
     });
   }
 
-  private LoadMaturityLevels() {
+  private OBSOLETE_LoadMaturityLevels() {
     return new Promise<void>((resolve, reject) => {
       console.log(`${this.perfNow()}s: LoadMaturityLevels Fetch`);
-      this.yaml.setURI('./assets/YAML/meta.yaml');
+      this.old_yaml.setURI('./assets/YAML/meta.yaml');
       // Function sets column header
-      this.yaml.getJson().subscribe(data => {
+      this.old_yaml.getJson().subscribe(data => {
         console.log(`${this.perfNow()}s: LoadMaturityLevels Downloaded`);
-        this.YamlObject = data;
+        this.old_YamlObject = data;
 
         // Levels header
-        for (let x in this.YamlObject['strings']['en']['maturity_levels']) {
+        for (let x in this.old_YamlObject['strings']['en']['maturityLevels']) {
           var y = parseInt(x) + 1;
-          this.radial_labels.push('Level ' + y);
+          this.old_radial_labels.push('Level ' + y);
           this.maxLevelOfMaturity = y;
         }
         resolve();
@@ -308,28 +305,28 @@ export class CircularHeatmapComponent implements OnInit {
     let currChipValue = chip.value.trim();
 
     if (chip.selected) {
-      this.selectedTeamChips = [currChipValue];
+      this.old_selectedTeamChips = [currChipValue];
       if (currChipValue == 'All') {
-        this.teamVisible = [...this.teamList];
+        this.old_teamVisible = [...this.old_teamList];
       } else {
-        this.teamVisible = [];
+        this.old_teamVisible = [];
 
         (
-          Object.keys(this.teamGroups) as (keyof typeof this.teamGroups)[]
+          Object.keys(this.old_teamGroups) as (keyof typeof this.old_teamGroups)[]
         ).forEach((key, index) => {
           if (key === currChipValue) {
             console.log('group selected');
-            this.teamVisible = [...this.teamGroups[key]];
+            this.old_teamVisible = [...this.old_teamGroups[key]];
           }
         });
       }
     } else {
-      this.selectedTeamChips = this.selectedTeamChips.filter(
+      this.old_selectedTeamChips = this.old_selectedTeamChips.filter(
         o => o !== currChipValue
       );
     }
-    console.log('Selected Chips', this.selectedTeamChips);
-    console.log('Team Visible', this.teamVisible);
+    console.log('Selected Chips', this.old_selectedTeamChips);
+    console.log('Team Visible', this.old_teamVisible);
     console.log('All chips', this.matChipsArray);
 
     // Update heatmap based on selection
@@ -339,17 +336,17 @@ export class CircularHeatmapComponent implements OnInit {
   toggleTeamSelection(chip: MatChip) {
     chip.toggleSelected();
     let currChipValue = chip.value.trim();
-    let prevSelectedChip = this.selectedTeamChips;
+    let prevSelectedChip = this.old_selectedTeamChips;
     if (chip.selected) {
-      this.teamVisible.push(currChipValue);
-      this.selectedTeamChips = [];
+      this.old_teamVisible.push(currChipValue);
+      this.old_selectedTeamChips = [];
     } else {
-      this.selectedTeamChips = [];
-      this.teamVisible = this.teamVisible.filter(o => o !== currChipValue);
+      this.old_selectedTeamChips = [];
+      this.old_teamVisible = this.old_teamVisible.filter(o => o !== currChipValue);
     }
-    console.log('Selected Chips', this.selectedTeamChips);
-    console.log('Team Visible', this.teamVisible);
-    console.log('Team List', this.teamList);
+    console.log('Selected Chips', this.old_selectedTeamChips);
+    console.log('Team Visible', this.old_teamVisible);
+    console.log('Team List', this.old_teamList);
     console.log('All chips', this.matChipsArray);
     // Update heatmap based on selection
     this.updateChips(prevSelectedChip);
@@ -361,11 +358,11 @@ export class CircularHeatmapComponent implements OnInit {
     this.matChipsArray.forEach(chip => {
       let currChipValue = chip.value.trim();
 
-      if (this.teamVisible.includes(currChipValue)) {
+      if (this.old_teamVisible.includes(currChipValue)) {
         console.log(currChipValue);
         chip.selected = true;
       } else {
-        if (!this.selectedTeamChips.includes(currChipValue)) {
+        if (!this.old_selectedTeamChips.includes(currChipValue)) {
           chip.selected = false;
         }
       }
@@ -377,19 +374,19 @@ export class CircularHeatmapComponent implements OnInit {
   teamCheckbox(activityIndex: number, teamKey: any) {
     let _self = this;
     var index = 0;
-    for (var i = 0; i < this.ALL_CARD_DATA.length; i++) {
+    for (var i = 0; i < this.old_ALL_CARD_DATA.length; i++) {
       if (
-        this.ALL_CARD_DATA[i]['SubDimension'] === this.cardHeader &&
-        this.ALL_CARD_DATA[i]['Level'] === this.cardSubheader
+        this.old_ALL_CARD_DATA[i]['SubDimension'] === this.old_cardHeader &&
+        this.old_ALL_CARD_DATA[i]['Level'] === this.old_cardSubheader
       ) {
         index = i;
         break;
       }
     }
-    this.ALL_CARD_DATA[index]['Activity'][activityIndex]['teamsImplemented'][
+    this.old_ALL_CARD_DATA[index]['Activity'][activityIndex]['teamsImplemented'][
       teamKey
     ] =
-      !this.ALL_CARD_DATA[index]['Activity'][activityIndex]['teamsImplemented'][
+      !this.old_ALL_CARD_DATA[index]['Activity'][activityIndex]['teamsImplemented'][
         teamKey
       ];
 
@@ -469,7 +466,7 @@ export class CircularHeatmapComponent implements OnInit {
 
         var clickedId = d.currentTarget.id;
         var index = parseInt(clickedId.replace('index-', ''));
-        curr = _self.ALL_CARD_DATA[index];
+        curr = _self.old_ALL_CARD_DATA[index];
         console.log('index', curr['Activity']);
 
         if (curr['Done%'] == -1) {
@@ -477,10 +474,10 @@ export class CircularHeatmapComponent implements OnInit {
           _self.setSectorCursor(svg, '#selected', '');
         } else {
           _self.showActivityCard = true;
-          _self.currentDimension = curr.Dimension;
-          _self.cardSubheader = curr.Level;
-          _self.activityData = curr.Activity;
-          _self.cardHeader = curr.SubDimension;
+          _self.old_currentDimension = curr.Dimension;
+          _self.old_cardSubheader = curr.Level;
+          _self.old_activityData = curr.Activity;
+          _self.old_cardHeader = curr.SubDimension;
           _self.setSectorCursor(svg, '#selected', clickedId);
         }
       })
@@ -734,8 +731,8 @@ export class CircularHeatmapComponent implements OnInit {
   }
 
   noActivitytoGrey(): void {
-    for (var x = 0; x < this.ALL_CARD_DATA.length; x++) {
-      if (this.ALL_CARD_DATA[x]['Done%'] == -1) {
+    for (var x = 0; x < this.old_ALL_CARD_DATA.length; x++) {
+      if (this.old_ALL_CARD_DATA[x]['Done%'] == -1) {
         d3.select('#index-' + x).attr('fill', '#DCDCDC');
       }
     }
@@ -758,26 +755,26 @@ export class CircularHeatmapComponent implements OnInit {
       subDimension: subdim,
       activityName: activityName,
     };
-    this.activityDetails = Object.assign(
+    this.old_activityDetails = Object.assign(
       {},
-      this.YamlObject[dim][subdim][activityName]
+      this.old_YamlObject[dim][subdim][activityName]
     );
-    this.activityDetails.description = this.defineStringValues(
-      this.activityDetails.description,
-      this.activityDetails.description
+    this.old_activityDetails.description = this.defineStringValues(
+      this.old_activityDetails.description,
+      this.old_activityDetails.description
     );
-    this.activityDetails.risk = this.defineStringValues(
-      this.activityDetails.risk,
-      this.activityDetails.risk
+    this.old_activityDetails.risk = this.defineStringValues(
+      this.old_activityDetails.risk,
+      this.old_activityDetails.risk
     );
-    this.activityDetails.measure = this.defineStringValues(
-      this.activityDetails.measure,
-      this.activityDetails.measure
+    this.old_activityDetails.measure = this.defineStringValues(
+      this.old_activityDetails.measure,
+      this.old_activityDetails.measure
     );
-    if (this.activityDetails) {
-      this.activityDetails.navigationExtras = navigationExtras;
+    if (this.old_activityDetails) {
+      this.old_activityDetails.navigationExtras = navigationExtras;
     }
-    console.log(this.activityDetails);
+    console.log(this.old_activityDetails);
     this.showOverlay = true;
   }
 
@@ -790,8 +787,8 @@ export class CircularHeatmapComponent implements OnInit {
   }
 
   saveEditedYAMLfile() {
-    this.setTeamsStatus(this.YamlObject, this.teamList, this.ALL_CARD_DATA);
-    let yamlStr = yaml.dump(this.YamlObject);
+    this.setTeamsStatus(this.old_YamlObject, this.old_teamList, this.old_ALL_CARD_DATA);
+    let yamlStr = yaml.dump(this.old_YamlObject);
 
     let file = new Blob([yamlStr], { type: 'text/csv;charset=utf-8' });
     var link = document.createElement('a');
@@ -801,7 +798,7 @@ export class CircularHeatmapComponent implements OnInit {
     link.remove();
   }
 
-  setTeamsStatus(yamlObject: any, teamList: string[], card_data: cardSchema[]) {
+  setTeamsStatus(yamlObject: any, teamList: string[], card_data: old_cardSchema[]) {
     // Loop through all activities from the card_data
     for (let card of card_data) {
       for (let activity of card.Activity) {
@@ -823,15 +820,15 @@ export class CircularHeatmapComponent implements OnInit {
 
   reColorHeatmap() {
     console.log('recolor');
-    var teamsCount = this.teamVisible.length;
+    var teamsCount = this.old_teamVisible.length;
 
-    for (var index = 0; index < this.ALL_CARD_DATA.length; index++) {
-      var activities = this.ALL_CARD_DATA[index]['Activity'];
+    for (var index = 0; index < this.old_ALL_CARD_DATA.length; index++) {
+      var activities = this.old_ALL_CARD_DATA[index]['Activity'];
       let cntAll: number = teamsCount * activities.length;
       let cntTrue: number = 0;
       var _self = this;
       for (var i = 0; i < activities.length; i++) {
-        for (var teamname of this.teamVisible) {
+        for (var teamname of this.old_teamVisible) {
           if (activities[i]['teamsImplemented'][teamname]) {
             cntTrue++;
             // console.log(`Counting ${activities[i].activityName}: ${teamname} (${cntTrue})`);
@@ -845,13 +842,13 @@ export class CircularHeatmapComponent implements OnInit {
         .range(['white', 'green']);
 
       if (cntAll !== 0) {
-        this.ALL_CARD_DATA[index]['Done%'] = cntTrue / cntAll;
+        this.old_ALL_CARD_DATA[index]['Done%'] = cntTrue / cntAll;
         // console.log(`${this.ALL_CARD_DATA[index].SubDimension} ${this.ALL_CARD_DATA[index].Level} Done: ${cntTrue}/${cntAll} = ${(cntTrue / cntAll*100).toFixed(1)}%`);
         d3.select('#index-' + index).attr('fill', function (p) {
-          return colorSector(_self.ALL_CARD_DATA[index]['Done%']);
+          return colorSector(_self.old_ALL_CARD_DATA[index]['Done%']);
         });
       } else {
-        this.ALL_CARD_DATA[index]['Done%'] = -1;
+        this.old_ALL_CARD_DATA[index]['Done%'] = -1;
         // console.log(`${this.ALL_CARD_DATA[index].SubDimension} ${this.ALL_CARD_DATA[index].Level} None`);
         d3.select('#index-' + index).attr('fill', '#DCDCDC');
       }
@@ -881,20 +878,20 @@ export class CircularHeatmapComponent implements OnInit {
   }
 
   saveDataset() {
-    localStorage.setItem('dataset', JSON.stringify(this.ALL_CARD_DATA));
+    localStorage.setItem('dataset', JSON.stringify(this.old_ALL_CARD_DATA));
   }
 
   loadDataset() {
     var content = this.getDatasetFromBrowserStorage();
     if (content != null) {
-      this.ALL_CARD_DATA = content;
+      this.old_ALL_CARD_DATA = content;
     }
   }
 
   getDatasetFromBrowserStorage(): any {
     console.log(`${this.perfNow()}s: getDatasetFromBrowserStorage() ####`);
     // @ts-ignore
-    if (this.ALL_CARD_DATA?.length && this.ALL_CARD_DATA[0]?.Task != null) {
+    if (this.old_ALL_CARD_DATA?.length && this.old_ALL_CARD_DATA[0]?.Task != null) {
       console.log('Found outdated dataset, removing');
       localStorage.removeItem('dataset');
     }

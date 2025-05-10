@@ -1,24 +1,24 @@
 # ToDo
 
 ## Doing
+- Refactor Circular Heatmap
+- Load TeamProgress yaml
 
 ## Next
-- Navigate to activity-description without site reload
+- Store TeamProgress to localStorage
+- Load localStorage TeamProgress
+- Export TeamProgress yaml
 
 
 ## Later
+- Merge in experiment's way of generating circ heat
 - Fix dependsOn that is uuid (e.g. 83057028-0b77-4d2e-8135-40969768ae88)
-- Load TeamProgress yaml
 - Sort linear list of activities (sorted by level, dim)
-- Substitute Circular Heatmap
-- Store TeamProgress
-- Load localStorage TeamProgress
 - Move META_FILE constant from data service to main app
 - Filter: tags: Fix update on SPACE key (trouble)
 
-- Substitute Activity Detail
-
 # Done
+- Navigate to activity-description without site reload
 - Refactor Dependecy graph
 - Refactor activity-description
 - Make sure loader.load() only runs once (even with navigations)
