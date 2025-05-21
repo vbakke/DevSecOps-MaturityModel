@@ -1,0 +1,16 @@
+.progress-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+
+.mat-slider-track-fill {
+  background-color: #66bb6a;
+  height: 10px;
+}
+.step-label {
+  min-width: 120px;
+} 
+

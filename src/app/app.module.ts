@@ -24,6 +24,7 @@ import { DependencyGraphComponent } from './component/dependency-graph/dependenc
 import { TeamsComponent } from './component/teams/teams.component';
 import { ToStringValuePipe } from './pipe/to-string-value.pipe';
 import { ModalMessageComponent } from './component/modal-message/modal-message.component';
+import { ProgressSliderComponent } from './component/progress-slider/progress-slider.component';
 import {
   MatDialogModule,
   MAT_DIALOG_DATA,
@@ -48,6 +49,7 @@ import {
     ToStringValuePipe,
     UserdayComponent,
     ModalMessageComponent,
+    ProgressSliderComponent,
   ],
   imports: [
     BrowserModule,
