@@ -19,6 +19,13 @@ export class LoaderService {
 
   constructor(private yamlService: YamlService) {}
 
+  public getMaxLevel(): number {
+    if (!this.cachedActivityStore) {
+      throw new Error('Activities not loaded. Call load() first.');
+    }
+    return this.cachedActivityStore.getMaxLevel();
+  }
+
   public getLevels(): string[] {
     if (!this.cachedActivityStore) {
       throw new Error('Activities not loaded. Call load() first.');

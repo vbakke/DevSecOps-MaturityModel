@@ -237,40 +237,30 @@
         </div>
         <mat-card class="example-card" *ngIf="showActivityCard">
           <mat-card-title-group>
-            <mat-card-title>{{ old_cardHeader }}</mat-card-title>
-            <mat-card-subtitle>{{ old_cardSubheader }}</mat-card-subtitle>
+            <mat-card-title>{{ showActivityCard.dimension }}</mat-card-title>
+            <mat-card-subtitle>{{ showActivityCard.level }}</mat-card-subtitle>
           </mat-card-title-group>
-          <mat-card-content
-            *ngFor="let activity of old_activityData; index as activityIndex">
+          <mat-card-content *ngFor="let activity of showActivityCard.activities; index as activityIndex">
             <mat-expansion-panel>
               <mat-expansion-panel-header>
                 <mat-panel-title>
                   <button
                     class="title-button"
-                    (click)="
-                      $event.preventDefault();
-                      openActivityDetails(
-                        old_currentDimension,
-                        old_cardHeader,
-                        activity['activityName']
-                      )
-                    ">
-                    {{ activity['activityName'] }}
+                    (click)="openActivityDetails(showActivityCard.dimension, activity['activityName'] || activity['name'])">
+                    {{ activity['activityName'] || activity['name'] }}
                   </button>
                 </mat-panel-title>
               </mat-expansion-panel-header>
               <ng-template matExpansionPanelContent>
                 <ul class="team-list">
                   <li *ngFor="let teamname of old_teamVisible">
-                    <mat-checkbox
-                      [checked]="activity.teamsImplemented[teamname]"
-                      color="primary"
-                      (click)="
-                        this.teamCheckbox(activityIndex, teamname);
-                        $event.preventDefault()
-                      ">
-                      {{ teamname }}
-                    </mat-checkbox>
+                    <label class="team-label">
+                      {{ teamname }}:
+                    </label>
+                    <progress-slider
+                      [steps]="['', 'Planned', 'Started', 'Implemented']"
+                      [initialValue]="0">
+                    ></progress-slider>
                   </li>
                 </ul>
                 <b *ngIf="old_teamVisible.length === 0">

@@ -1,15 +1,20 @@
 ---
-checkForDsommUpdates: true
+checkForDsommUpdates: true  # Yet to be implemented
 progress:
+  "Not started": 0%
   Planned: 10%
   Started: 30%
   Implemented: 100% 
-$teams: 
+# progress:
+#   Low maturity: 0%
+#   Medium maturity: 40%
+#   High maturity: 100% 
+teams: 
   $ref: 'default/teams.yaml#/teams'
-$teamGroups:
+teamGroups:
   $ref: 'default/teams.yaml#/teamGroups'
 
-teamProgressFile: 'teamprogress.yaml' 
+teamProgressFile: 'team-progress.yaml' 
 activityFiles:
     - generated/generated.yaml 
     # - default/activities.yaml 
@@ -42,8 +47,3 @@ strings:
         'High (two disciplines)',
         'Very High (three or more disciplines)',
       ]
-teams: ['Default', 'B', 'C']
-teamGroups:
-  GroupA: ['Default', 'B']
-  GroupB: ['B', 'C']
-  GroupC: ['Default', 'C']

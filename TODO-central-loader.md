@@ -1,16 +1,31 @@
 # ToDo
 
 ## Doing
-- Refactor Circular Heatmap
 - Load TeamProgress yaml
+    - Load YAML progress
+- Refactor Circular Heatmap
+    - show progress for each activity
 
 ## Next
+- Load TeamProgress yaml
+    - Store in localStorage
+    - Handle boolean for backwards compatibility
+    - Merge localStorage and YAML
+- Progress Slider
+    - Data model, contains date, so warning about downgrade can show date
+    - Handle when previous value does not have a date (backwards compatibility)
+    - Catch close to save new progresses
 - Store TeamProgress to localStorage
 - Load localStorage TeamProgress
 - Export TeamProgress yaml
+- Filters
+    - filter teams
+    - filter none => all
+
 
 
 ## Later
+- Add validation for meta.yaml, progress step: include 0% and 100%, and increacing values
 - Merge in experiment's way of generating circ heat
 - Fix dependsOn that is uuid (e.g. 83057028-0b77-4d2e-8135-40969768ae88)
 - Sort linear list of activities (sorted by level, dim)

@@ -52,7 +52,7 @@ export class CircularHeatmapComponent implements OnInit {
   maxLevelOfMaturity: number = -1;
   showOverlay: boolean = false;
   showFilters: boolean = true;
-  showActivityCard: boolean = false;
+  showActivityCard: any = null;
   old_cardHeader: string = '';
   old_cardSubheader: string = '';
   old_currentDimension: string = '';
@@ -66,6 +66,16 @@ export class CircularHeatmapComponent implements OnInit {
   old_teamVisible: string[] = [];
   old_segment_labels: string[] = [];
   old_activityDetails: any;
+  
+  @ViewChildren(MatChip) chips!: QueryList<MatChip>;
+  matChipsArray: MatChip[] = [];
+  
+  // New properties for refactored data
+  dimLabels: string[] = [];
+  maxLevel: number = 0;
+  allSectors: any[] = [];
+  dimensionLabels: string[] = [];
+  selectedSector: any = null;
 
   constructor(
     private old_yaml: ymlService,
@@ -73,6 +83,7 @@ export class CircularHeatmapComponent implements OnInit {
     private router: Router,
     public modal: ModalMessageComponent
   ) { }
+
 
   ngOnInit(): void {
     console.log(`${this.perfNow()}s: ngOnInit`);
@@ -85,18 +96,29 @@ export class CircularHeatmapComponent implements OnInit {
       .then((activityStore: ActivityStore) => {
         console.log(`${this.perfNow()}s: set filters: ${this.chips?.length}`);
         this.matChipsArray = this.chips.toArray();
-        console.log('--- LOADED COMPLETE (old & new) ---');
-        let data: any = activityStore.data;
-        this.old_YamlObject = data;
-        for (let c in data) {
-          console.log(' - ' + c);
-          for (let d in data[c]) {
-            console.log('    - ' + d);
-            // for (let a in data[c][d]) {
-            //   console.log(`       - (${data[c][d][a]?.level}) ${a}`);
-            // }
-          }
-        }
+
+        this.setYamlData(activityStore);
+
+        // For now, just draw the sectors (no activities yet)
+        this.loadCircularHeatMap(
+          '#chart',
+          this.allSectors,
+          this.dimensionLabels,
+          this.maxLevel
+        );
+
+
+        // console.log('--- LOADED COMPLETE (old & new) ---');
+        // this.old_YamlObject = activityStore.data;
+        // for (let c in this.old_YamlObject) {
+        //   console.log(' - ' + c);
+        //   for (let d in this.old_YamlObject[c]) {
+        //     console.log('    - ' + d);
+        //     // for (let a in data[c][d]) {
+        //     //   console.log(`       - (${data[c][d][a]?.level}) ${a}`);
+        //     // }
+        //   }
+        // }
       })
       .catch(err => {
         this.displayMessage(new DialogInfo(err.message, 'An error occurred'));
@@ -106,12 +128,33 @@ export class CircularHeatmapComponent implements OnInit {
       });
   }
 
-  @ViewChildren(MatChip) chips!: QueryList<MatChip>;
-  matChipsArray: MatChip[] = [];
 
   displayMessage(dialogInfo: DialogInfo) {
     this.modal.openDialog(dialogInfo);
   }
+
+  consolelog(message: string) {
+    console.log(message);
+  }
+
+  setYamlData(activityStore: ActivityStore) {
+    this.maxLevel = this.loader.getMaxLevel();
+    this.dimensionLabels = activityStore.getAllDimensionNames();
+    
+    // Prepare all sectors: one for each (dimension, level) pair
+    this.allSectors = [];
+    for (let lvl = 1; lvl <= this.maxLevel; lvl++) {
+      for (let dimName of this.dimensionLabels) {
+        const activities = activityStore.getActivities(dimName, lvl);
+        this.allSectors.push({
+          dimension: dimName,
+          level: 'Level ' + lvl,
+          activities: activities,
+          progress: 0,
+        });
+      }
+    }
+  }    
 
   private OBSOLETE_LoadMaturityDataFromGeneratedYaml() {
     return new Promise<void>((resolve, reject) => {
@@ -121,7 +164,7 @@ export class CircularHeatmapComponent implements OnInit {
         console.log(`${this.perfNow()}s: LoadMaturityData Downloaded`);
         const activityStore: ActivityStore = await this.loader.load();
         this.old_YamlObject = activityStore.data;
-        this.AddSegmentLabels(this.old_YamlObject);
+        this.OBSOLETE_AddSegmentLabels(this.old_YamlObject);
         const localStorageData = this.getDatasetFromBrowserStorage();
 
         // Initialize the card array
@@ -136,7 +179,7 @@ export class CircularHeatmapComponent implements OnInit {
             subdimCount++;
             console.log(subdimCount, subdim);
             let activities: Map<number, old_activitySchema[]> =
-              this.processActivities(
+              this.OBSOLETE_processActivities(
                 this.old_YamlObject[dim][subdim],
                 localStorageData
               );
@@ -163,13 +206,13 @@ export class CircularHeatmapComponent implements OnInit {
         }
 
         console.log('ALL CARD DATA', this.old_ALL_CARD_DATA);
-        this.loadCircularHeatMap(
-          this.old_ALL_CARD_DATA,
-          '#chart',
-          this.old_radial_labels,
-          this.old_segment_labels
-        );
-        this.noActivitytoGrey();
+        // this.loadCircularHeatMap(
+        //   this.old_ALL_CARD_DATA,
+        //   '#chart',
+        //   this.old_radial_labels,
+        //   this.old_segment_labels
+        // );
+        // this.noActivitytoGrey();
         console.log(`${this.perfNow()}s: LoadMaturityData End`);
         resolve();
       });
@@ -183,7 +226,7 @@ export class CircularHeatmapComponent implements OnInit {
    * Status of Team Implementation is merged from both server status and
    * locally stored changes.
    */
-  private processActivities(
+  private OBSOLETE_processActivities(
     card: any,
     localStorageData: any
   ): Map<number, old_activitySchema[]> {
@@ -201,7 +244,7 @@ export class CircularHeatmapComponent implements OnInit {
 
       // Read server and locally stored teams statuses as well
       var teamsFromYaml: any = currentActivity.teamsImplemented;
-      var teamsFromLocalstorage: any = this.getTeamImplementedFromJson(
+      var teamsFromLocalstorage: any = this.OBSOLETE_getTeamImplementedFromJson(
         localStorageData,
         activityName
       );
@@ -225,7 +268,7 @@ export class CircularHeatmapComponent implements OnInit {
     return activities;
   }
 
-  private getTeamImplementedFromJson(
+  private OBSOLETE_getTeamImplementedFromJson(
     data: old_ProjectData,
     activityName: string
   ): any | undefined {
@@ -247,7 +290,7 @@ export class CircularHeatmapComponent implements OnInit {
     return undefined;
   }
 
-  private AddSegmentLabels(yampObject: any[]) {
+  private OBSOLETE_AddSegmentLabels(yampObject: any[]) {
     for (let dim in yampObject) {
       for (let subdim in yampObject[dim]) {
         this.old_segment_labels.push(subdim);
@@ -395,41 +438,41 @@ export class CircularHeatmapComponent implements OnInit {
   }
 
   loadCircularHeatMap(
-    dataset: any,
     dom_element_to_append_to: string,
-    radial_labels: string[],
-    segment_labels: string[]
+    dataset: any,
+    dimLabels: string[],
+    maxLevel: number
   ) {
-    //console.log(segment_labels)
-    //d3.select(dom_element_to_append_to).selectAll('svg').exit()
     let _self = this;
+    var imageWidth = 1200;
+    var marginAll = 5;
     var margin = {
-      top: 50,
-      right: 50,
-      bottom: 50,
-      left: 50,
+      top: marginAll,
+      right: marginAll,
+      bottom: marginAll,
+      left: marginAll,
     };
-    var width = 1250 - margin.left - margin.right;
+    var bbWidth = imageWidth - Math.max(margin.left+margin.right, margin.top+margin.bottom)*2;  // bounding box
+    var segmentLabelHeight = bbWidth * 0.0155;  // Fuzzy number, to match the longest label within one sector
+    var outerRadius = bbWidth / 2 - segmentLabelHeight; 
+    var innerRadius = outerRadius / 5; 
+    var segmentHeight = (outerRadius -  innerRadius) / maxLevel;
+    
     var curr: any;
-    var height = width;
-    var innerRadius = 100; // width/14;
-
-    var segmentHeight =
-      (width - margin.top - margin.bottom - 2 * innerRadius) /
-      (2 * radial_labels.length);
-
-    var chart = this.circularHeatChart(segment_labels.length)
+    var chart = this.circularHeatChart(dimLabels.length)
+      .margin(margin)
       .innerRadius(innerRadius)
       .segmentHeight(segmentHeight)
       .domain([0, 1])
       .range(['white', 'green'])
-      .radialLabels(radial_labels)
-      .segmentLabels(segment_labels);
+      // .radialLabels(radial_labels)
+      .segmentLabels(dimLabels)
+      .segmentLabelHeight(segmentLabelHeight);
 
     chart.accessor(function (d: any) {
-      return d['Done%'];
+      return d.progress;
     });
-    //d3.select("svg").remove();
+
     var svg = d3
       .select(dom_element_to_append_to)
       .selectAll('svg')
@@ -438,62 +481,35 @@ export class CircularHeatmapComponent implements OnInit {
       .append('svg')
       .attr('width', '100%')
       .attr('height', '100%')
-      .attr('viewBox', '0 0 1200 1200')
+      .attr('viewBox', `0 0 ${imageWidth} ${imageWidth}`)
       .append('g')
       .attr(
         'transform',
-        'translate(' +
-          (width / 2 - (radial_labels.length * segmentHeight + innerRadius)) +
-          ',' +
-          margin.top +
-          ')'
+        `translate(${margin.left + segmentLabelHeight}, ${margin.top + segmentLabelHeight})`
       )
       .call(chart);
 
-    function cx() {
-      var e = window.event as MouseEvent;
-      return e.clientX;
-    }
-    function cy() {
-      var e = window.event as MouseEvent;
-      return e.clientY;
-    }
-
     svg
       .selectAll('path')
-      .on('click', function (d) {
-        _self.setSectorCursor(svg, '#hover', '');
-
-        var clickedId = d.currentTarget.id;
+      .on('click', function () {
+        var clickedId = d3.select(this).attr('id');
+        _self.setSectorCursor(svg, '#selected', clickedId);
         var index = parseInt(clickedId.replace('index-', ''));
-        curr = _self.old_ALL_CARD_DATA[index];
-        console.log('index', curr['Activity']);
-
-        if (curr['Done%'] == -1) {
-          _self.showActivityCard = false;
-          _self.setSectorCursor(svg, '#selected', '');
+        _self.selectedSector = dataset[index]; // Store selected sector for details
+        // Assign showActivityCard to the sector if it has activities, else null
+        if (_self.selectedSector && _self.selectedSector.activities && _self.selectedSector.activities.length > 0) {
+          _self.showActivityCard = _self.selectedSector;
         } else {
-          _self.showActivityCard = true;
-          _self.old_currentDimension = curr.Dimension;
-          _self.old_cardSubheader = curr.Level;
-          _self.old_activityData = curr.Activity;
-          _self.old_cardHeader = curr.SubDimension;
-          _self.setSectorCursor(svg, '#selected', clickedId);
+          _self.showActivityCard = null;
         }
       })
-      .on('mouseover', function (d) {
-        curr = d.currentTarget.__data__;
-
-        if (curr && curr['Done%'] != -1) {
-          var clickedId = d.srcElement.id;
-          _self.setSectorCursor(svg, '#hover', clickedId);
-        }
+      .on('mouseover', function () {
+        var hoveredId = d3.select(this).attr('id');
+        _self.setSectorCursor(svg, '#hover', hoveredId);
       })
-
-      .on('mouseout', function (d) {
+      .on('mouseout', function () {
         _self.setSectorCursor(svg, '#hover', '');
       });
-    this.reColorHeatmap();
   }
 
   circularHeatChart(num_of_segments: number) {
@@ -506,6 +522,7 @@ export class CircularHeatmapComponent implements OnInit {
       innerRadius = 20,
       numSegments = num_of_segments,
       segmentHeight = 20,
+      segmentLabelHeight = 12,
       domain: any = null,
       range = ['white', 'red'],
       accessor = function (d: any) {
@@ -513,8 +530,6 @@ export class CircularHeatmapComponent implements OnInit {
       };
     var radialLabels = [];
     var segmentLabels: any[] = [];
-
-    //console.log(segmentLabels)
 
     function chart(selection: any) {
       selection.each(function (this: any, data: any) {
@@ -549,9 +564,8 @@ export class CircularHeatmapComponent implements OnInit {
           .data(data)
           .enter()
           .append('path')
-          // .attr("class","segment")
           .attr('class', function (d: any) {
-            return 'segment-' + d.SubDimension.replace(/ /g, '-');
+            return 'segment-' + d.dimension.replace(/ /g, '-');
           })
           .attr('id', function (d: any, i: number) {
             return 'index-' + i;
@@ -566,16 +580,20 @@ export class CircularHeatmapComponent implements OnInit {
               .endAngle(ea)
           )
           .attr('stroke', '#252525')
-          .attr('fill', function (d) {
+          .attr('fill', function (d: any) {
+            if (!d.activities || d.activities.length === 0) {
+              return '#DCDCDC';
+            }
             return color(accessor(d));
           });
-
+          
         // Unique id so that the text path defs are unique - is there a better way to do this?
         // console.log(d3.selectAll(".circular-heat")["_groups"][0].length)
         var id = 1;
 
         //Segment labels
-        var segmentLabelOffset = 5;
+        var segmentLabelFontSize = segmentLabelHeight * 2/3;
+        var segmentLabelOffset = segmentLabelHeight * 1/3;
         var r =
           innerRadius +
           Math.ceil(data.length / numSegments) * segmentHeight +
@@ -605,10 +623,11 @@ export class CircularHeatmapComponent implements OnInit {
           .enter()
           .append('text')
           .append('textPath')
+          .attr('text-anchor', 'middle')
           .attr('xlink:href', '#segment-label-path-' + id)
-          .style('font-size', '12px')
+          .style('font-size', segmentLabelFontSize)
           .attr('startOffset', function (d, i) {
-            return (i * 100) / numSegments + 0.1 + '%';
+            return ((i+.5) * 100) / numSegments + '%';   // shift ½ segment to center
           })
           .text(function (d: any) {
             return d;
@@ -661,50 +680,47 @@ export class CircularHeatmapComponent implements OnInit {
 
     /* Configuration getters/setters */
     chart.margin = function (_: any) {
-      //if (!arguments.length) return margin;
       margin = _;
       return chart;
     };
 
     chart.innerRadius = function (_: any) {
-      // if (!arguments.length) return innerRadius;
       innerRadius = _;
       return chart;
     };
 
     chart.numSegments = function (_: any) {
-      //if (!arguments.length) return numSegments;
       numSegments = _;
       return chart;
     };
 
     chart.segmentHeight = function (_: any) {
-      // if (!arguments.length) return segmentHeight;
       segmentHeight = _;
       return chart;
     };
 
+    chart.segmentLabelHeight = function (_: any) {
+      segmentLabelHeight = _;
+      return chart;
+    };
+
     chart.domain = function (_: any) {
-      //if (!arguments.length) return domain;
       domain = _;
       return chart;
     };
 
     chart.range = function (_: any) {
-      // if (!arguments.length) return range;
       range = _;
       return chart;
     };
 
     chart.radialLabels = function (_: any) {
-      // if (!arguments.length) return radialLabels;
       if (_ == null) _ = [];
       radialLabels = _;
       return chart;
     };
 
     chart.segmentLabels = function (_: any) {
-      // if (!arguments.length) return segmentLabels;
       if (_ == null) _ = [];
       segmentLabels = _;
       return chart;
@@ -749,32 +765,34 @@ export class CircularHeatmapComponent implements OnInit {
     }
   }
 
-  openActivityDetails(dim: string, subdim: string, activityName: string) {
-    let navigationExtras = {
-      dimension: dim,
-      subDimension: subdim,
-      activityName: activityName,
-    };
-    this.old_activityDetails = Object.assign(
-      {},
-      this.old_YamlObject[dim][subdim][activityName]
-    );
-    this.old_activityDetails.description = this.defineStringValues(
-      this.old_activityDetails.description,
-      this.old_activityDetails.description
-    );
-    this.old_activityDetails.risk = this.defineStringValues(
-      this.old_activityDetails.risk,
-      this.old_activityDetails.risk
-    );
-    this.old_activityDetails.measure = this.defineStringValues(
-      this.old_activityDetails.measure,
-      this.old_activityDetails.measure
-    );
-    if (this.old_activityDetails) {
-      this.old_activityDetails.navigationExtras = navigationExtras;
+  openActivityDetails(dimension: string, activityName: string) {
+    // Find the activity in the selected sector
+    if (!this.showActivityCard || !this.showActivityCard.activities) {
+      this.old_activityDetails = null;
+      this.showOverlay = true;
+      return;
     }
-    console.log(this.old_activityDetails);
+    const activity = this.showActivityCard.activities.find(
+      (a: any) => a.activityName === activityName || a.name === activityName
+    );
+    if (!activity) {
+      this.old_activityDetails = null;
+      this.showOverlay = true;
+      return;
+    }
+    // Prepare navigationExtras and details
+    let navigationExtras = {
+      dimension: this.showActivityCard.dimension,
+      level: this.showActivityCard.levelName,
+      activityName: activity.activityName || activity.name,
+    };
+    this.old_activityDetails = {
+      ...activity,
+      navigationExtras,
+      description: this.defineStringValues(activity.description, activity.description),
+      risk: this.defineStringValues(activity.risk, activity.risk),
+      measure: this.defineStringValues(activity.measure, activity.measure),
+    };
     this.showOverlay = true;
   }
 
