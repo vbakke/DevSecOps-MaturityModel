@@ -226,10 +226,11 @@
               <mat-chip-list selectable multiple>
                 <mat-chip
                   #c="matChip"
-                  *ngFor="let team of meta?.teams"
-                  (click)="toggleTeamSelection(c)"
-                  selected>
-                  {{ team }}
+                  *ngFor="let team of filtersTeams | keyvalue"
+                  (click)="toggleFilter(filtersTeams, c)"
+                  [value]="team.key"
+                  [selected]="team.value">
+                  {{ team.key }}
                 </mat-chip>
               </mat-chip-list>
             </mat-form-field>
@@ -253,15 +254,17 @@
               </mat-expansion-panel-header>
               <ng-template matExpansionPanelContent>
                 <ul class="team-list">
-                  <li *ngFor="let teamname of old_teamVisible">
-                    <label class="team-label">
-                      {{ teamname }}:
+                  <ng-container *ngFor="let team of filtersTeams| keyvalue">
+                  <li *ngIf="team.value || !hasTeamsFilter">
+                      <label class="team-label">
+                      {{ team.key }}:
                     </label>
-                    <progress-slider
-                      [steps]="['', 'Planned', 'Started', 'Implemented']"
-                      [initialValue]="0">
-                    ></progress-slider>
-                  </li>
+                          <progress-slider
+                          [steps]="['', 'Planned', 'Started', 'Implemented']"
+                          [initialValue]="0">
+                          ></progress-slider>
+                    </li>
+                  </ng-container>
                 </ul>
                 <b *ngIf="old_teamVisible.length === 0">
                   No Teams Selected, Please select a team from the filters

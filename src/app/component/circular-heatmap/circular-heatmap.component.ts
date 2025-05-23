@@ -54,6 +54,7 @@ export class CircularHeatmapComponent implements OnInit {
   showOverlay: boolean = false;
   showFilters: boolean = true;
   showActivityCard: any = null;
+
   old_cardHeader: string = '';
   old_cardSubheader: string = '';
   old_currentDimension: string = '';
@@ -73,6 +74,8 @@ export class CircularHeatmapComponent implements OnInit {
   meta: MetaFile | null = null;
   // New properties for refactored data
   dimLabels: string[] = [];
+  filtersTeams: Record<string, boolean> = {};
+  hasTeamsFilter: boolean = false;
   maxLevel: number = 0;
   allSectors: any[] = [];
   dimensionLabels: string[] = [];
@@ -98,6 +101,7 @@ export class CircularHeatmapComponent implements OnInit {
         console.log(`${this.perfNow()}s: set filters: ${this.chips?.length}`);
         this.matChipsArray = this.chips.toArray();
         this.meta = this.loader.meta;
+        this.filtersTeams = this.buildFilters(this?.meta?.teams as string[]);
         this.setYamlData(activityStore);
 
         // For now, just draw the sectors (no activities yet)
@@ -156,6 +160,17 @@ export class CircularHeatmapComponent implements OnInit {
       }
     }
   }    
+
+  buildFilters(names: string[]): Record<string, boolean> {
+    let filters: Record<string, boolean> = {};
+    if (names) {
+      for (let name of names) {
+          filters[name] = false;
+      }
+    }
+    return filters;
+  }
+
 
   private OBSOLETE_LoadMaturityDataFromGeneratedYaml() {
     return new Promise<void>((resolve, reject) => {
@@ -344,6 +359,13 @@ export class CircularHeatmapComponent implements OnInit {
     });
   }
 
+  toggleFilter(filters: Record<string, boolean>, chip: MatChip) {
+    chip.toggleSelected();
+    filters[chip.value] = chip.selected;
+    this.hasTeamsFilter = Object.values(filters).some(v => v === true);
+    this.updateChips(1);
+  }
+
   toggleTeamGroupSelection(chip: MatChip) {
     chip.toggleSelected();
     let currChipValue = chip.value.trim();
@@ -397,7 +419,6 @@ export class CircularHeatmapComponent implements OnInit {
   }
 
   updateChips(fromTeamGroup: any) {
-    console.log('updating chips', fromTeamGroup);
     // Re select chips
     this.matChipsArray.forEach(chip => {
       let currChipValue = chip.value.trim();
