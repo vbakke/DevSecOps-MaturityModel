@@ -1,10 +1,13 @@
 # ToDo
 
+
 ## Doing
 - Load TeamProgress yaml
-    - Load YAML progress
+    - Store teamProgress as part of activityStore under each activity
+    - How to deal with deleted progress??? (Do later)
 - Refactor Circular Heatmap
-    - show progress for each activity
+    - show progress for each activity on the slider
+    - show progress for each activity in thje sector
 
 ## Next
 - Load TeamProgress yaml
@@ -33,6 +36,7 @@
 - Filter: tags: Fix update on SPACE key (trouble)
 
 # Done
+- Load YAML progress
 - Navigate to activity-description without site reload
 - Refactor Dependecy graph
 - Refactor activity-description

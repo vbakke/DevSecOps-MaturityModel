@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { perfNow } from 'src/app/util/util';
 import { YamlService } from '../yaml-loader/yaml-loader.service';
-import { Meta, MetaStrings } from 'src/app/model/meta';
+import { MetaFile, MetaStrings, TeamProgressFile } from 'src/app/model/meta';
 import { ActivityStore, Data } from 'src/app/model/activity-store';
 
 export class DataValidationError extends Error {
@@ -15,38 +15,10 @@ export class LoaderService {
   private META_FILE: string = '/assets/YAML/meta.yaml';
   private debug: boolean = true;
   private cachedActivityStore: ActivityStore | null = null;
-  public meta: Meta | null = null;
+  public meta: MetaFile | null = null;
 
   constructor(private yamlService: YamlService) {}
 
-  public getMaxLevel(): number {
-    if (!this.cachedActivityStore) {
-      throw new Error('Activities not loaded. Call load() first.');
-    }
-    return this.cachedActivityStore.getMaxLevel();
-  }
-
-  public getLevels(): string[] {
-    if (!this.cachedActivityStore) {
-      throw new Error('Activities not loaded. Call load() first.');
-    }
-    let maxLvl: number = this.cachedActivityStore.getMaxLevel();
-    return this.getMetaStrings().maturityLevels.slice(0, maxLvl);
-  }
-
-  getMetaStrings(): MetaStrings {
-    if (this.meta == null) {
-      throw Error('Meta yaml has not yet been loaded successfully');
-    }
-
-    let lang: string = this.meta.lang || 'en';
-    if (!this.meta.strings?.hasOwnProperty(lang)) {
-      lang = Object(this.meta?.strings).keys()[0];
-      this.meta.lang = lang;
-    }
-    return this.meta?.strings[lang];
-  }
-  
   public async load(): Promise<ActivityStore> {
     // Return cached data if available
     if (this.cachedActivityStore) {
@@ -61,7 +33,22 @@ export class LoaderService {
       
       // Then load activities
       this.cachedActivityStore = await this.loadActivities(this.meta);
+
+      // Load the progress of each team
+      let teamProgress: TeamProgressFile = await this.loadTeamProgress(this.meta);
+      this.cachedActivityStore.addTeamProgress(teamProgress.progress);
       
+      teamProgress = await this.yamlService.loadYamlUnresolvedRefs(this.meta.teamProgressFile.replace('.yaml', '-2.yaml')) as TeamProgressFile;
+      this.cachedActivityStore.addTeamProgress(teamProgress.progress);
+    
+      teamProgress = JSON.parse(localStorage.getItem('teamProgress') || '{}') as TeamProgressFile;
+      this.cachedActivityStore.addTeamProgress(teamProgress.progress);
+
+      // TODO: Load old yaml format (generated.yaml)
+      // TODO: Load old yaml format (localStorage)
+
+  
+
       if (this.debug) console.log(`${perfNow()}s: ----- Load Service End -----`);
       return this.cachedActivityStore;
     } catch (err) {
@@ -71,17 +58,21 @@ export class LoaderService {
     }
   }
 
-  private async loadMeta(): Promise<Meta> {
+  private async loadMeta(): Promise<MetaFile> {
     if (this.debug) {
       console.log(`${perfNow()} s: Load meta: ${this.META_FILE}`);
     }
-    let meta: Meta = await this.yamlService.loadYaml(this.META_FILE);
+    let meta: MetaFile = await this.yamlService.loadYaml(this.META_FILE);
 
     if (!meta.activityFiles) {
       throw Error("The meta.yaml has no 'activityFiles' to be loaded");
     }
+    if (!meta.teamProgressFile) {
+      throw Error("The meta.yaml has no 'teamProgressFile' to be loaded");
+    }
     
     // Resolve paths relative to meta.yaml
+    meta.teamProgressFile = this.yamlService.makeFullPath(meta.teamProgressFile, this.META_FILE);
     meta.activityFiles = meta.activityFiles.map(file => 
       this.yamlService.makeFullPath(file, this.META_FILE)
     );
@@ -90,7 +81,11 @@ export class LoaderService {
     return meta;
   }
 
-  private async loadActivities(meta: Meta): Promise<ActivityStore> {
+  private async loadTeamProgress(meta: MetaFile): Promise<TeamProgressFile> {
+    return this.yamlService.loadYamlUnresolvedRefs(meta.teamProgressFile);
+  }
+
+  private async loadActivities(meta: MetaFile): Promise<ActivityStore> {
     const activityStore = new ActivityStore();
     const errors: string[] = [];
     let usingHistoricYamlFile = false;
@@ -133,4 +128,33 @@ export class LoaderService {
     this.clearCache();
     return this.load();
   }
+
+  public getMaxLevel(): number {
+    if (!this.cachedActivityStore) {
+      throw new Error('Activities not loaded. Call load() first.');
+    }
+    return this.cachedActivityStore.getMaxLevel();
+  }
+
+  public getLevels(): string[] {
+    if (!this.cachedActivityStore) {
+      throw new Error('Activities not loaded. Call load() first.');
+    }
+    let maxLvl: number = this.cachedActivityStore.getMaxLevel();
+    return this.getMetaStrings().maturityLevels.slice(0, maxLvl);
+  }
+
+  getMetaStrings(): MetaStrings {
+    if (this.meta == null) {
+      throw Error('Meta yaml has not yet been loaded successfully');
+    }
+
+    let lang: string = this.meta.lang || 'en';
+    if (!this.meta.strings?.hasOwnProperty(lang)) {
+      lang = Object(this.meta?.strings).keys()[0];
+      this.meta.lang = lang;
+    }
+    return this.meta?.strings[lang];
+  }
+  
 }

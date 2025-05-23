@@ -1,5 +1,7 @@
 import { appendHashElement } from '../util/ArrayHash';
+import { isEmptyObj } from '../util/util';
 import { IgnoreList } from './ignore-list';
+import { TeamProgress, Progress } from './meta';
 
 export type Data = Record<string, Category>;
 export type Category = Record<string, Dimension>;
@@ -79,6 +81,7 @@ export class ActivityStore {
   private _categoryNames: string[] = [];
   private _allDimensions: Record<string, Activity[]> = {};
   private _maxLevel: number = -1;
+  private _progress: Progress = {};
 
   public getData(): Data {
     return this.data;
@@ -343,4 +346,48 @@ export class ActivityStore {
 
     Object.assign(existingActivity, newActivity);
   }
+
+  public addTeamProgress(inProgress: Progress): void {
+    console.log(inProgress);
+    if (!inProgress) return;
+
+    if (isEmptyObj(this._progress)) {
+      this._progress = inProgress;
+      return;
+    }
+    
+    let orgProgress: Progress = this._progress;
+    for (let activityUuid in inProgress) {
+      if (isEmptyObj(orgProgress[activityUuid])) {
+        orgProgress[activityUuid] = inProgress[activityUuid];
+        continue;
+      }
+    
+      for (let teamname in inProgress[activityUuid]) {
+        if (isEmptyObj(orgProgress[activityUuid][teamname])) {
+          orgProgress[activityUuid][teamname] = inProgress[activityUuid][teamname];
+        } else {
+          let inTeamProgress: TeamProgress = inProgress[activityUuid][teamname];
+          let orgTeamProgress: TeamProgress = orgProgress[activityUuid][teamname];
+  
+          for (let key in inTeamProgress) {
+            let orgDate: Date = orgTeamProgress[key];
+            let inDate: Date = inTeamProgress[key];
+            
+            if (this.isOutdated(orgDate, inDate)) {
+              orgTeamProgress[key] = inTeamProgress[key];
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  private isOutdated(orgDate: Date, inDate: Date): boolean {
+    if (!inDate) return false;
+    if (!orgDate) return true
+    
+    return inDate.getTime() < orgDate.getTime();
+  }
 }
+

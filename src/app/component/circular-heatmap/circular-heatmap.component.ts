@@ -18,6 +18,7 @@ import {
   DialogInfo,
 } from '../modal-message/modal-message.component';
 import { ActivityStore } from 'src/app/model/activity-store';
+import { MetaFile } from 'src/app/model/meta';
 
 export interface old_activitySchema {
   uuid: string;
@@ -69,7 +70,7 @@ export class CircularHeatmapComponent implements OnInit {
   
   @ViewChildren(MatChip) chips!: QueryList<MatChip>;
   matChipsArray: MatChip[] = [];
-  
+  meta: MetaFile | null = null;
   // New properties for refactored data
   dimLabels: string[] = [];
   maxLevel: number = 0;
@@ -89,14 +90,14 @@ export class CircularHeatmapComponent implements OnInit {
     console.log(`${this.perfNow()}s: ngOnInit`);
     // Ensure that Levels and Teams load before MaturityData
     // using promises, since ngOnInit does not support async/await
-    this.OBSOLETE_LoadMaturityLevels()
-      .then(() => this.OBSOLETE_LoadTeamsFromMetaYaml())
-      .then(() => this.OBSOLETE_LoadMaturityDataFromGeneratedYaml())
-      .then(() => this.loader.load())
+    // this.OBSOLETE_LoadMaturityLevels()
+    //   .then(() => this.OBSOLETE_LoadTeamsFromMetaYaml())
+    //   .then(() => this.OBSOLETE_LoadMaturityDataFromGeneratedYaml())
+    this.loader.load()
       .then((activityStore: ActivityStore) => {
         console.log(`${this.perfNow()}s: set filters: ${this.chips?.length}`);
         this.matChipsArray = this.chips.toArray();
-
+        this.meta = this.loader.meta;
         this.setYamlData(activityStore);
 
         // For now, just draw the sectors (no activities yet)
