@@ -208,15 +208,10 @@
               <mat-label>Team Group Filter</mat-label>
               <mat-chip-list selectable>
                 <mat-chip
-                  #c="matChip"
-                  (click)="toggleTeamGroupSelection(c)"
-                  selected>
-                  All
-                </mat-chip>
-                <mat-chip
-                  #c="matChip"
-                  *ngFor="let group of meta?.teamGroups | keyvalue : unsorted"
-                  (click)="toggleTeamGroupSelection(c)">
+                  #chip="matChip"
+                  *ngFor="let group of filtersTeamGroups | keyvalue : unsorted"
+                  (click)="toggleTeamGroupFilter(chip)"
+                  [selected]="filtersTeamGroups[group.key]">
                   {{ group.key }}
                 </mat-chip>
               </mat-chip-list>
@@ -225,9 +220,9 @@
               <mat-label>Team Filter</mat-label>
               <mat-chip-list selectable multiple>
                 <mat-chip
-                  #c="matChip"
+                  #chip="matChip"
                   *ngFor="let team of filtersTeams | keyvalue"
-                  (click)="toggleFilter(filtersTeams, c)"
+                  (click)="toggleTeamFilter(chip)"
                   [value]="team.key"
                   [selected]="team.value">
                   {{ team.key }}
@@ -266,10 +261,6 @@
                     </li>
                   </ng-container>
                 </ul>
-                <b *ngIf="old_teamVisible.length === 0">
-                  No Teams Selected, Please select a team from the filters
-                  above.
-                </b>
               </ng-template>
             </mat-expansion-panel>
           </mat-card-content>

@@ -6,7 +6,7 @@ import {
   ChangeDetectorRef,
 } from '@angular/core';
 import { ymlService } from 'src/app/service/yaml-parser/yaml-parser.service';
-import { hasData } from 'src/app/util/util';
+import { equalArray } from 'src/app/util/util';
 import { LoaderService } from 'src/app/service/loader/data-loader.service';
 import * as d3 from 'd3';
 import * as yaml from 'js-yaml';
@@ -75,6 +75,7 @@ export class CircularHeatmapComponent implements OnInit {
   // New properties for refactored data
   dimLabels: string[] = [];
   filtersTeams: Record<string, boolean> = {};
+  filtersTeamGroups: Record<string, boolean> = {};
   hasTeamsFilter: boolean = false;
   maxLevel: number = 0;
   allSectors: any[] = [];
@@ -101,7 +102,9 @@ export class CircularHeatmapComponent implements OnInit {
         console.log(`${this.perfNow()}s: set filters: ${this.chips?.length}`);
         this.matChipsArray = this.chips.toArray();
         this.meta = this.loader.meta;
-        this.filtersTeams = this.buildFilters(this?.meta?.teams as string[]);
+        this.filtersTeams = this.buildFilters(this.meta?.teams as string[]);
+        this.filtersTeamGroups = this.buildFilters(Object.keys(this.meta?.teamGroups || {}));
+        this.filtersTeamGroups['All'] = true;
         this.setYamlData(activityStore);
 
         // For now, just draw the sectors (no activities yet)
@@ -111,19 +114,6 @@ export class CircularHeatmapComponent implements OnInit {
           this.dimensionLabels,
           this.maxLevel
         );
-
-
-        // console.log('--- LOADED COMPLETE (old & new) ---');
-        // this.old_YamlObject = activityStore.data;
-        // for (let c in this.old_YamlObject) {
-        //   console.log(' - ' + c);
-        //   for (let d in this.old_YamlObject[c]) {
-        //     console.log('    - ' + d);
-        //     // for (let a in data[c][d]) {
-        //     //   console.log(`       - (${data[c][d][a]?.level}) ${a}`);
-        //     // }
-        //   }
-        // }
       })
       .catch(err => {
         this.displayMessage(new DialogInfo(err.message, 'An error occurred'));
@@ -359,11 +349,30 @@ export class CircularHeatmapComponent implements OnInit {
     });
   }
 
-  toggleFilter(filters: Record<string, boolean>, chip: MatChip) {
+  toggleTeamGroupFilter(chip: MatChip) {
+    let teamGroup = chip.value.trim();
+    if (!chip.selected) {
+      chip.toggleSelected();
+  
+      Object.keys(this.filtersTeams).forEach(key => {
+        this.filtersTeams[key] = this.meta?.teamGroups[teamGroup]?.includes(key) || false;
+      });
+      this.hasTeamsFilter = Object.values(this.filtersTeams).some(v => v === true);
+    }
+  }
+  
+  toggleTeamFilter(chip: MatChip) {
     chip.toggleSelected();
-    filters[chip.value] = chip.selected;
-    this.hasTeamsFilter = Object.values(filters).some(v => v === true);
-    this.updateChips(1);
+    this.filtersTeams[chip.value.trim()] = chip.selected;
+    
+    this.hasTeamsFilter = Object.values(this.filtersTeams).some(v => v === true);
+      
+    let selectedTeams: string[] = Object.keys(this.filtersTeams).filter(key => this.filtersTeams[key]);
+
+    Object.keys(this.meta?.teamGroups || {}).forEach(group => {
+      let match: boolean = equalArray(selectedTeams, this.meta?.teamGroups[group]);
+      this.filtersTeamGroups[group] = match;
+    });
   }
 
   toggleTeamGroupSelection(chip: MatChip) {

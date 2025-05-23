@@ -71,6 +71,13 @@ export class LoaderService {
       throw Error("The meta.yaml has no 'teamProgressFile' to be loaded");
     }
     
+    // Remove group teams not specified 
+    Object.keys(meta.teamGroups).forEach(group => {
+      meta.teamGroups[group] = meta.teamGroups[group].filter(team => meta.teams.includes(team));
+    });
+    // Insert key: 'All' with value: [], in the first position of the meta.teamGroups Record<string, string[]>
+    meta.teamGroups = { 'All': [], ...meta.teamGroups };
+
     // Resolve paths relative to meta.yaml
     meta.teamProgressFile = this.yamlService.makeFullPath(meta.teamProgressFile, this.META_FILE);
     meta.activityFiles = meta.activityFiles.map(file => 
