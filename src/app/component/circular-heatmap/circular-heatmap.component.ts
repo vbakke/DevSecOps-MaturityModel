@@ -6,7 +6,7 @@ import {
   ChangeDetectorRef,
 } from '@angular/core';
 import { ymlService } from 'src/app/service/yaml-parser/yaml-parser.service';
-import { hasData } from 'src/app/util/util';
+import { equalArray } from 'src/app/util/util';
 import { LoaderService } from 'src/app/service/loader/data-loader.service';
 import * as d3 from 'd3';
 import * as yaml from 'js-yaml';
@@ -18,23 +18,26 @@ import {
   DialogInfo,
 } from '../modal-message/modal-message.component';
 import { ActivityStore } from 'src/app/model/activity-store';
+import { MetaFile, ProgressDefinition } from 'src/app/model/meta';
+import { SectorViewController } from './sector-viewcontroller';
 
-export interface activitySchema {
+
+export interface old_activitySchema {
   uuid: string;
   activityName: string;
   teamsImplemented: any;
 }
 
-export interface cardSchema {
+export interface old_cardSchema {
   Dimension: string;
   SubDimension: string;
   Level: string;
   'Done%': number;
-  Activity: activitySchema[];
+  Activity: old_activitySchema[];
 }
 
-type ProjectData = {
-  Activity: activitySchema[];
+type old_ProjectData = {
+  Activity: old_activitySchema[];
   Dimension: string;
   Done: number;
   Level: string;
@@ -48,58 +51,75 @@ type ProjectData = {
 })
 export class CircularHeatmapComponent implements OnInit {
   Routing: string = '/activity-description';
-  maxLevelOfMaturity: number = -1;
-  showActivityCard: boolean = false;
-  cardHeader: string = '';
-  cardSubheader: string = '';
-  currentDimension: string = '';
-  activityData: any[] = [];
-  ALL_CARD_DATA: cardSchema[] = [];
-  radial_labels: string[] = [];
-  YamlObject: any;
-  teamList: any;
-  teamGroups: any;
-  selectedTeamChips: string[] = ['All'];
-  teamVisible: string[] = [];
-  segment_labels: string[] = [];
-  activityDetails: any;
-  showOverlay: boolean;
-  showFilters: boolean;
   markdown: md = md();
+  maxLevelOfMaturity: number = -1;
+  showOverlay: boolean = false;
+  showFilters: boolean = true;
+  showActivityCard: any = null;
+
+  old_cardHeader: string = '';
+  old_cardSubheader: string = '';
+  old_currentDimension: string = '';
+  old_activityData: any[] = [];
+  old_ALL_CARD_DATA: old_cardSchema[] = [];
+  old_radial_labels: string[] = [];
+  old_YamlObject: any;
+  old_teamList: any;
+  old_teamGroups: any;
+  old_selectedTeamChips: string[] = ['All'];
+  old_teamVisible: string[] = [];
+  old_segment_labels: string[] = [];
+  old_activityDetails: any;
+  @ViewChildren(MatChip) chips!: QueryList<MatChip>;
+  matChipsArray: MatChip[] = [];
+  meta: MetaFile | null = null;
+  activityStore: ActivityStore | null = null;
+
+  // New properties for refactored data
+  dimLabels: string[] = [];
+  filtersTeams: Record<string, boolean> = {};
+  filtersTeamGroups: Record<string, boolean> = {};
+  hasTeamsFilter: boolean = false;
+  maxLevel: number = 0;
+  allSectors: SectorViewController[] = [];
+  dimensionLabels: string[] = [];
+  selectedSector: SectorViewController | null = null;
+  progressStates: string[] = [];
 
   constructor(
-    private yaml: ymlService,
+    private old_yaml: ymlService,
     private loader: LoaderService,
     private router: Router,
     public modal: ModalMessageComponent
-  ) {
-    this.showOverlay = false;
-    this.showFilters = true;
-  }
+  ) { }
+
 
   ngOnInit(): void {
     console.log(`${this.perfNow()}s: ngOnInit`);
     // Ensure that Levels and Teams load before MaturityData
     // using promises, since ngOnInit does not support async/await
-    this.LoadMaturityLevels()
-      .then(() => this.LoadTeamsFromMetaYaml())
-      .then(() => this.LoadMaturityDataFromGeneratedYaml())
-      .then(() => this.loader.load())
+    this.loader.load()
       .then((activityStore: ActivityStore) => {
         console.log(`${this.perfNow()}s: set filters: ${this.chips?.length}`);
         this.matChipsArray = this.chips.toArray();
-        console.log('--- LOADED COMPLETE (old & new) ---');
-        let data: any = activityStore.data;
-        this.YamlObject = data;
-        for (let c in data) {
-          console.log(' - ' + c);
-          for (let d in data[c]) {
-            console.log('    - ' + d);
-            for (let a in data[c][d]) {
-              console.log(`       - (${data[c][d][a]?.level}) ${a}`);
-            }
-          }
-        }
+        this.meta = this.loader.meta;
+        this.filtersTeams = this.buildFilters(this.meta?.teams as string[]);
+        this.filtersTeamGroups = this.buildFilters(Object.keys(this.meta?.teamGroups || {}));
+        this.filtersTeamGroups['All'] = true;
+
+        let progressDefinition: ProgressDefinition = this.meta?.progressDefinition || {};
+        SectorViewController.init(this.meta?.teams || [], activityStore.getProgress(), progressDefinition);
+        this.progressStates = SectorViewController.getProgressStates();
+
+        this.setYamlData(activityStore);
+
+        // For now, just draw the sectors (no activities yet)
+        this.loadCircularHeatMap(
+          '#chart',
+          this.allSectors,
+          this.dimensionLabels,
+          this.maxLevel
+        );
       })
       .catch(err => {
         this.displayMessage(new DialogInfo(err.message, 'An error occurred'));
@@ -109,38 +129,70 @@ export class CircularHeatmapComponent implements OnInit {
       });
   }
 
-  @ViewChildren(MatChip) chips!: QueryList<MatChip>;
-  matChipsArray: MatChip[] = [];
 
   displayMessage(dialogInfo: DialogInfo) {
     this.modal.openDialog(dialogInfo);
   }
 
-  private LoadMaturityDataFromGeneratedYaml() {
+  consolelog(message: string) {
+    console.log(message);
+  }
+
+  setYamlData(activityStore: ActivityStore) {
+    this.activityStore = activityStore;
+    this.maxLevel = this.loader.getMaxLevel();
+    this.dimensionLabels = activityStore.getAllDimensionNames();
+    
+    // Prepare all sectors: one for each (dimension, level) pair
+    this.allSectors = [];
+    for (let lvl = 1; lvl <= this.maxLevel; lvl++) {
+      for (let dimName of this.dimensionLabels) {
+        const activities = activityStore.getActivities(dimName, lvl);
+        this.allSectors.push(new SectorViewController(
+          dimName,
+          'Level ' + lvl,
+          activities,
+        ));
+      }
+    }
+  }    
+
+  buildFilters(names: string[]): Record<string, boolean> {
+    let filters: Record<string, boolean> = {};
+    if (names) {
+      for (let name of names) {
+          filters[name] = false;
+      }
+    }
+    return filters;
+  }
+
+
+  private OBSOLETE_LoadMaturityDataFromGeneratedYaml() {
     return new Promise<void>((resolve, reject) => {
       console.log(`${this.perfNow()}s: LoadMaturityData Fetch`);
-      this.yaml.setURI('./assets/YAML/generated/generated.yaml');
-      this.yaml.getJson().subscribe(async (data) => {
+      this.old_yaml.setURI('./assets/YAML/generated/generated.yaml');
+      this.old_yaml.getJson().subscribe(async data => {
         console.log(`${this.perfNow()}s: LoadMaturityData Downloaded`);
         const activityStore: ActivityStore = await this.loader.load();
-        this.YamlObject = activityStore.data;
-        this.AddSegmentLabels(this.YamlObject);
+        this.old_YamlObject = activityStore.data;
+        this.OBSOLETE_AddSegmentLabels(this.old_YamlObject);
         const localStorageData = this.getDatasetFromBrowserStorage();
 
         // Initialize the card array
-        let segmentTotalCount = this.segment_labels.length;
+        let segmentTotalCount = this.old_segment_labels.length;
         let cardTotalCount = segmentTotalCount * this.maxLevelOfMaturity;
-        this.ALL_CARD_DATA = new Array(cardTotalCount).fill(null);
+        this.old_ALL_CARD_DATA = new Array(cardTotalCount).fill(null);
 
         // Process each card / sector
         let subdimCount = -1;
-        for (let dim in this.YamlObject) {
-          for (let subdim in this.YamlObject[dim]) {
+        for (let dim in this.old_YamlObject) {
+          for (let subdim in this.old_YamlObject[dim]) {
             subdimCount++;
             console.log(subdimCount, subdim);
-            let activities: Map<number, activitySchema[]> =
-              this.processActivities(
-                this.YamlObject[dim][subdim],
+            let activities: Map<number, old_activitySchema[]> =
+              this.OBSOLETE_processActivities(
+                this.old_YamlObject[dim][subdim],
                 localStorageData
               );
 
@@ -150,7 +202,7 @@ export class CircularHeatmapComponent implements OnInit {
               level++
             ) {
               // Create and store each card (with activities for that level)
-              var cardSchemaData: cardSchema = {
+              var cardSchemaData: old_cardSchema = {
                 Dimension: dim,
                 SubDimension: subdim,
                 Level: 'Level ' + level,
@@ -160,19 +212,19 @@ export class CircularHeatmapComponent implements OnInit {
 
               // Store cards in sequential slots, by dimension then level
               let levelIndex = (level - 1) * segmentTotalCount;
-              this.ALL_CARD_DATA[levelIndex + subdimCount] = cardSchemaData;
+              this.old_ALL_CARD_DATA[levelIndex + subdimCount] = cardSchemaData;
             }
           }
         }
 
-        console.log('ALL CARD DATA', this.ALL_CARD_DATA);
-        this.loadCircularHeatMap(
-          this.ALL_CARD_DATA,
-          '#chart',
-          this.radial_labels,
-          this.segment_labels
-        );
-        this.noActivitytoGrey();
+        console.log('ALL CARD DATA', this.old_ALL_CARD_DATA);
+        // this.loadCircularHeatMap(
+        //   this.old_ALL_CARD_DATA,
+        //   '#chart',
+        //   this.old_radial_labels,
+        //   this.old_segment_labels
+        // );
+        // this.noActivitytoGrey();
         console.log(`${this.perfNow()}s: LoadMaturityData End`);
         resolve();
       });
@@ -186,11 +238,11 @@ export class CircularHeatmapComponent implements OnInit {
    * Status of Team Implementation is merged from both server status and
    * locally stored changes.
    */
-  private processActivities(
+  private OBSOLETE_processActivities(
     card: any,
     localStorageData: any
-  ): Map<number, activitySchema[]> {
-    let activities: Map<number, activitySchema[]> = new Map();
+  ): Map<number, old_activitySchema[]> {
+    let activities: Map<number, old_activitySchema[]> = new Map();
     for (let activityName in card) {
       let currentActivity: any = card[activityName];
       let level: number = currentActivity.level;
@@ -198,13 +250,13 @@ export class CircularHeatmapComponent implements OnInit {
 
       // Initialize a status for all genuine teams
       let genuineTeams: any = {};
-      this.teamList.forEach((singleTeam: string) => {
+      this.old_teamList.forEach((singleTeam: string) => {
         genuineTeams[singleTeam] = false;
       });
 
       // Read server and locally stored teams statuses as well
       var teamsFromYaml: any = currentActivity.teamsImplemented;
-      var teamsFromLocalstorage: any = this.getTeamImplementedFromJson(
+      var teamsFromLocalstorage: any = this.OBSOLETE_getTeamImplementedFromJson(
         localStorageData,
         activityName
       );
@@ -228,8 +280,8 @@ export class CircularHeatmapComponent implements OnInit {
     return activities;
   }
 
-  private getTeamImplementedFromJson(
-    data: ProjectData,
+  private OBSOLETE_getTeamImplementedFromJson(
+    data: old_ProjectData,
     activityName: string
   ): any | undefined {
     if (data) {
@@ -250,56 +302,88 @@ export class CircularHeatmapComponent implements OnInit {
     return undefined;
   }
 
-  private AddSegmentLabels(yampObject: any[]) {
+  private OBSOLETE_AddSegmentLabels(yampObject: any[]) {
     for (let dim in yampObject) {
       for (let subdim in yampObject[dim]) {
-        this.segment_labels.push(subdim);
+        this.old_segment_labels.push(subdim);
       }
     }
-    console.log(this.segment_labels);
+    console.log(this.old_segment_labels);
   }
 
-  private LoadTeamsFromMetaYaml() {
+  private OBSOLETE_LoadTeamsFromMetaYaml() {
     return new Promise<void>((resolve, reject) => {
       console.log(`${this.perfNow()}s: LoadTeamsFromMetaYaml Fetch`);
-      this.yaml.setURI('./assets/YAML/meta.yaml');
-      this.yaml.getJson().subscribe(data => {
+      this.old_yaml.setURI('./assets/YAML/meta.yaml');
+      this.old_yaml.getJson().subscribe(data => {
         console.log(`${this.perfNow()}s: LoadTeamsFromMetaYaml Downloaded`);
-        this.YamlObject = data;
+        this.old_YamlObject = data;
 
-        this.teamList = this.YamlObject['teams']; // Genuine teams (the true source)
-        this.teamGroups = this.YamlObject['teamGroups'];
-        this.teamVisible = [...this.teamList];
+        this.old_teamList = this.old_YamlObject['old_teams']; // Genuine teams (the true source)
+        this.old_teamGroups = this.old_YamlObject['old_teamGroups'];
+        this.old_teamVisible = [...this.old_teamList];
 
         // Ensure that all team names in the groups are genuine team names
-        for (let team in this.teamGroups) {
-          this.teamGroups[team] = this.teamGroups[team].filter((t: string) =>
-            this.teamList.includes(t)
+        for (let team in this.old_teamGroups) {
+          this.old_teamGroups[team] = this.old_teamGroups[team].filter((t: string) =>
+            this.old_teamList.includes(t)
           );
-          if (this.teamGroups[team].length == 0) delete this.teamGroups[team];
+          if (this.old_teamGroups[team].length == 0) delete this.old_teamGroups[team];
         }
         resolve();
       });
     });
   }
 
-  private LoadMaturityLevels() {
+  private OBSOLETE_LoadMaturityLevels() {
     return new Promise<void>((resolve, reject) => {
       console.log(`${this.perfNow()}s: LoadMaturityLevels Fetch`);
-      this.yaml.setURI('./assets/YAML/meta.yaml');
+      this.old_yaml.setURI('./assets/YAML/meta.yaml');
       // Function sets column header
-      this.yaml.getJson().subscribe(data => {
+      this.old_yaml.getJson().subscribe(data => {
         console.log(`${this.perfNow()}s: LoadMaturityLevels Downloaded`);
-        this.YamlObject = data;
+        this.old_YamlObject = data;
 
         // Levels header
-        for (let x in this.YamlObject['strings']['en']['maturity_levels']) {
+        for (let x in this.old_YamlObject['strings']['en']['maturityLevels']) {
           var y = parseInt(x) + 1;
-          this.radial_labels.push('Level ' + y);
+          this.old_radial_labels.push('Level ' + y);
           this.maxLevelOfMaturity = y;
         }
         resolve();
       });
+    });
+  }
+
+  toggleTeamGroupFilter(chip: MatChip) {
+    let teamGroup = chip.value.trim();
+    if (!chip.selected) {
+      chip.toggleSelected();
+  
+      Object.keys(this.filtersTeams).forEach(key => {
+        this.filtersTeams[key] = this.meta?.teamGroups[teamGroup]?.includes(key) || false;
+      });
+      this.hasTeamsFilter = Object.values(this.filtersTeams).some(v => v === true);
+    }
+  }
+  
+  getTeamProgressState(activityUuid: string, teamName: string): string {
+    return this.activityStore?.getTeamProgressState(activityUuid, teamName) || '';
+    return this.selectedSector?.activities?.find(a => a.uuid === activityUuid)?.teamsImplemented[teamName] || '';
+
+  }
+
+  toggleTeamFilter(chip: MatChip) {
+    chip.toggleSelected();
+    this.filtersTeams[chip.value.trim()] = chip.selected;
+    
+    this.hasTeamsFilter = Object.values(this.filtersTeams).some(v => v === true);
+      
+    let selectedTeams: string[] = Object.keys(this.filtersTeams).filter(key => this.filtersTeams[key]);
+
+    Object.keys(this.meta?.teamGroups || {}).forEach(group => {
+      let match: boolean = equalArray(selectedTeams, this.meta?.teamGroups[group]);
+      this.filtersTeamGroups[group] = match;
     });
   }
 
@@ -308,28 +392,28 @@ export class CircularHeatmapComponent implements OnInit {
     let currChipValue = chip.value.trim();
 
     if (chip.selected) {
-      this.selectedTeamChips = [currChipValue];
+      this.old_selectedTeamChips = [currChipValue];
       if (currChipValue == 'All') {
-        this.teamVisible = [...this.teamList];
+        this.old_teamVisible = [...this.old_teamList];
       } else {
-        this.teamVisible = [];
+        this.old_teamVisible = [];
 
         (
-          Object.keys(this.teamGroups) as (keyof typeof this.teamGroups)[]
+          Object.keys(this.old_teamGroups) as (keyof typeof this.old_teamGroups)[]
         ).forEach((key, index) => {
           if (key === currChipValue) {
             console.log('group selected');
-            this.teamVisible = [...this.teamGroups[key]];
+            this.old_teamVisible = [...this.old_teamGroups[key]];
           }
         });
       }
     } else {
-      this.selectedTeamChips = this.selectedTeamChips.filter(
+      this.old_selectedTeamChips = this.old_selectedTeamChips.filter(
         o => o !== currChipValue
       );
     }
-    console.log('Selected Chips', this.selectedTeamChips);
-    console.log('Team Visible', this.teamVisible);
+    console.log('Selected Chips', this.old_selectedTeamChips);
+    console.log('Team Visible', this.old_teamVisible);
     console.log('All chips', this.matChipsArray);
 
     // Update heatmap based on selection
@@ -339,33 +423,32 @@ export class CircularHeatmapComponent implements OnInit {
   toggleTeamSelection(chip: MatChip) {
     chip.toggleSelected();
     let currChipValue = chip.value.trim();
-    let prevSelectedChip = this.selectedTeamChips;
+    let prevSelectedChip = this.old_selectedTeamChips;
     if (chip.selected) {
-      this.teamVisible.push(currChipValue);
-      this.selectedTeamChips = [];
+      this.old_teamVisible.push(currChipValue);
+      this.old_selectedTeamChips = [];
     } else {
-      this.selectedTeamChips = [];
-      this.teamVisible = this.teamVisible.filter(o => o !== currChipValue);
+      this.old_selectedTeamChips = [];
+      this.old_teamVisible = this.old_teamVisible.filter(o => o !== currChipValue);
     }
-    console.log('Selected Chips', this.selectedTeamChips);
-    console.log('Team Visible', this.teamVisible);
-    console.log('Team List', this.teamList);
+    console.log('Selected Chips', this.old_selectedTeamChips);
+    console.log('Team Visible', this.old_teamVisible);
+    console.log('Team List', this.old_teamList);
     console.log('All chips', this.matChipsArray);
     // Update heatmap based on selection
     this.updateChips(prevSelectedChip);
   }
 
   updateChips(fromTeamGroup: any) {
-    console.log('updating chips', fromTeamGroup);
     // Re select chips
     this.matChipsArray.forEach(chip => {
       let currChipValue = chip.value.trim();
 
-      if (this.teamVisible.includes(currChipValue)) {
+      if (this.old_teamVisible.includes(currChipValue)) {
         console.log(currChipValue);
         chip.selected = true;
       } else {
-        if (!this.selectedTeamChips.includes(currChipValue)) {
+        if (!this.old_selectedTeamChips.includes(currChipValue)) {
           chip.selected = false;
         }
       }
@@ -377,19 +460,19 @@ export class CircularHeatmapComponent implements OnInit {
   teamCheckbox(activityIndex: number, teamKey: any) {
     let _self = this;
     var index = 0;
-    for (var i = 0; i < this.ALL_CARD_DATA.length; i++) {
+    for (var i = 0; i < this.old_ALL_CARD_DATA.length; i++) {
       if (
-        this.ALL_CARD_DATA[i]['SubDimension'] === this.cardHeader &&
-        this.ALL_CARD_DATA[i]['Level'] === this.cardSubheader
+        this.old_ALL_CARD_DATA[i]['SubDimension'] === this.old_cardHeader &&
+        this.old_ALL_CARD_DATA[i]['Level'] === this.old_cardSubheader
       ) {
         index = i;
         break;
       }
     }
-    this.ALL_CARD_DATA[index]['Activity'][activityIndex]['teamsImplemented'][
+    this.old_ALL_CARD_DATA[index]['Activity'][activityIndex]['teamsImplemented'][
       teamKey
     ] =
-      !this.ALL_CARD_DATA[index]['Activity'][activityIndex]['teamsImplemented'][
+      !this.old_ALL_CARD_DATA[index]['Activity'][activityIndex]['teamsImplemented'][
         teamKey
       ];
 
@@ -398,41 +481,41 @@ export class CircularHeatmapComponent implements OnInit {
   }
 
   loadCircularHeatMap(
-    dataset: any,
     dom_element_to_append_to: string,
-    radial_labels: string[],
-    segment_labels: string[]
+    dataset: any,
+    dimLabels: string[],
+    maxLevel: number
   ) {
-    //console.log(segment_labels)
-    //d3.select(dom_element_to_append_to).selectAll('svg').exit()
     let _self = this;
+    var imageWidth = 1200;
+    var marginAll = 5;
     var margin = {
-      top: 50,
-      right: 50,
-      bottom: 50,
-      left: 50,
+      top: marginAll,
+      right: marginAll,
+      bottom: marginAll,
+      left: marginAll,
     };
-    var width = 1250 - margin.left - margin.right;
+    var bbWidth = imageWidth - Math.max(margin.left+margin.right, margin.top+margin.bottom)*2;  // bounding box
+    var segmentLabelHeight = bbWidth * 0.0155;  // Fuzzy number, to match the longest label within one sector
+    var outerRadius = bbWidth / 2 - segmentLabelHeight; 
+    var innerRadius = outerRadius / 5; 
+    var segmentHeight = (outerRadius -  innerRadius) / maxLevel;
+    
     var curr: any;
-    var height = width;
-    var innerRadius = 100; // width/14;
-
-    var segmentHeight =
-      (width - margin.top - margin.bottom - 2 * innerRadius) /
-      (2 * radial_labels.length);
-
-    var chart = this.circularHeatChart(segment_labels.length)
+    var chart = this.circularHeatChart(dimLabels.length)
+      .margin(margin)
       .innerRadius(innerRadius)
       .segmentHeight(segmentHeight)
       .domain([0, 1])
       .range(['white', 'green'])
-      .radialLabels(radial_labels)
-      .segmentLabels(segment_labels);
+      // .radialLabels(radial_labels)
+      .segmentLabels(dimLabels)
+      .segmentLabelHeight(segmentLabelHeight);
 
     chart.accessor(function (d: any) {
-      return d['Done%'];
+      return d.getSectorProgress();
     });
-    //d3.select("svg").remove();
+
     var svg = d3
       .select(dom_element_to_append_to)
       .selectAll('svg')
@@ -441,62 +524,35 @@ export class CircularHeatmapComponent implements OnInit {
       .append('svg')
       .attr('width', '100%')
       .attr('height', '100%')
-      .attr('viewBox', '0 0 1200 1200')
+      .attr('viewBox', `0 0 ${imageWidth} ${imageWidth}`)
       .append('g')
       .attr(
         'transform',
-        'translate(' +
-          (width / 2 - (radial_labels.length * segmentHeight + innerRadius)) +
-          ',' +
-          margin.top +
-          ')'
+        `translate(${margin.left + segmentLabelHeight}, ${margin.top + segmentLabelHeight})`
       )
       .call(chart);
 
-    function cx() {
-      var e = window.event as MouseEvent;
-      return e.clientX;
-    }
-    function cy() {
-      var e = window.event as MouseEvent;
-      return e.clientY;
-    }
-
     svg
       .selectAll('path')
-      .on('click', function (d) {
-        _self.setSectorCursor(svg, '#hover', '');
-
-        var clickedId = d.currentTarget.id;
+      .on('click', function () {
+        var clickedId = d3.select(this).attr('id');
+        _self.setSectorCursor(svg, '#selected', clickedId);
         var index = parseInt(clickedId.replace('index-', ''));
-        curr = _self.ALL_CARD_DATA[index];
-        console.log('index', curr['Activity']);
-
-        if (curr['Done%'] == -1) {
-          _self.showActivityCard = false;
-          _self.setSectorCursor(svg, '#selected', '');
+        _self.selectedSector = dataset[index]; // Store selected sector for details
+        // Assign showActivityCard to the sector if it has activities, else null
+        if (_self.selectedSector && _self.selectedSector.activities && _self.selectedSector.activities.length > 0) {
+          _self.showActivityCard = _self.selectedSector;
         } else {
-          _self.showActivityCard = true;
-          _self.currentDimension = curr.Dimension;
-          _self.cardSubheader = curr.Level;
-          _self.activityData = curr.Activity;
-          _self.cardHeader = curr.SubDimension;
-          _self.setSectorCursor(svg, '#selected', clickedId);
+          _self.showActivityCard = null;
         }
       })
-      .on('mouseover', function (d) {
-        curr = d.currentTarget.__data__;
-
-        if (curr && curr['Done%'] != -1) {
-          var clickedId = d.srcElement.id;
-          _self.setSectorCursor(svg, '#hover', clickedId);
-        }
+      .on('mouseover', function () {
+        var hoveredId = d3.select(this).attr('id');
+        _self.setSectorCursor(svg, '#hover', hoveredId);
       })
-
-      .on('mouseout', function (d) {
+      .on('mouseout', function () {
         _self.setSectorCursor(svg, '#hover', '');
       });
-    this.reColorHeatmap();
   }
 
   circularHeatChart(num_of_segments: number) {
@@ -509,6 +565,7 @@ export class CircularHeatmapComponent implements OnInit {
       innerRadius = 20,
       numSegments = num_of_segments,
       segmentHeight = 20,
+      segmentLabelHeight = 12,
       domain: any = null,
       range = ['white', 'red'],
       accessor = function (d: any) {
@@ -516,8 +573,6 @@ export class CircularHeatmapComponent implements OnInit {
       };
     var radialLabels = [];
     var segmentLabels: any[] = [];
-
-    //console.log(segmentLabels)
 
     function chart(selection: any) {
       selection.each(function (this: any, data: any) {
@@ -552,9 +607,8 @@ export class CircularHeatmapComponent implements OnInit {
           .data(data)
           .enter()
           .append('path')
-          // .attr("class","segment")
           .attr('class', function (d: any) {
-            return 'segment-' + d.SubDimension.replace(/ /g, '-');
+            return 'segment-' + d.dimension.replace(/ /g, '-');
           })
           .attr('id', function (d: any, i: number) {
             return 'index-' + i;
@@ -569,16 +623,20 @@ export class CircularHeatmapComponent implements OnInit {
               .endAngle(ea)
           )
           .attr('stroke', '#252525')
-          .attr('fill', function (d) {
+          .attr('fill', function (d: any) {
+            if (!d.activities || d.activities.length === 0) {
+              return '#DCDCDC';
+            }
             return color(accessor(d));
           });
-
+          
         // Unique id so that the text path defs are unique - is there a better way to do this?
         // console.log(d3.selectAll(".circular-heat")["_groups"][0].length)
         var id = 1;
 
         //Segment labels
-        var segmentLabelOffset = 5;
+        var segmentLabelFontSize = segmentLabelHeight * 2/3;
+        var segmentLabelOffset = segmentLabelHeight * 1/3;
         var r =
           innerRadius +
           Math.ceil(data.length / numSegments) * segmentHeight +
@@ -608,10 +666,11 @@ export class CircularHeatmapComponent implements OnInit {
           .enter()
           .append('text')
           .append('textPath')
+          .attr('text-anchor', 'middle')
           .attr('xlink:href', '#segment-label-path-' + id)
-          .style('font-size', '12px')
+          .style('font-size', segmentLabelFontSize)
           .attr('startOffset', function (d, i) {
-            return (i * 100) / numSegments + 0.1 + '%';
+            return ((i+.5) * 100) / numSegments + '%';   // shift ½ segment to center
           })
           .text(function (d: any) {
             return d;
@@ -664,50 +723,47 @@ export class CircularHeatmapComponent implements OnInit {
 
     /* Configuration getters/setters */
     chart.margin = function (_: any) {
-      //if (!arguments.length) return margin;
       margin = _;
       return chart;
     };
 
     chart.innerRadius = function (_: any) {
-      // if (!arguments.length) return innerRadius;
       innerRadius = _;
       return chart;
     };
 
     chart.numSegments = function (_: any) {
-      //if (!arguments.length) return numSegments;
       numSegments = _;
       return chart;
     };
 
     chart.segmentHeight = function (_: any) {
-      // if (!arguments.length) return segmentHeight;
       segmentHeight = _;
       return chart;
     };
 
+    chart.segmentLabelHeight = function (_: any) {
+      segmentLabelHeight = _;
+      return chart;
+    };
+
     chart.domain = function (_: any) {
-      //if (!arguments.length) return domain;
       domain = _;
       return chart;
     };
 
     chart.range = function (_: any) {
-      // if (!arguments.length) return range;
       range = _;
       return chart;
     };
 
     chart.radialLabels = function (_: any) {
-      // if (!arguments.length) return radialLabels;
       if (_ == null) _ = [];
       radialLabels = _;
       return chart;
     };
 
     chart.segmentLabels = function (_: any) {
-      // if (!arguments.length) return segmentLabels;
       if (_ == null) _ = [];
       segmentLabels = _;
       return chart;
@@ -734,8 +790,8 @@ export class CircularHeatmapComponent implements OnInit {
   }
 
   noActivitytoGrey(): void {
-    for (var x = 0; x < this.ALL_CARD_DATA.length; x++) {
-      if (this.ALL_CARD_DATA[x]['Done%'] == -1) {
+    for (var x = 0; x < this.old_ALL_CARD_DATA.length; x++) {
+      if (this.old_ALL_CARD_DATA[x]['Done%'] == -1) {
         d3.select('#index-' + x).attr('fill', '#DCDCDC');
       }
     }
@@ -751,33 +807,41 @@ export class CircularHeatmapComponent implements OnInit {
       return valueOfDataIfUndefined;
     }
   }
-
-  openActivityDetails(dim: string, subdim: string, activityName: string) {
-    let navigationExtras = {
-      dimension: dim,
-      subDimension: subdim,
-      activityName: activityName,
-    };
-    this.activityDetails = Object.assign(
-      {},
-      this.YamlObject[dim][subdim][activityName]
-    );
-    this.activityDetails.description = this.defineStringValues(
-      this.activityDetails.description,
-      this.activityDetails.description
-    );
-    this.activityDetails.risk = this.defineStringValues(
-      this.activityDetails.risk,
-      this.activityDetails.risk
-    );
-    this.activityDetails.measure = this.defineStringValues(
-      this.activityDetails.measure,
-      this.activityDetails.measure
-    );
-    if (this.activityDetails) {
-      this.activityDetails.navigationExtras = navigationExtras;
+  onPanelOpened(activity: any) {
+    console.log('Panel opened', activity);
+  }
+  onPanelClosed(activity: any) {
+    console.log('Panel closed', activity);
+  }
+  
+  openActivityDetails(dimension: string, activityName: string) {
+    // Find the activity in the selected sector
+    if (!this.showActivityCard || !this.showActivityCard.activities) {
+      this.old_activityDetails = null;
+      this.showOverlay = true;
+      return;
     }
-    console.log(this.activityDetails);
+    const activity = this.showActivityCard.activities.find(
+      (a: any) => a.activityName === activityName || a.name === activityName
+    );
+    if (!activity) {
+      this.old_activityDetails = null;
+      this.showOverlay = true;
+      return;
+    }
+    // Prepare navigationExtras and details
+    let navigationExtras = {
+      dimension: this.showActivityCard.dimension,
+      level: this.showActivityCard.levelName,
+      activityName: activity.activityName || activity.name,
+    };
+    this.old_activityDetails = {
+      ...activity,
+      navigationExtras,
+      description: this.defineStringValues(activity.description, activity.description),
+      risk: this.defineStringValues(activity.risk, activity.risk),
+      measure: this.defineStringValues(activity.measure, activity.measure),
+    };
     this.showOverlay = true;
   }
 
@@ -790,8 +854,8 @@ export class CircularHeatmapComponent implements OnInit {
   }
 
   saveEditedYAMLfile() {
-    this.setTeamsStatus(this.YamlObject, this.teamList, this.ALL_CARD_DATA);
-    let yamlStr = yaml.dump(this.YamlObject);
+    this.setTeamsStatus(this.old_YamlObject, this.old_teamList, this.old_ALL_CARD_DATA);
+    let yamlStr = yaml.dump(this.old_YamlObject);
 
     let file = new Blob([yamlStr], { type: 'text/csv;charset=utf-8' });
     var link = document.createElement('a');
@@ -801,7 +865,7 @@ export class CircularHeatmapComponent implements OnInit {
     link.remove();
   }
 
-  setTeamsStatus(yamlObject: any, teamList: string[], card_data: cardSchema[]) {
+  setTeamsStatus(yamlObject: any, teamList: string[], card_data: old_cardSchema[]) {
     // Loop through all activities from the card_data
     for (let card of card_data) {
       for (let activity of card.Activity) {
@@ -823,15 +887,15 @@ export class CircularHeatmapComponent implements OnInit {
 
   reColorHeatmap() {
     console.log('recolor');
-    var teamsCount = this.teamVisible.length;
+    var teamsCount = this.old_teamVisible.length;
 
-    for (var index = 0; index < this.ALL_CARD_DATA.length; index++) {
-      var activities = this.ALL_CARD_DATA[index]['Activity'];
+    for (var index = 0; index < this.old_ALL_CARD_DATA.length; index++) {
+      var activities = this.old_ALL_CARD_DATA[index]['Activity'];
       let cntAll: number = teamsCount * activities.length;
       let cntTrue: number = 0;
       var _self = this;
       for (var i = 0; i < activities.length; i++) {
-        for (var teamname of this.teamVisible) {
+        for (var teamname of this.old_teamVisible) {
           if (activities[i]['teamsImplemented'][teamname]) {
             cntTrue++;
             // console.log(`Counting ${activities[i].activityName}: ${teamname} (${cntTrue})`);
@@ -845,13 +909,13 @@ export class CircularHeatmapComponent implements OnInit {
         .range(['white', 'green']);
 
       if (cntAll !== 0) {
-        this.ALL_CARD_DATA[index]['Done%'] = cntTrue / cntAll;
+        this.old_ALL_CARD_DATA[index]['Done%'] = cntTrue / cntAll;
         // console.log(`${this.ALL_CARD_DATA[index].SubDimension} ${this.ALL_CARD_DATA[index].Level} Done: ${cntTrue}/${cntAll} = ${(cntTrue / cntAll*100).toFixed(1)}%`);
         d3.select('#index-' + index).attr('fill', function (p) {
-          return colorSector(_self.ALL_CARD_DATA[index]['Done%']);
+          return colorSector(_self.old_ALL_CARD_DATA[index]['Done%']);
         });
       } else {
-        this.ALL_CARD_DATA[index]['Done%'] = -1;
+        this.old_ALL_CARD_DATA[index]['Done%'] = -1;
         // console.log(`${this.ALL_CARD_DATA[index].SubDimension} ${this.ALL_CARD_DATA[index].Level} None`);
         d3.select('#index-' + index).attr('fill', '#DCDCDC');
       }
@@ -881,20 +945,20 @@ export class CircularHeatmapComponent implements OnInit {
   }
 
   saveDataset() {
-    localStorage.setItem('dataset', JSON.stringify(this.ALL_CARD_DATA));
+    localStorage.setItem('dataset', JSON.stringify(this.old_ALL_CARD_DATA));
   }
 
   loadDataset() {
     var content = this.getDatasetFromBrowserStorage();
     if (content != null) {
-      this.ALL_CARD_DATA = content;
+      this.old_ALL_CARD_DATA = content;
     }
   }
 
   getDatasetFromBrowserStorage(): any {
     console.log(`${this.perfNow()}s: getDatasetFromBrowserStorage() ####`);
     // @ts-ignore
-    if (this.ALL_CARD_DATA?.length && this.ALL_CARD_DATA[0]?.Task != null) {
+    if (this.old_ALL_CARD_DATA?.length && this.old_ALL_CARD_DATA[0]?.Task != null) {
       console.log('Found outdated dataset, removing');
       localStorage.removeItem('dataset');
     }

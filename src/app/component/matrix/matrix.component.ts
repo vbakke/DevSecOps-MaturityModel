@@ -8,10 +8,7 @@ import { Activity, ActivityStore, Data } from 'src/app/model/activity-store';
 import { UntilDestroy } from '@ngneat/until-destroy';
 import { MatChip, MatChipList } from '@angular/material/chips';
 import { deepCopy } from 'src/app/util/util';
-import {
-  ModalMessageComponent,
-  DialogInfo,
-} from '../modal-message/modal-message.component';
+import { ModalMessageComponent, DialogInfo } from '../modal-message/modal-message.component';
 
 export interface MatrixRow {
   Category: string;
@@ -22,10 +19,7 @@ export interface MatrixRow {
   level4: Activity[];
   level5: Activity[];
 }
-type LevelKey = keyof Pick<
-  MatrixRow,
-  'level1' | 'level2' | 'level3' | 'level4' | 'level5'
->;
+type LevelKey = keyof Pick<MatrixRow, 'level1' | 'level2' | 'level3' | 'level4' | 'level5'>;
 
 @UntilDestroy()
 @Component({
@@ -46,11 +40,13 @@ export class MatrixComponent implements OnInit {
   MATRIX_DATA: MatrixRow[] = [];
   dataSource: any = new MatTableDataSource<MatrixRow>(this.MATRIX_DATA);
 
+  /* eslint-disable */
   constructor(
     private loader: LoaderService,
     private router: Router,
     public modal: ModalMessageComponent
   ) {}
+  /* eslint-enable */
 
   reset() {
     for (let dim in this.filtersDim) {
@@ -246,9 +242,9 @@ export class MatrixComponent implements OnInit {
 
   // activity description routing + providing parameters
   navigate(uuid: string) {
-    let navigationExtras: NavigationExtras = {
+    const navigationExtras: NavigationExtras = {
       queryParams: { uuid: uuid },
     };
-    return `${this.Routing}?${stringify(navigationExtras.queryParams)}`;
+    this.router.navigate([this.Routing], navigationExtras);
   }
 }

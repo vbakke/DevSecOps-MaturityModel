@@ -1,5 +1,7 @@
 import { appendHashElement } from '../util/ArrayHash';
+import { isEmptyObj } from '../util/util';
 import { IgnoreList } from './ignore-list';
+import { TeamProgress, Progress } from './meta';
 
 export type Data = Record<string, Category>;
 export type Category = Record<string, Dimension>;
@@ -13,9 +15,23 @@ export interface Activity {
   level: number;
   name: string;
   description: string;
-  tags: string[];
   risk: string;
   measure: string;
+  tags: string[];
+  implementatonGuide: string;
+  difficultyOfImplementation: DifficultyOfImplementation;
+  usefulness: number;
+  dependsOn: string[];
+  comments: string;
+  implementation: Implementation[];
+  evidence: string;
+  teamsEvidence: Object;
+  assessment: string;  iso: string[];
+  iso22: string[];
+  samm: string[];
+  openCRE: string[];
+  isImplemented: boolean;
+  teamsImplemented: Record<string, any>;
 }
 
 // export interface activityDescription {
@@ -44,12 +60,18 @@ export interface Activity {
 //   // isImplemented: boolean;
 //   // teamsImplemented: Record<string, any>;
 // }
-// export interface Implementation {
-//   name: string;
-//   tags: string[];
-//   url: string;
-//   description: string;
-// }
+export interface Implementation {
+  name: string;
+  tags: string[];
+  url: string;
+  description: string;
+}
+
+export interface DifficultyOfImplementation {
+  knowledge: number;
+  time: number;
+  resources: number;
+}
 
 export class ActivityStore {
   public data: Data = {};
@@ -59,9 +81,14 @@ export class ActivityStore {
   private _categoryNames: string[] = [];
   private _allDimensions: Record<string, Activity[]> = {};
   private _maxLevel: number = -1;
+  private _progress: Progress = {};
 
   public getData(): Data {
     return this.data;
+  }
+
+  public getProgress(): Progress {
+    return this._progress;
   }
 
   public getAllActivities(): Activity[] {
@@ -76,6 +103,14 @@ export class ActivityStore {
     return Object.keys(this._allDimensions);
   }
 
+  public getActivity(uuid: string, name: string): Activity {
+    let activity: Activity = this.getActivityByUuid(uuid);
+    if (!activity) {
+      activity = this.getActivityByName(name);
+    }
+    return activity;
+  }
+  
   public getActivityByName(name: string): Activity {
     return this._activityByName[name];
   }
@@ -91,6 +126,22 @@ export class ActivityStore {
 
   public getMaxLevel(): number {
     return this._maxLevel;
+  }
+
+  public getTeamProgressState(activityUuid: string, teamName: string): string {
+    // Return the key with the most largest value
+    let teamProgress: TeamProgress = this._progress?.[activityUuid]?.[teamName];
+    if (!teamProgress) return '';
+
+    let newestProgressState: string = '';
+    let maxDate: Date = new Date(0);
+    for (let key in teamProgress) {
+      if (teamProgress[key].getTime() > maxDate.getTime()) {
+        maxDate = teamProgress[key];
+        newestProgressState = key;
+      } 
+    }
+    return newestProgressState;
   }
 
   public addActivityFile(yaml: Data, errors: string[]) {
@@ -315,4 +366,48 @@ export class ActivityStore {
 
     Object.assign(existingActivity, newActivity);
   }
+
+  public addTeamProgress(inProgress: Progress): void {
+    console.log(inProgress);
+    if (!inProgress) return;
+
+    if (isEmptyObj(this._progress)) {
+      this._progress = inProgress;
+      return;
+    }
+    
+    let orgProgress: Progress = this._progress;
+    for (let activityUuid in inProgress) {
+      if (isEmptyObj(orgProgress[activityUuid])) {
+        orgProgress[activityUuid] = inProgress[activityUuid];
+        continue;
+      }
+    
+      for (let teamname in inProgress[activityUuid]) {
+        if (isEmptyObj(orgProgress[activityUuid][teamname])) {
+          orgProgress[activityUuid][teamname] = inProgress[activityUuid][teamname];
+        } else {
+          let inTeamProgress: TeamProgress = inProgress[activityUuid][teamname];
+          let orgTeamProgress: TeamProgress = orgProgress[activityUuid][teamname];
+  
+          for (let key in inTeamProgress) {
+            let orgDate: Date = orgTeamProgress[key];
+            let inDate: Date = inTeamProgress[key];
+            
+            if (this.isOutdated(orgDate, inDate)) {
+              orgTeamProgress[key] = inTeamProgress[key];
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private isOutdated(orgDate: Date, inDate: Date): boolean {
+    if (!inDate) return false;
+    if (!orgDate) return true
+    
+    return inDate.getTime() < orgDate.getTime();
+  }
 }
+

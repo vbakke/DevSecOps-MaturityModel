@@ -2,13 +2,12 @@ import { HttpClientModule } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { ymlService } from 'src/app/service/yaml-parser/yaml-parser.service';
 import { MatrixComponent, MatrixRow } from './matrix.component';
 import { MatChip } from '@angular/material/chips';
-import { ActivityStore } from 'src/app/model/activity-store';
 import { ModalMessageComponent } from '../modal-message/modal-message.component';
 import { MatDialogRef } from '@angular/material/dialog';
 import { LoaderService } from 'src/app/service/loader/data-loader.service';
+import { MockLoaderService } from 'src/app/service/loader/mock-data-loader.service';
 
 // Setup test data
 const MOCK_DATA: any = {
@@ -24,31 +23,18 @@ const MOCK_DATA: any = {
     },
   },
 };
+let mockLoaderService: MockLoaderService;
 
 describe('MatrixComponent', () => {
   let component: MatrixComponent;
   let fixture: ComponentFixture<MatrixComponent>;
-  let MOCK_MATRIX_DATA: MatrixRow[] = [];
-
-  // Create mock LoaderService
-  const mockLoaderService = {
-    load: () => {
-      console.log('MOCK loader service');
-      let activityStore = new ActivityStore();
-      let errors: string[] = [];
-      activityStore.addActivityFile(MOCK_DATA, errors);
-      console.log('MOCK activityStore:', activityStore);
-      return Promise.resolve(activityStore);
-    },
-    getLevels: () => ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5'],
-  };
 
   beforeEach(async () => {
+    mockLoaderService = new MockLoaderService(MOCK_DATA);
     await TestBed.configureTestingModule({
       providers: [
-        { provide: LoaderService, useValue: mockLoaderService },
-        ymlService,
         HttpClientTestingModule,
+        { provide: LoaderService, useValue: mockLoaderService },
         { provide: MatDialogRef, useValue: {} },
         { provide: ModalMessageComponent, useValue: {} },
       ],

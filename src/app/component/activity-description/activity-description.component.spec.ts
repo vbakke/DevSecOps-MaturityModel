@@ -5,18 +5,29 @@ import { sample } from 'rxjs';
 import { ymlService } from 'src/app/service/yaml-parser/yaml-parser.service';
 
 import { ActivityDescriptionComponent } from './activity-description.component';
+import { LoaderService } from 'src/app/service/loader/data-loader.service';
+import { MockLoaderService } from 'src/app/service/loader/mock-data-loader.service';
+
+let mockLoaderService: MockLoaderService;
 
 describe('ActivityDescriptionComponent', () => {
   let component: ActivityDescriptionComponent;
   let fixture: ComponentFixture<ActivityDescriptionComponent>;
+  mockLoaderService = new MockLoaderService({});
 
+  /* eslint-disable */
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      providers: [ymlService, HttpClient, HttpHandler],
+      providers: [
+        HttpClient,
+        HttpHandler,
+        { provide: LoaderService, useValue: mockLoaderService },
+      ],
       imports: [RouterTestingModule],
       declarations: [ActivityDescriptionComponent],
     }).compileComponents();
   });
+  /* eslint-enable */
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ActivityDescriptionComponent);
@@ -31,8 +42,8 @@ describe('ActivityDescriptionComponent', () => {
   it('check if header is being generated', () => {
     const testDimension = 'Sample Dimension';
     const testSubDimension = 'Sample subDimension';
-    component.currentActivity.dimension = testDimension;
-    component.currentActivity.subDimension = testSubDimension;
+    component.currentActivity.category = testDimension;
+    component.currentActivity.dimension = testSubDimension;
     fixture.detectChanges();
     const HTMLElement: HTMLElement = fixture.nativeElement;
     const heading = HTMLElement.querySelector('h1')!;
@@ -54,11 +65,8 @@ describe('ActivityDescriptionComponent', () => {
     component.currentActivity.description = testDescription;
     fixture.detectChanges();
     const HTMLElement: HTMLElement = fixture.nativeElement;
-    const contentDisplayedinParagraphTag =
-      HTMLElement.querySelector('#description')!;
-    expect(contentDisplayedinParagraphTag.textContent).toContain(
-      testDescription
-    );
+    const contentDisplayedinParagraphTag = HTMLElement.querySelector('#description')!;
+    expect(contentDisplayedinParagraphTag.textContent).toContain(testDescription);
   });
 
   it('check if risk is being generated', () => {
@@ -75,8 +83,7 @@ describe('ActivityDescriptionComponent', () => {
     component.currentActivity.measure = testMeasure;
     fixture.detectChanges();
     const HTMLElement: HTMLElement = fixture.nativeElement;
-    const contentDisplayedinParagraphTag =
-      HTMLElement.querySelector('#measure')!;
+    const contentDisplayedinParagraphTag = HTMLElement.querySelector('#measure')!;
     expect(contentDisplayedinParagraphTag.textContent).toContain(testMeasure);
   });
 
@@ -85,12 +92,8 @@ describe('ActivityDescriptionComponent', () => {
     component.currentActivity.implementatonGuide = testImplementationGuide;
     fixture.detectChanges();
     const HTMLElement: HTMLElement = fixture.nativeElement;
-    const contentDisplayedinParagraphTag = HTMLElement.querySelector(
-      '#implementatonGuide'
-    )!;
-    expect(contentDisplayedinParagraphTag.textContent).toContain(
-      testImplementationGuide
-    );
+    const contentDisplayedinParagraphTag = HTMLElement.querySelector('#implementatonGuide')!;
+    expect(contentDisplayedinParagraphTag.textContent).toContain(testImplementationGuide);
   });
 
   it('check if evidence is being generated', () => {
@@ -102,9 +105,7 @@ describe('ActivityDescriptionComponent', () => {
     console.log('parentElement', parentElement[1].textContent);
     const lengthOfObject = Object.keys(testEvidence).length;
     for (var i = 0; i > lengthOfObject; i++)
-      expect(parentElement[i].textContent).toContain(
-        Object.keys(testEvidence)[i] + Object.values(testEvidence)[i]
-      );
+      expect(parentElement[i].textContent).toContain(Object.keys(testEvidence)[i] + Object.values(testEvidence)[i]);
   });
 
   it('check if assessment is being generated', () => {
@@ -112,11 +113,8 @@ describe('ActivityDescriptionComponent', () => {
     component.currentActivity.assessment = testAssessment;
     fixture.detectChanges();
     const HTMLElement: HTMLElement = fixture.nativeElement;
-    const contentDisplayedinParagraphTag =
-      HTMLElement.querySelector('#assessment')!;
-    expect(contentDisplayedinParagraphTag.textContent).toContain(
-      testAssessment
-    );
+    const contentDisplayedinParagraphTag = HTMLElement.querySelector('#assessment')!;
+    expect(contentDisplayedinParagraphTag.textContent).toContain(testAssessment);
   });
 
   it('check if comments is being generated', () => {
@@ -124,8 +122,7 @@ describe('ActivityDescriptionComponent', () => {
     component.currentActivity.comments = testComments;
     fixture.detectChanges();
     const HTMLElement: HTMLElement = fixture.nativeElement;
-    const contentDisplayedinParagraphTag =
-      HTMLElement.querySelector('#comments')!;
+    const contentDisplayedinParagraphTag = HTMLElement.querySelector('#comments')!;
     expect(contentDisplayedinParagraphTag.textContent).toContain(testComments);
   });
 
@@ -142,8 +139,7 @@ describe('ActivityDescriptionComponent', () => {
 
     fixture.detectChanges();
     const HTMLElement: HTMLElement = fixture.nativeElement;
-    const contentDisplayedinParagraphTag =
-      HTMLElement.querySelectorAll('#references')!;
+    const contentDisplayedinParagraphTag = HTMLElement.querySelectorAll('#references')!;
 
     expect(contentDisplayedinParagraphTag[0].textContent).toContain(
       component.SAMMVersion +
@@ -152,8 +148,7 @@ describe('ActivityDescriptionComponent', () => {
         testISO[0] +
         component.ISO22Version +
         testISO22[0] +
-        component.openCREVersion +
-        uuid
+        component.openCREVersion
     );
   });
 });
