@@ -9,13 +9,20 @@ import { MatSliderModule } from '@angular/material/slider';
 })
 export class ProgressSliderComponent implements OnInit {
   @Input() steps: string[] = [];
-  @Input() initialValue: number = 0;
+  @Input() initial: string = '';
   // @Output() stepChange = new EventEmitter<number>();
-
+  
+  initialValue: number = 0;
   currentValue: number = 0;
 
   ngOnInit() {
+    this.initialValue = this.steps.indexOf(this.initial);
+    if (this.initialValue === -1) this.initialValue = 0;
     this.currentValue = this.initialValue;
+  }
+
+  getCurrent() {
+    return this.steps[this.currentValue];
   }
 
   onSlide(event: any) {

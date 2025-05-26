@@ -38,17 +38,14 @@ export class LoaderService {
       let teamProgress: TeamProgressFile = await this.loadTeamProgress(this.meta);
       this.cachedActivityStore.addTeamProgress(teamProgress.progress);
       
-      teamProgress = await this.yamlService.loadYamlUnresolvedRefs(this.meta.teamProgressFile.replace('.yaml', '-2.yaml')) as TeamProgressFile;
-      this.cachedActivityStore.addTeamProgress(teamProgress.progress);
+      // teamProgress = await this.yamlService.loadYamlUnresolvedRefs(this.meta.teamProgressFile.replace('.yaml', '-2.yaml')) as TeamProgressFile;
+      // this.cachedActivityStore.addTeamProgress(teamProgress.progress);
     
       teamProgress = JSON.parse(localStorage.getItem('teamProgress') || '{}') as TeamProgressFile;
       this.cachedActivityStore.addTeamProgress(teamProgress.progress);
 
       // TODO: Load old yaml format (generated.yaml)
       // TODO: Load old yaml format (localStorage)
-
-  
-
       if (this.debug) console.log(`${perfNow()}s: ----- Load Service End -----`);
       return this.cachedActivityStore;
     } catch (err) {
@@ -71,6 +68,9 @@ export class LoaderService {
       throw Error("The meta.yaml has no 'teamProgressFile' to be loaded");
     }
     
+    // Recalculate percentages of progress definition
+    this.recalculateProgressDefinition(meta);
+
     // Remove group teams not specified 
     Object.keys(meta.teamGroups).forEach(group => {
       meta.teamGroups[group] = meta.teamGroups[group].filter(team => meta.teams.includes(team));
@@ -135,6 +135,43 @@ export class LoaderService {
     this.clearCache();
     return this.load();
   }
+
+  private recalculateProgressDefinition(meta: MetaFile) {
+    let errors: string[] = [];
+
+    for (let state of Object.keys(meta.progressDefinition)) {
+      let value: string | number = meta.progressDefinition[state];
+      if (typeof value === 'string') {
+        let isPercentage: boolean = (value as string).includes('%');
+        value = parseFloat(value);
+        if (isPercentage) { 
+          value = value / 100;
+        }
+        if (value > 1 || value < 0) {
+          errors.push(`The progress value for '${state}' must be between 0% and 100%`);
+          continue;
+        }
+      }
+      meta.progressDefinition[state] = value;
+    }
+    
+    if (Math.min(...Object.values(meta.progressDefinition)) !== 0) {
+      errors.push(`The meta.progressDefinition must specify a name for 0% completed`);
+    }
+    if (Math.max(...Object.values(meta.progressDefinition)) !== 1) {
+      errors.push(`The meta.progressDefinition must specify a name for 100% completed`);
+    }
+
+    if (errors.length > 0) {
+      throw new DataValidationError(
+        'Data validation error for progress definition in meta.yaml: \n\n- ' +
+          errors.join('\n- ')
+      );
+    }
+  }
+
+
+
 
   public getMaxLevel(): number {
     if (!this.cachedActivityStore) {

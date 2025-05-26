@@ -87,6 +87,10 @@ export class ActivityStore {
     return this.data;
   }
 
+  public getProgress(): Progress {
+    return this._progress;
+  }
+
   public getAllActivities(): Activity[] {
     return this._activityList;
   }
@@ -122,6 +126,22 @@ export class ActivityStore {
 
   public getMaxLevel(): number {
     return this._maxLevel;
+  }
+
+  public getTeamProgressState(activityUuid: string, teamName: string): string {
+    // Return the key with the most largest value
+    let teamProgress: TeamProgress = this._progress?.[activityUuid]?.[teamName];
+    if (!teamProgress) return '';
+
+    let newestProgressState: string = '';
+    let maxDate: Date = new Date(0);
+    for (let key in teamProgress) {
+      if (teamProgress[key].getTime() > maxDate.getTime()) {
+        maxDate = teamProgress[key];
+        newestProgressState = key;
+      } 
+    }
+    return newestProgressState;
   }
 
   public addActivityFile(yaml: Data, errors: string[]) {
@@ -382,7 +402,7 @@ export class ActivityStore {
       }
     }
   }
-  
+
   private isOutdated(orgDate: Date, inDate: Date): boolean {
     if (!inDate) return false;
     if (!orgDate) return true

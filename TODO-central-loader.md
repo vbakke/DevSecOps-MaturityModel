@@ -6,8 +6,9 @@
     - Store teamProgress as part of activityStore under each activity
     - How to deal with deleted progress??? (Do later)
 - Refactor Circular Heatmap
+    - Update progress (when slider is moved) when new sector is selected
     - show progress for each activity on the slider
-    - show progress for each activity in thje sector
+    - update progress for each activity in the sector, on teams change
 
 ## Next
 - Load TeamProgress yaml

@@ -2,7 +2,7 @@ export interface MetaFile {
   checkForDsommUpdates: boolean;
   lang: string;
   strings: Record<string, MetaStrings>;
-  progress: ProgressDefinition;
+  progressDefinition: ProgressDefinition;
   teamGroups: TeamGroups;
   teams: TeamNames;
   activityFiles: string[];
@@ -24,7 +24,7 @@ export interface TeamProgressFile {
   progress: Progress;
 }
 
-export type ProgressDefinition = Record<ProgressState, Date>;
+export type ProgressDefinition = Record<ProgressState, number>;
 export type Progress = Record<Uuid, ActivityProgress>; 
 export type ActivityProgress = Record<TeamName, TeamProgress>; 
 export type TeamProgress = Record<ProgressState, Date>; 

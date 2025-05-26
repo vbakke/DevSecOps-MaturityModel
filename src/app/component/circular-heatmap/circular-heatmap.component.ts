@@ -18,7 +18,9 @@ import {
   DialogInfo,
 } from '../modal-message/modal-message.component';
 import { ActivityStore } from 'src/app/model/activity-store';
-import { MetaFile } from 'src/app/model/meta';
+import { MetaFile, ProgressDefinition } from 'src/app/model/meta';
+import { SectorViewController } from './sector-viewcontroller';
+
 
 export interface old_activitySchema {
   uuid: string;
@@ -68,19 +70,21 @@ export class CircularHeatmapComponent implements OnInit {
   old_teamVisible: string[] = [];
   old_segment_labels: string[] = [];
   old_activityDetails: any;
-  
   @ViewChildren(MatChip) chips!: QueryList<MatChip>;
   matChipsArray: MatChip[] = [];
   meta: MetaFile | null = null;
+  activityStore: ActivityStore | null = null;
+
   // New properties for refactored data
   dimLabels: string[] = [];
   filtersTeams: Record<string, boolean> = {};
   filtersTeamGroups: Record<string, boolean> = {};
   hasTeamsFilter: boolean = false;
   maxLevel: number = 0;
-  allSectors: any[] = [];
+  allSectors: SectorViewController[] = [];
   dimensionLabels: string[] = [];
-  selectedSector: any = null;
+  selectedSector: SectorViewController | null = null;
+  progressStates: string[] = [];
 
   constructor(
     private old_yaml: ymlService,
@@ -94,9 +98,6 @@ export class CircularHeatmapComponent implements OnInit {
     console.log(`${this.perfNow()}s: ngOnInit`);
     // Ensure that Levels and Teams load before MaturityData
     // using promises, since ngOnInit does not support async/await
-    // this.OBSOLETE_LoadMaturityLevels()
-    //   .then(() => this.OBSOLETE_LoadTeamsFromMetaYaml())
-    //   .then(() => this.OBSOLETE_LoadMaturityDataFromGeneratedYaml())
     this.loader.load()
       .then((activityStore: ActivityStore) => {
         console.log(`${this.perfNow()}s: set filters: ${this.chips?.length}`);
@@ -105,6 +106,11 @@ export class CircularHeatmapComponent implements OnInit {
         this.filtersTeams = this.buildFilters(this.meta?.teams as string[]);
         this.filtersTeamGroups = this.buildFilters(Object.keys(this.meta?.teamGroups || {}));
         this.filtersTeamGroups['All'] = true;
+
+        let progressDefinition: ProgressDefinition = this.meta?.progressDefinition || {};
+        SectorViewController.init(this.meta?.teams || [], activityStore.getProgress(), progressDefinition);
+        this.progressStates = SectorViewController.getProgressStates();
+
         this.setYamlData(activityStore);
 
         // For now, just draw the sectors (no activities yet)
@@ -133,6 +139,7 @@ export class CircularHeatmapComponent implements OnInit {
   }
 
   setYamlData(activityStore: ActivityStore) {
+    this.activityStore = activityStore;
     this.maxLevel = this.loader.getMaxLevel();
     this.dimensionLabels = activityStore.getAllDimensionNames();
     
@@ -141,12 +148,11 @@ export class CircularHeatmapComponent implements OnInit {
     for (let lvl = 1; lvl <= this.maxLevel; lvl++) {
       for (let dimName of this.dimensionLabels) {
         const activities = activityStore.getActivities(dimName, lvl);
-        this.allSectors.push({
-          dimension: dimName,
-          level: 'Level ' + lvl,
-          activities: activities,
-          progress: 0,
-        });
+        this.allSectors.push(new SectorViewController(
+          dimName,
+          'Level ' + lvl,
+          activities,
+        ));
       }
     }
   }    
@@ -361,6 +367,12 @@ export class CircularHeatmapComponent implements OnInit {
     }
   }
   
+  getTeamProgressState(activityUuid: string, teamName: string): string {
+    return this.activityStore?.getTeamProgressState(activityUuid, teamName) || '';
+    return this.selectedSector?.activities?.find(a => a.uuid === activityUuid)?.teamsImplemented[teamName] || '';
+
+  }
+
   toggleTeamFilter(chip: MatChip) {
     chip.toggleSelected();
     this.filtersTeams[chip.value.trim()] = chip.selected;
@@ -501,7 +513,7 @@ export class CircularHeatmapComponent implements OnInit {
       .segmentLabelHeight(segmentLabelHeight);
 
     chart.accessor(function (d: any) {
-      return d.progress;
+      return d.getSectorProgress();
     });
 
     var svg = d3

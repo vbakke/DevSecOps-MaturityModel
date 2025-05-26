@@ -114,7 +114,7 @@
   padding-right: 16px;
   vertical-align: middle;
   text-align: right;
-  /* font-weight: 500; */
+  font-size: smaller;
 }
 progress-slider {
   display: table-cell;
@@ -149,6 +149,15 @@ button.filter-toggle {
   display: flex;
   align-items: flex-end;
   flex-direction: column;
+}
+
+:host ::ng-deep .activity-card .mat-expansion-panel-body {
+  padding: 0 5px;
+}
+
+:host ::ng-deep .activity-card .mat-expansion-panel-body li {
+  justify-content: center;
+  align-items: center;
 }
 
 @media only screen and (max-width: 750px) {

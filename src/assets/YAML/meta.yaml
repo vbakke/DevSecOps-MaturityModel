@@ -1,6 +1,6 @@
 ---
 checkForDsommUpdates: true  # Yet to be implemented
-progress:
+progressDefinition:
   "Not started": 0%
   Planned: 10%
   Started: 30%

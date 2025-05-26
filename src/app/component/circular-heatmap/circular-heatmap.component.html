@@ -231,7 +231,7 @@
             </mat-form-field>
           </div>
         </div>
-        <mat-card class="example-card" *ngIf="showActivityCard">
+        <mat-card class="activity-card" *ngIf="showActivityCard">
           <mat-card-title-group>
             <mat-card-title>{{ showActivityCard.dimension }}</mat-card-title>
             <mat-card-subtitle>{{ showActivityCard.level }}</mat-card-subtitle>
@@ -242,8 +242,8 @@
                 <mat-panel-title>
                   <button
                     class="title-button"
-                    (click)="openActivityDetails(showActivityCard.dimension, activity['activityName'] || activity['name'])">
-                    {{ activity['activityName'] || activity['name'] }}
+                    (click)="openActivityDetails(showActivityCard.dimension, activity['name'])">
+                    {{ activity['name'] }}
                   </button>
                 </mat-panel-title>
               </mat-expansion-panel-header>
@@ -255,8 +255,8 @@
                       {{ team.key }}:
                     </label>
                           <progress-slider
-                          [steps]="['', 'Planned', 'Started', 'Implemented']"
-                          [initialValue]="0">
+                          [steps]="progressStates"
+                          [initial]="getTeamProgressState(activity['uuid'], team.key)">
                           ></progress-slider>
                     </li>
                   </ng-container>
