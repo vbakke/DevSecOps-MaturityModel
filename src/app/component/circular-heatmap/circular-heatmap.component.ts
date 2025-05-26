@@ -807,7 +807,13 @@ export class CircularHeatmapComponent implements OnInit {
       return valueOfDataIfUndefined;
     }
   }
-
+  onPanelOpened(activity: any) {
+    console.log('Panel opened', activity);
+  }
+  onPanelClosed(activity: any) {
+    console.log('Panel closed', activity);
+  }
+  
   openActivityDetails(dimension: string, activityName: string) {
     // Find the activity in the selected sector
     if (!this.showActivityCard || !this.showActivityCard.activities) {

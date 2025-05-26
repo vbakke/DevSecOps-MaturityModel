@@ -237,7 +237,9 @@
             <mat-card-subtitle>{{ showActivityCard.level }}</mat-card-subtitle>
           </mat-card-title-group>
           <mat-card-content *ngFor="let activity of showActivityCard.activities; index as activityIndex">
-            <mat-expansion-panel>
+            <mat-expansion-panel
+              (opened)="onPanelOpened(activity)"
+              (closed)="onPanelClosed(activity)">
               <mat-expansion-panel-header>
                 <mat-panel-title>
                   <button
