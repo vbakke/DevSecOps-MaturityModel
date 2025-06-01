@@ -9,6 +9,7 @@ import { UntilDestroy } from '@ngneat/until-destroy';
 import { MatChip, MatChipList } from '@angular/material/chips';
 import { deepCopy } from 'src/app/util/util';
 import { ModalMessageComponent, DialogInfo } from '../modal-message/modal-message.component';
+import { DataStore } from 'src/app/model/data-store';
 
 export interface MatrixRow {
   Category: string;
@@ -29,7 +30,7 @@ type LevelKey = keyof Pick<MatrixRow, 'level1' | 'level2' | 'level3' | 'level4' 
 })
 export class MatrixComponent implements OnInit {
   Routing: string = '/activity-description';
-  activities: ActivityStore = new ActivityStore();
+  dataStore: DataStore = new DataStore();
   data: Data = {};
   levels: Partial<Record<LevelKey, string>> = {};
   filtersTag: Record<string, boolean> = {};
@@ -61,8 +62,8 @@ export class MatrixComponent implements OnInit {
   ngOnInit(): void {
     this.loader
       .load()
-      .then((activityStore: ActivityStore) => {
-        this.setYamlData(activityStore);
+      .then((dataStore: DataStore) => {
+        this.setYamlData(dataStore);
       })
       .catch(err => {
         this.displayMessage(new DialogInfo(err.message, 'An error occurred'));
@@ -76,15 +77,18 @@ export class MatrixComponent implements OnInit {
     this.modal.openDialog(dialogInfo);
   }
 
-  setYamlData(activityStore: ActivityStore) {
-    this.activities = activityStore;
-    this.data = this.activities.getData();
-    this.allCategoryNames = this.activities.getAllCategoryNames();
-    this.allDimensionNames = this.activities.getAllDimensionNames();
+  setYamlData(dataStore: DataStore) {
+    this.dataStore = dataStore;
+    if (!dataStore.activityStore) {
+      return;
+    }
+    // this.data = this.activities.getData();
+    this.allCategoryNames = dataStore?.activityStore?.getAllCategoryNames() || [];
+    this.allDimensionNames = dataStore?.activityStore?.getAllDimensionNames() || [];
 
-    this.MATRIX_DATA = this.buildMatrixData(this.activities);
-    this.levels = this.buildLevels(this.loader.getLevels());
-    this.filtersTag = this.buildFiltersForTag(this.activities.getAllActivities());  // eslint-disable-line
+    this.MATRIX_DATA = this.buildMatrixData(dataStore.activityStore);
+    this.levels = this.buildLevels(dataStore.getLevels());
+    this.filtersTag = this.buildFiltersForTag(dataStore.activityStore.getAllActivities());  // eslint-disable-line
     this.filtersDim = this.buildFiltersForDim(this.MATRIX_DATA);
     this.columnNames = ['Category', 'Dimension'];
     this.columnNames.push(...Object.keys(this.levels));

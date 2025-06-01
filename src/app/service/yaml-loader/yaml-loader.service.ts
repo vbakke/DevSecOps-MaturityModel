@@ -30,7 +30,7 @@ export class YamlService {
    *  Load a yaml file, and convert it to an object
    */
   public async loadYamlUnresolvedRefs(url: string): Promise<any> {
-    // console.log(perfNow() + ': Fetching ' + url);
+    console.log(perfNow() + ': DEBUG: Fetching ' + url);
     const response: Response = await fetch(url);
 
     if (!response.ok) {

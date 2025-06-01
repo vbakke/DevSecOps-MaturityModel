@@ -10,7 +10,7 @@ import { MatSliderModule } from '@angular/material/slider';
 export class ProgressSliderComponent implements OnInit {
   @Input() steps: string[] = [];
   @Input() initial: string = '';
-  // @Output() stepChange = new EventEmitter<number>();
+  @Output() stepChange = new EventEmitter<string>();
   
   initialValue: number = 0;
   currentValue: number = 0;
@@ -25,6 +25,10 @@ export class ProgressSliderComponent implements OnInit {
     return this.steps[this.currentValue];
   }
 
+  hasChanged(): boolean {
+    return this.initialValue != this.currentValue;
+  }
+
   onSlide(event: any) {
     console.log('Slider changed:', event);
   }
@@ -32,7 +36,7 @@ export class ProgressSliderComponent implements OnInit {
   onStepChange(step: number | null) {
     if (step !== null) {
       this.currentValue = step as number;
-      // this.stepChange.emit(this.currentStep);
+      this.stepChange?.emit(this.getCurrent());
     }
   }
 } 

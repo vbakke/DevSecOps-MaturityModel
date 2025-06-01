@@ -2,13 +2,16 @@
 
 
 ## Doing
+- Refactor Circular Heatmap
+    - Slider: HasChanged()
+    - Update progress data (when slider is moved) only when new sector is selected
+    - 
+    - Cache originale dates, and reset these id slider is moved back
+      - Add warning message that dates will be lost of closing the tab
+
 - Load TeamProgress yaml
     - Store teamProgress as part of activityStore under each activity
     - How to deal with deleted progress??? (Do later)
-- Refactor Circular Heatmap
-    - Update progress (when slider is moved) when new sector is selected
-    - show progress for each activity on the slider
-    - update progress for each activity in the sector, on teams change
 
 ## Next
 - Load TeamProgress yaml
@@ -29,14 +32,18 @@
 
 
 ## Later
-- Add validation for meta.yaml, progress step: include 0% and 100%, and increacing values
 - Merge in experiment's way of generating circ heat
 - Fix dependsOn that is uuid (e.g. 83057028-0b77-4d2e-8135-40969768ae88)
 - Sort linear list of activities (sorted by level, dim)
 - Move META_FILE constant from data service to main app
 - Filter: tags: Fix update on SPACE key (trouble)
+  
+- Teams: Allow editing teams names in browser
+- Teams: Store teams names in localstorage
+- Teams: Export teams YAML from teams page
 
 # Done
+- Add validation for meta.yaml, progress step: include 0% and 100%
 - Load YAML progress
 - Navigate to activity-description without site reload
 - Refactor Dependecy graph
