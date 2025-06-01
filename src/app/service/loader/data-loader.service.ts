@@ -35,6 +35,8 @@ export class LoaderService {
       
       // Load meta.yaml first
       this.dataStore.meta = await this.loadMeta();
+      console.warn('TODO: MOVE THIS TO DATASTORE...');
+      this.dataStore.progressStore?.init(this.dataStore.meta.teams, this.dataStore.meta.progressDefinition);
       
       // Then load activities
       this.dataStore.addActivities(await this.loadActivities(this.dataStore.meta));

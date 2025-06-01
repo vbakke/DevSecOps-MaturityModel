@@ -3,10 +3,10 @@
 
 ## Doing
 - Refactor Circular Heatmap
-    - Slider: HasChanged()
-    - Update progress data (when slider is moved) only when new sector is selected
-    - 
-    - Cache originale dates, and reset these id slider is moved back
+    - Update progress data on slider change
+    - Fix: Recolor when lowering slider
+    - Fix: Recolor when changing selected teams
+    - Fix: Cache originale dates, and reset these id slider is moved back
       - Add warning message that dates will be lost of closing the tab
 
 - Load TeamProgress yaml

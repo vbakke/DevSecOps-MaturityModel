@@ -258,7 +258,8 @@
                     </label>
                           <progress-slider
                           [steps]="progressStates"
-                          [initial]="getTeamProgressState(activity['uuid'], team.key)">
+                          [initial]="getTeamProgressState(activity['uuid'], team.key)"
+                          (progressChange)="onProgressChange(activity['uuid'], team.key, $event)"
                           ></progress-slider>
                     </li>
                   </ng-container>

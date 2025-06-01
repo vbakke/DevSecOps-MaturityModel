@@ -1,7 +1,9 @@
 import { Activity } from "src/app/model/activity-store";
-import { ActivityProgress, Progress, ProgressDefinition, TeamNames, TeamProgress } from "src/app/model/meta";
+import { ActivityProgress, Progress, ProgressDefinition, TeamNames, TeamProgress, Uuid } from "src/app/model/meta";
+import { ProgressStore } from "src/app/model/progress-store";
 
 export class SectorViewController {
+    static _progressStore: ProgressStore | null;
     static _allProgress: Progress | null;
     static _progressValues: ProgressDefinition | null;
     static _progressStates: string[] | null;
@@ -13,16 +15,17 @@ export class SectorViewController {
     activities: Activity[];
     progressValue: number;
   
-    static init(teamnames: TeamNames, progress: Progress, progressStates: ProgressDefinition) {
+    static init(progressStore: ProgressStore, teamnames: TeamNames, progress: Progress, progressStates: ProgressDefinition) {
+      this._progressStore = progressStore;
       this._allTeams = teamnames;
       this._allProgress = progress;
       this._progressValues = progressStates;
       this._progressStates = Object.keys(progressStates)
-      .sort((a, b) => progressStates[b] - progressStates[a]);      
+            .sort((a, b) => progressStates[b] - progressStates[a]);      
     }
 
     static getProgressStates() {
-      return this._progressStates?.reverse() || [];
+      return this._progressStates?.slice().reverse() || [];
     }
 
     static setVisibleTeams(teams: TeamNames) {
@@ -54,27 +57,15 @@ export class SectorViewController {
     }
 
     // Calculate the progress of an activity, across all visible teams
-    private getActivityProgress(uuid: string, teams: TeamNames): number {
+    private getActivityProgress(uuid: Uuid, teams: TeamNames): number {
       let activity: ActivityProgress = SectorViewController._allProgress?.[uuid] || {};
       let progress: number = 0;
       for (const team of teams) {
-        progress += SectorViewController.getProgressValue(activity[team]);
+        progress += SectorViewController._progressStore?.getTeamActivityProgressValue(uuid, team) || 0;
       }
       return progress / teams.length;
     }
 
-    // Calculate the progress value for a team progress state
-    static getProgressValue(teamProgress: TeamProgress): number {
-      if (!this._progressValues) return 0;
-      if (!teamProgress) return 0;
-  
-      for (const state of SectorViewController._progressStates || []) {
-        if (teamProgress[state] !== undefined) {
-          return this._progressValues[state];
-        }
-      }
-      return 0;
-    }
   }
   
   

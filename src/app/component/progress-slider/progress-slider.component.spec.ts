@@ -33,9 +33,9 @@ describe('ProgressSliderComponent', () => {
   });
 
   it('should emit step changes', () => {
-    spyOn(component.stepChange, 'emit');
+    spyOn(component.progressChange, 'emit');
     component.onStepChange(2);
-    expect(component.stepChange.emit).toHaveBeenCalledWith(2);
+    expect(component.progressChange.emit).toHaveBeenCalledWith(2);
   });
 
   it('should display the correct step label', () => {

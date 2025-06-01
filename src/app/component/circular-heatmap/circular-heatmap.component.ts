@@ -18,7 +18,7 @@ import {
   DialogInfo,
 } from '../modal-message/modal-message.component';
 import { Activity, ActivityStore } from 'src/app/model/activity-store';
-import { MetaFile, ProgressDefinition } from 'src/app/model/meta';
+import { Uuid, ProgressDefinition, TeamName, ProgressTitle } from 'src/app/model/meta';
 import { SectorViewController } from './sector-viewcontroller';
 import { DataStore } from 'src/app/model/data-store';
 
@@ -107,13 +107,16 @@ export class CircularHeatmapComponent implements OnInit {
         if (!dataStore.activityStore) {
           throw Error("TODO: Ooops! Dette må håndteres");
         }
+        if (!dataStore.progressStore) {
+          throw Error("TODO: Ooops! Dette må håndteres");
+        }
 
         this.filtersTeams = this.buildFilters(dataStore.meta?.teams as string[]);
         this.filtersTeamGroups = this.buildFilters(Object.keys(dataStore.meta?.teamGroups || {}));
         this.filtersTeamGroups['All'] = true;
 
         let progressDefinition: ProgressDefinition = dataStore.meta?.progressDefinition || {};
-        SectorViewController.init(dataStore.meta?.teams || [], dataStore?.progressStore?.getProgress() || {}, progressDefinition);
+        SectorViewController.init(dataStore.progressStore, dataStore.meta?.teams || [], dataStore?.progressStore?.getProgress() || {}, progressDefinition);
         this.progressStates = SectorViewController.getProgressStates();
 
         this.setYamlData(dataStore);
@@ -373,7 +376,7 @@ export class CircularHeatmapComponent implements OnInit {
   }
   
   getTeamProgressState(activityUuid: string, teamName: string): string {
-    return this.dataStore?.progressStore?.getTeamActivityProgressState(activityUuid, teamName) || '';
+    return this.dataStore?.progressStore?.getTeamActivityProgressState_WHY(activityUuid, teamName) || '';
     // return this.selectedSector?.activities?.find(a => a.uuid === activityUuid)?.teamsImplemented[teamName] || '';
   }
 
@@ -484,6 +487,28 @@ export class CircularHeatmapComponent implements OnInit {
     this.reColorHeatmap();
   }
 
+  onProgressChange(
+    activityUuid: Uuid,
+    teamName: TeamName,
+    newProgress: ProgressTitle)
+  {
+    if (!this.dataStore || !this.dataStore.progressStore || !this.dataStore.activityStore) {
+      throw Error('Data store or progress store is not initialized.');
+    }
+
+    this.dataStore.progressStore.setTeamActivityProgressState(
+      activityUuid,
+      teamName,
+      newProgress);
+    // this.reColorHeatmap();
+    let activity: Activity = this.dataStore.activityStore.getActivityByUuid(activityUuid);   
+    let index = this.dimensionLabels.indexOf(activity.dimension)
+      + this.dimensionLabels.length * (activity.level -1) ;
+
+    this.recolorSector(index);
+    // this.recolorSector(activityUuid, teamName);
+  }
+
   loadCircularHeatMap(
     dom_element_to_append_to: string,
     dataset: any,
@@ -517,6 +542,8 @@ export class CircularHeatmapComponent implements OnInit {
       .segmentLabelHeight(segmentLabelHeight);
 
     chart.accessor(function (d: any) {
+      if (d.getSectorProgress() > 0)
+        console.log('Color', d.level, d.dimension, d.value, d.getSectorProgress());
       return d.getSectorProgress();
     });
 
@@ -887,6 +914,21 @@ export class CircularHeatmapComponent implements OnInit {
           teamsImplemented;
       }
     }
+  }
+
+  recolorSector(index: number) {
+    console.log('recolorSector', index);
+    var colorSector = d3
+      .scaleLinear<string, string>()
+      .domain([0, 1])
+      .range(['white', 'green']);
+
+    let progressValue: number = this.allSectors[index].getSectorProgress();
+    d3.select('#index-' + index).attr(
+      'fill',
+      colorSector(progressValue)
+    );
+    console.log(`Recolor sector ${index} with progress ${(progressValue*100).toFixed(1)}%`);
   }
 
   reColorHeatmap() {
