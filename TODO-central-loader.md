@@ -2,29 +2,12 @@
 
 
 ## Doing
-- Refactor Circular Heatmap
-    - Update progress data on slider change
-    - Fix: Recolor when lowering slider
-    - Fix: Recolor when changing selected teams
-    - Fix: Cache originale dates, and reset these id slider is moved back
-      - Add warning message that dates will be lost of closing the tab
-
-- Load TeamProgress yaml
-    - Store teamProgress as part of activityStore under each activity
-    - How to deal with deleted progress??? (Do later)
 
 ## Next
-- Load TeamProgress yaml
-    - Store in localStorage
-    - Handle boolean for backwards compatibility
-    - Merge localStorage and YAML
-- Progress Slider
-    - Data model, contains date, so warning about downgrade can show date
-    - Handle when previous value does not have a date (backwards compatibility)
-    - Catch close to save new progresses
 - Store TeamProgress to localStorage
 - Load localStorage TeamProgress
 - Export TeamProgress yaml
+- Read boolean from backwards compatibility storage
 - Filters
     - filter teams
     - filter none => all
@@ -37,12 +20,20 @@
 - Sort linear list of activities (sorted by level, dim)
 - Move META_FILE constant from data service to main app
 - Filter: tags: Fix update on SPACE key (trouble)
-  
+- Circular, Card: Add Complete symbol per activity
+
+- Dependency graph: Add to CircularHeatmap Details
+- Dependency graph: Make it clickable
+- Matrix: Remember filters, when moving back from details
+
 - Teams: Allow editing teams names in browser
 - Teams: Store teams names in localstorage
 - Teams: Export teams YAML from teams page
+- Teams: View timeline for a team
 
 # Done
+- Load TeamProgress yaml
+- Refactor Circular Heatmap
 - Add validation for meta.yaml, progress step: include 0% and 100%
 - Load YAML progress
 - Navigate to activity-description without site reload

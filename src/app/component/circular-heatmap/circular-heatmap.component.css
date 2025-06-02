@@ -129,6 +129,12 @@ progress-slider {
 .filter-container {
   position: relative;
 }
+
+.ng-star-inserted span {
+    font-size: smaller;
+    font-style: italic;
+}
+
 button.filter-toggle {
   position: absolute;
   top: 2px;

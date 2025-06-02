@@ -196,7 +196,7 @@ export class ProgressStore {
         console.warn(`Progress state ${progressTitle} already exists for activity ${activityUuid} and team ${teamName}`);
       }
       // Store the current progress state in the temporary store
-      console.log(`Backup ${teamName}: ${progressTitle}: ${this._progress[activityUuid][teamName][progressTitle]}`);
+      console.log(`Backup ${teamName}: ${progressTitle}: ${this._progress[activityUuid][teamName][progressTitle].toISOString()}`);
       this._tempProgress[activityUuid][teamName][progressTitle] = this._progress[activityUuid][teamName][progressTitle];
       delete this._progress[activityUuid][teamName][progressTitle];
     }
@@ -231,10 +231,10 @@ export class ProgressStore {
         prevDate = this._tempProgress[activityUuid][teamName][progressTitle];
         this._progress[activityUuid][teamName][progressTitle] = prevDate;
         delete this._tempProgress[activityUuid][teamName][progressTitle];
-        console.log(`Restore ${teamName}: ${progressTitle}: ${this._progress[activityUuid][teamName][progressTitle]}`);
+        console.log(`Restore ${teamName}: ${progressTitle}: ${this._progress[activityUuid][teamName][progressTitle].toISOString()}`);
     } else {
         // If temp title does not exist, use the date from the previous step
-        console.log(`Set ${teamName}: ${progressTitle}: ${prevDate}`);
+        console.log(`Set ${teamName}: ${progressTitle}: ${prevDate.toISOString()}`);
         this._progress[activityUuid][teamName][progressTitle] = prevDate;        
       }
     }
