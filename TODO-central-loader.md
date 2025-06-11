@@ -4,8 +4,6 @@
 ## Doing
 
 ## Next
-- Store TeamProgress to localStorage
-- Load localStorage TeamProgress
 - Export TeamProgress yaml
 - Read boolean from backwards compatibility storage
 - Filters
@@ -32,6 +30,8 @@
 - Teams: View timeline for a team
 
 # Done
+- Store TeamProgress to localStorage
+- Load localStorage TeamProgress
 - Load TeamProgress yaml
 - Refactor Circular Heatmap
 - Add validation for meta.yaml, progress step: include 0% and 100%

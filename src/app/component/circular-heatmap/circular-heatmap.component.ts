@@ -116,7 +116,7 @@ export class CircularHeatmapComponent implements OnInit {
         this.filtersTeamGroups['All'] = true;
 
         let progressDefinition: ProgressDefinition = dataStore.meta?.progressDefinition || {};
-        SectorViewController.init(dataStore.progressStore, dataStore.meta?.teams || [], dataStore?.progressStore?.getProgress() || {}, progressDefinition);
+        SectorViewController.init(dataStore.progressStore, dataStore.meta?.teams || [], dataStore?.progressStore?.getProgressData() || {}, progressDefinition);
         this.progressStates = SectorViewController.getProgressStates();
 
         this.setYamlData(dataStore);
@@ -376,7 +376,7 @@ export class CircularHeatmapComponent implements OnInit {
   }
   
   getTeamProgressState(activityUuid: string, teamName: string): string {
-    return this.dataStore?.progressStore?.getTeamActivityProgressState_WHY(activityUuid, teamName) || '';
+    return this.dataStore?.progressStore?.getTeamActivityTitle(activityUuid, teamName) || '';
     // return this.selectedSector?.activities?.find(a => a.uuid === activityUuid)?.teamsImplemented[teamName] || '';
   }
 
@@ -917,7 +917,7 @@ export class CircularHeatmapComponent implements OnInit {
   }
 
   recolorSector(index: number) {
-    console.log('recolorSector', index);
+    // console.log('recolorSector', index);
     var colorSector = d3
       .scaleLinear<string, string>()
       .domain([0, 1])

@@ -22,8 +22,8 @@ export class DataStore {
   public addActivities(activities: ActivityStore): void {
     this.activityStore = activities;
   }
-  public addTeamProgress(progress: Progress): void {
-    this.progressStore?.addTeamProgress(progress);
+  public addProgressData(progress: Progress): void {
+    this.progressStore?.addProgressData(progress);
   }
 
   public getMetaStrings(): MetaStrings {

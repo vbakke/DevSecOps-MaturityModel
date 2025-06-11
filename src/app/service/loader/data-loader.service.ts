@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { perfNow } from 'src/app/util/util';
 import { YamlService } from '../yaml-loader/yaml-loader.service';
-import { MetaFile, MetaStrings, TeamProgressFile } from 'src/app/model/meta';
+import { MetaFile, MetaStrings, Progress, TeamProgressFile } from 'src/app/model/meta';
 import { ActivityStore, Data } from 'src/app/model/activity-store';
 import { ProgressStore } from 'src/app/model/progress-store';
 import { DataStore } from 'src/app/model/data-store';
@@ -43,14 +43,11 @@ export class LoaderService {
 
       // Load the progress for each team's activities
       let teamProgress: TeamProgressFile = await this.loadTeamProgress(this.dataStore.meta);
-      this.dataStore.addTeamProgress(teamProgress.progress);
-      
-      teamProgress = await this.yamlService.loadYamlUnresolvedRefs(this.dataStore.meta.teamProgressFile.replace('.yaml', '-2.yaml')) as TeamProgressFile;
-      this.dataStore.addTeamProgress(teamProgress.progress);
-    
-
-      // teamProgress = JSON.parse(localStorage.getItem('teamProgress') || '{}') as TeamProgressFile;
-      // this.dataStore.addTeamProgress(teamProgress.progress);
+      this.dataStore.addProgressData(teamProgress.progress);
+      let browserProgress: TeamProgressFile | null = this.dataStore.progressStore?.retrieveLocalStorage() || null;
+      if (browserProgress != null) {
+        this.dataStore.addProgressData(browserProgress?.progress);
+      }   
 
       // TODO: Load old yaml format (generated.yaml)
       // TODO: Load old yaml format (localStorage)

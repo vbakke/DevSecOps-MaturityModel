@@ -1,9 +1,11 @@
-import { appendHashElement } from '../util/ArrayHash';
+import { YamlService } from '../service/yaml-loader/yaml-loader.service';
 import { isEmptyObj } from '../util/util';
-import { IgnoreList } from './ignore-list';
-import { TeamProgress, Progress, TeamNames, ProgressDefinition, Uuid, TeamName, ProgressTitle } from './meta';
+import { TeamProgress, Progress, TeamNames, ProgressDefinition, Uuid, TeamName, ProgressTitle, TeamProgressFile } from './meta';
+
+const LOCALSTORAGE_KEY: string = 'progress';
 
 export class ProgressStore {
+  private yamlService: YamlService = new YamlService();
   private _progress: Progress = {};
   private _tempProgress: Progress = {};
   private _progressDefinition: ProgressDefinition | null = null;
@@ -18,17 +20,11 @@ export class ProgressStore {
     this._progressTitlesDescOrder = this._progressTitles.slice().reverse();
   }
 
-  public getProgress(): Progress {
+  public getProgressData(): Progress {
     return this._progress;
   }
 
-
-  public addProgressData(progress: Progress) {
-    // TODO: Merge second progress
-    this._progress = progress;
-  }
-
-  public addTeamProgress(newProgress: Progress): void {
+  public addProgressData(newProgress: Progress): void {
     console.log(newProgress);
     if (!newProgress) return;
 
@@ -99,19 +95,15 @@ export class ProgressStore {
   public getTeamProgressTitle(activityUuid: Uuid, teamName: TeamName): ProgressTitle {
     // Return the key with the most largest value
     let teamProgress: TeamProgress = this._progress?.[activityUuid]?.[teamName];
-    if (isEmptyObj(teamProgress)) {
-      return this._progressTitles?.[0] || '';
+    if (!this._progressTitles) return '';
+    if (!isEmptyObj(teamProgress)) {
+      for (let title of this._progressTitlesDescOrder || []) {
+        if (teamProgress[title]) {
+          return title;
+        } 
+      }
     }
-
-    let newestProgressState: ProgressTitle = '';
-    let maxDate: Date = new Date(0);
-    for (let key in teamProgress) {
-      if (teamProgress[key].getTime() > maxDate.getTime()) {
-        maxDate = teamProgress[key];
-        newestProgressState = key;
-      } 
-    }
-    return newestProgressState;
+    return this._progressTitles[0];
   }
 
   public getTeamActivityProgressValue(activityUuid: Uuid, teamName: TeamName): number {
@@ -121,13 +113,15 @@ export class ProgressStore {
 
   public getTeamActivityTitle(activityUuid: Uuid, teamName: TeamName): ProgressTitle {
     // Return the team activity title for the given activity and team
+    if (this._progressTitles == null) return '';
     let teamProgress: TeamProgress = this.getTeamProgress(activityUuid, teamName);
+    if (teamProgress == null) return this._progressTitles[0];
     for (const title of this._progressTitlesDescOrder || []) {
       if (teamProgress[title] !== undefined && this._progressDefinition) {
         return title;
       }
     }
-    return '';
+    return this._progressTitles[0];
   }
 
   // Calculate the progress value for a team progress state
@@ -148,11 +142,12 @@ export class ProgressStore {
     teamName: TeamName,
     newProgress: ProgressTitle)
   {
-    console.log(`Setting progress state for activity ${activityUuid} and team ${teamName} to ${newProgress}`);
     if (!this._progressTitles || !this._progressTitlesDescOrder) {
       throw Error('Progress states are not initialized');
     }
-
+    console.log(`Setting progress state for activity ${activityUuid} and team ${teamName} to: ${newProgress}`);
+    this.dump(activityUuid, teamName);
+    
     if (!this._progress[activityUuid]) {
       this._progress[activityUuid] = {};
     }
@@ -166,13 +161,57 @@ export class ProgressStore {
     let newIndex: number = this._progressTitles.indexOf(newProgress);
 
     if (newIndex < orgIndex) {
-      this.temporarilyStoreTeamActivity(activityUuid, teamName, newIndex + 1, orgIndex);
+      this.clearTeamActivityProgress(activityUuid, teamName, newIndex + 1, orgIndex);
     } else if (newIndex > orgIndex) {
-      this.restoreTemporaryTeamActivity(activityUuid, teamName, orgIndex + 1, newIndex);
+      this.setTeamActivityProgress(activityUuid, teamName, orgIndex + 1, newIndex);
     }
+    this.dump(activityUuid, teamName);
+    this.saveToLocalStorage();
   }
 
-  private temporarilyStoreTeamActivity(
+  private dump(activityUuid: Uuid, teamName: TeamName) {
+    console.log(`${activityUuid}: ${teamName}`);
+    if (this._progressTitles == null) return;
+    for (let i = 0; i < this._progressTitles.length; i++) {
+      let progress = this._progressTitles[i];
+      console.log(` - ${progress.padEnd(11)}: ${this._progress?.[activityUuid]?.[teamName]?.[progress]?.toISOString()?.substring(0, 10)} ${this._tempProgress?.[activityUuid]?.[teamName]?.[progress]?.toISOString()?.substring(0, 10)}`);
+    }
+  }
+  public saveToLocalStorage() {
+    let yamlStr: string = this.toProgressYamlString(this._progress, 'veb')
+    localStorage.setItem(LOCALSTORAGE_KEY, yamlStr);
+  }
+  
+  private toProgressYamlString(progress: Progress, uuidMap?: string, indent: number = 2): string {
+    let str = 'progress:\n';
+    let tab = ' '.repeat(indent);
+    for (let activityUuid in progress) {
+
+      let comment: string = (uuidMap) ? `  # ${uuidMap}` : '';
+      str += tab + `${activityUuid}:${comment}\n`;
+
+      for (let teamName in progress[activityUuid]) {
+        str += tab + tab + `'${teamName}':\n`;
+        for (let title in progress[activityUuid][teamName]) {
+          let date: string = (progress[activityUuid][teamName][title] as Date).toISOString().substring(0, 10);
+          str += tab + tab + tab + `'${title}': ${date}\n`;
+        }
+      }
+    }
+    return str;
+  }
+  public retrieveLocalStorage(): TeamProgressFile | null {
+    let yamlStr: string | null = localStorage.getItem(LOCALSTORAGE_KEY);
+    if (yamlStr == null) return null;
+
+    return this.yamlService.parse(yamlStr);
+  }
+
+  /**
+   * Clear progress for a team's activity, from startIndex to endIndex.
+   * It will store a backup of the progress in _tempProgress, in case the dates need to be restored.
+   */
+  private clearTeamActivityProgress(
     activityUuid: Uuid,
     teamName: TeamName,
     startIndex: number,
@@ -181,7 +220,13 @@ export class ProgressStore {
     if (!this._progressTitles) {
       throw Error('Progress states are not initialized');
     }
+    console.log(`clearTeamActivityProgress('${teamName}'): ${startIndex}-${endIndex}`)
+    // Set value
+    if (startIndex > 0 && !this._progress[activityUuid][teamName][this._progressTitles[startIndex-1]]) {
+      this._progress[activityUuid][teamName][this._progressTitles[startIndex-1]] = this.today();
+    }
 
+    // Prepare temp storage
     if (!this._tempProgress[activityUuid]) {
       this._tempProgress[activityUuid] = {};
     }
@@ -196,14 +241,17 @@ export class ProgressStore {
         console.warn(`Progress state ${progressTitle} already exists for activity ${activityUuid} and team ${teamName}`);
       }
       // Store the current progress state in the temporary store
-      console.log(`Backup ${teamName}: ${progressTitle}: ${this._progress[activityUuid][teamName][progressTitle].toISOString()}`);
-      this._tempProgress[activityUuid][teamName][progressTitle] = this._progress[activityUuid][teamName][progressTitle];
+      console.log(`Backup ${teamName}: ${progressTitle}: ${this._progress?.[activityUuid]?.[teamName]?.[progressTitle]?.toISOString()}`);
+      let date: Date = this._progress[activityUuid][teamName][progressTitle];
+      if (date) {
+        this._tempProgress[activityUuid][teamName][progressTitle] = date;
+      }
       delete this._progress[activityUuid][teamName][progressTitle];
     }
     console.log(`Temporary store: `, this._tempProgress);
   }
 
-  private restoreTemporaryTeamActivity(
+  private setTeamActivityProgress(
     activityUuid: Uuid,
     teamName: TeamName,
     startIndex: number,
@@ -212,6 +260,7 @@ export class ProgressStore {
     if (!this._progressTitles) {
       throw Error('Progress states are not initialized');
     }
+    console.log(`setTeamActivityProgress('${teamName}'): ${startIndex}-${endIndex}`)
 
     if (!this._progress[activityUuid]) {
       throw Error(`Temporary progress for activity ${activityUuid} does not exist`);
@@ -221,8 +270,7 @@ export class ProgressStore {
     }
 
     // Create dateonly object, for today, in UTC timezone
-    let prevDate = new Date();
-    prevDate = new Date(Date.UTC(prevDate.getUTCFullYear(), prevDate.getUTCMonth(), prevDate.getUTCDate()));
+    let prevDate = this.today();
 
     for (let i = endIndex; i >= startIndex; i--) {
       let progressTitle: ProgressTitle = this._progressTitles[i];
@@ -231,14 +279,19 @@ export class ProgressStore {
         prevDate = this._tempProgress[activityUuid][teamName][progressTitle];
         this._progress[activityUuid][teamName][progressTitle] = prevDate;
         delete this._tempProgress[activityUuid][teamName][progressTitle];
-        console.log(`Restore ${teamName}: ${progressTitle}: ${this._progress[activityUuid][teamName][progressTitle].toISOString()}`);
+        console.log(`Restore ${teamName}: ${progressTitle}: ${this._progress?.[activityUuid]?.[teamName]?.[progressTitle]?.toISOString()}`);
     } else {
         // If temp title does not exist, use the date from the previous step
-        console.log(`Set ${teamName}: ${progressTitle}: ${prevDate.toISOString()}`);
+        console.log(`Set ${teamName}: ${progressTitle}: ${prevDate?.toISOString()}`);
         this._progress[activityUuid][teamName][progressTitle] = prevDate;        
       }
     }
     console.log(`Restored ${teamName}. Temporary store: `, this._tempProgress);
   }
+  private today(): Date {
+    let now = new Date();
+    return  new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  }
+
 }
 
