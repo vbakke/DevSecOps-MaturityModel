@@ -1,33 +1,42 @@
-# ToDo
-
 
 ## Doing
+- Heatmap: Local Storage details
+- Heatmap: Fix: don't store 'Not started'
+- Heatmap: Fix: asterisk marks when modified
 
 ## Next
 - Export TeamProgress yaml
-- Read boolean from backwards compatibility storage
+- Read previous local storage for backwards compatibility 
 - Filters
     - filter teams
     - filter none => all
 
 
-
 ## Later
-- Merge in experiment's way of generating circ heat
+### Dependency graph
+- Dependency graph: Add to CircularHeatmap Details
+- Dependency graph: Make it clickable
+### Mapping
+- Mapping: Refactor to adhere to new data structure. (Page currently broken)
+### Matrix
+- Matrix: Remember filters, when moving back from details
+### Teams
+- Teams: Allow editing teams names in browser
+- Teams: Store teams names in localstorage
+- Teams: Export teams YAML from teams page
+- Teams: View timeline for a team (?)
+## Documentation
+- Doc: Update `Usage`
+- Doc: Update `README.md`
+- Doc: Update `About Us`
+- Doc: Update `Development.md`
+- Doc: Update `INSTALL.md`
+## Misc
 - Fix dependsOn that is uuid (e.g. 83057028-0b77-4d2e-8135-40969768ae88)
 - Sort linear list of activities (sorted by level, dim)
 - Move META_FILE constant from data service to main app
 - Filter: tags: Fix update on SPACE key (trouble)
 - Circular, Card: Add Complete symbol per activity
-
-- Dependency graph: Add to CircularHeatmap Details
-- Dependency graph: Make it clickable
-- Matrix: Remember filters, when moving back from details
-
-- Teams: Allow editing teams names in browser
-- Teams: Store teams names in localstorage
-- Teams: Export teams YAML from teams page
-- Teams: View timeline for a team
 
 # Done
 - Store TeamProgress to localStorage
@@ -57,3 +66,5 @@
 - Load Activities
 - Substitute refs
 - Load Yaml
+
+For details and dates, please see the [GitHub log](https://github.com/vbakke/DevSecOps-MaturityModel/commits/experiment/).
