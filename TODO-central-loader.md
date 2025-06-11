@@ -2,26 +2,10 @@
 
 
 ## Doing
-- Load TeamProgress yaml
-    - Store teamProgress as part of activityStore under each activity
-    - How to deal with deleted progress??? (Do later)
-- Refactor Circular Heatmap
-    - Update progress (when slider is moved) when new sector is selected
-    - show progress for each activity on the slider
-    - update progress for each activity in the sector, on teams change
 
 ## Next
-- Load TeamProgress yaml
-    - Store in localStorage
-    - Handle boolean for backwards compatibility
-    - Merge localStorage and YAML
-- Progress Slider
-    - Data model, contains date, so warning about downgrade can show date
-    - Handle when previous value does not have a date (backwards compatibility)
-    - Catch close to save new progresses
-- Store TeamProgress to localStorage
-- Load localStorage TeamProgress
 - Export TeamProgress yaml
+- Read boolean from backwards compatibility storage
 - Filters
     - filter teams
     - filter none => all
@@ -29,14 +13,28 @@
 
 
 ## Later
-- Add validation for meta.yaml, progress step: include 0% and 100%, and increacing values
 - Merge in experiment's way of generating circ heat
 - Fix dependsOn that is uuid (e.g. 83057028-0b77-4d2e-8135-40969768ae88)
 - Sort linear list of activities (sorted by level, dim)
 - Move META_FILE constant from data service to main app
 - Filter: tags: Fix update on SPACE key (trouble)
+- Circular, Card: Add Complete symbol per activity
+
+- Dependency graph: Add to CircularHeatmap Details
+- Dependency graph: Make it clickable
+- Matrix: Remember filters, when moving back from details
+
+- Teams: Allow editing teams names in browser
+- Teams: Store teams names in localstorage
+- Teams: Export teams YAML from teams page
+- Teams: View timeline for a team
 
 # Done
+- Store TeamProgress to localStorage
+- Load localStorage TeamProgress
+- Load TeamProgress yaml
+- Refactor Circular Heatmap
+- Add validation for meta.yaml, progress step: include 0% and 100%
 - Load YAML progress
 - Navigate to activity-description without site reload
 - Refactor Dependecy graph

@@ -1,6 +1,6 @@
 import { K, Y } from '@angular/cdk/keycodes';
 import { Injectable } from '@angular/core';
-import { parse } from 'yamljs';
+import { parse  as yamlParse } from 'yamljs';
 import { perfNow } from 'src/app/util/util';
 
 @Injectable({ providedIn: 'root' })
@@ -10,6 +10,11 @@ export class YamlService {
   constructor() {
     this._refs = {};
   }
+
+  public parse(yamlStr: string): any {
+    return yamlParse(yamlStr);
+  }
+
 
   /**
    * Loads and swaps any '$ref' references.
@@ -30,7 +35,7 @@ export class YamlService {
    *  Load a yaml file, and convert it to an object
    */
   public async loadYamlUnresolvedRefs(url: string): Promise<any> {
-    // console.log(perfNow() + ': Fetching ' + url);
+    console.log(perfNow() + ': DEBUG: Fetching ' + url);
     const response: Response = await fetch(url);
 
     if (!response.ok) {
@@ -40,7 +45,7 @@ export class YamlService {
     }
     const yamlText: string = await response.text();
 
-    return parse(yamlText);
+    return yamlParse(yamlText);
   }
 
   /**

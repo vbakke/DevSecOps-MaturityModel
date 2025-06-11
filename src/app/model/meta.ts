@@ -24,11 +24,11 @@ export interface TeamProgressFile {
   progress: Progress;
 }
 
-export type ProgressDefinition = Record<ProgressState, number>;
+export type ProgressDefinition = Record<ProgressTitle, number>;
 export type Progress = Record<Uuid, ActivityProgress>; 
 export type ActivityProgress = Record<TeamName, TeamProgress>; 
-export type TeamProgress = Record<ProgressState, Date>; 
-type Uuid = string; 
-type TeamName = string; 
-type ProgressState = string; 
+export type TeamProgress = Record<ProgressTitle, Date>; 
+export type Uuid = string; 
+export type TeamName = string; 
+export type ProgressTitle = string; 
 

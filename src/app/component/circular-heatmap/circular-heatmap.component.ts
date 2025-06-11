@@ -17,9 +17,10 @@ import {
   ModalMessageComponent,
   DialogInfo,
 } from '../modal-message/modal-message.component';
-import { ActivityStore } from 'src/app/model/activity-store';
-import { MetaFile, ProgressDefinition } from 'src/app/model/meta';
+import { Activity, ActivityStore } from 'src/app/model/activity-store';
+import { Uuid, ProgressDefinition, TeamName, ProgressTitle } from 'src/app/model/meta';
 import { SectorViewController } from './sector-viewcontroller';
+import { DataStore } from 'src/app/model/data-store';
 
 
 export interface old_activitySchema {
@@ -72,8 +73,8 @@ export class CircularHeatmapComponent implements OnInit {
   old_activityDetails: any;
   @ViewChildren(MatChip) chips!: QueryList<MatChip>;
   matChipsArray: MatChip[] = [];
-  meta: MetaFile | null = null;
-  activityStore: ActivityStore | null = null;
+  // meta: MetaFile | null = null;
+  dataStore: DataStore | null = null;
 
   // New properties for refactored data
   dimLabels: string[] = [];
@@ -99,19 +100,26 @@ export class CircularHeatmapComponent implements OnInit {
     // Ensure that Levels and Teams load before MaturityData
     // using promises, since ngOnInit does not support async/await
     this.loader.load()
-      .then((activityStore: ActivityStore) => {
+      .then((dataStore: DataStore) => {
         console.log(`${this.perfNow()}s: set filters: ${this.chips?.length}`);
         this.matChipsArray = this.chips.toArray();
-        this.meta = this.loader.meta;
-        this.filtersTeams = this.buildFilters(this.meta?.teams as string[]);
-        this.filtersTeamGroups = this.buildFilters(Object.keys(this.meta?.teamGroups || {}));
+        // this.meta = this.loader.meta;
+        if (!dataStore.activityStore) {
+          throw Error("TODO: Ooops! Dette må håndteres");
+        }
+        if (!dataStore.progressStore) {
+          throw Error("TODO: Ooops! Dette må håndteres");
+        }
+
+        this.filtersTeams = this.buildFilters(dataStore.meta?.teams as string[]);
+        this.filtersTeamGroups = this.buildFilters(Object.keys(dataStore.meta?.teamGroups || {}));
         this.filtersTeamGroups['All'] = true;
 
-        let progressDefinition: ProgressDefinition = this.meta?.progressDefinition || {};
-        SectorViewController.init(this.meta?.teams || [], activityStore.getProgress(), progressDefinition);
+        let progressDefinition: ProgressDefinition = dataStore.meta?.progressDefinition || {};
+        SectorViewController.init(dataStore.progressStore, dataStore.meta?.teams || [], dataStore?.progressStore?.getProgressData() || {}, progressDefinition);
         this.progressStates = SectorViewController.getProgressStates();
 
-        this.setYamlData(activityStore);
+        this.setYamlData(dataStore);
 
         // For now, just draw the sectors (no activities yet)
         this.loadCircularHeatMap(
@@ -138,16 +146,16 @@ export class CircularHeatmapComponent implements OnInit {
     console.log(message);
   }
 
-  setYamlData(activityStore: ActivityStore) {
-    this.activityStore = activityStore;
-    this.maxLevel = this.loader.getMaxLevel();
-    this.dimensionLabels = activityStore.getAllDimensionNames();
+  setYamlData(dataStore: DataStore) {
+    this.dataStore = dataStore;
+    this.maxLevel = dataStore.getMaxLevel();
+    this.dimensionLabels = dataStore?.activityStore?.getAllDimensionNames() || [];
     
     // Prepare all sectors: one for each (dimension, level) pair
     this.allSectors = [];
     for (let lvl = 1; lvl <= this.maxLevel; lvl++) {
       for (let dimName of this.dimensionLabels) {
-        const activities = activityStore.getActivities(dimName, lvl);
+        const activities: Activity[] = dataStore?.activityStore?.getActivities(dimName, lvl) || [];
         this.allSectors.push(new SectorViewController(
           dimName,
           'Level ' + lvl,
@@ -174,7 +182,7 @@ export class CircularHeatmapComponent implements OnInit {
       this.old_yaml.setURI('./assets/YAML/generated/generated.yaml');
       this.old_yaml.getJson().subscribe(async data => {
         console.log(`${this.perfNow()}s: LoadMaturityData Downloaded`);
-        const activityStore: ActivityStore = await this.loader.load();
+        const activityStore: ActivityStore = new ActivityStore(); // await this.loader.load();
         this.old_YamlObject = activityStore.data;
         this.OBSOLETE_AddSegmentLabels(this.old_YamlObject);
         const localStorageData = this.getDatasetFromBrowserStorage();
@@ -361,16 +369,15 @@ export class CircularHeatmapComponent implements OnInit {
       chip.toggleSelected();
   
       Object.keys(this.filtersTeams).forEach(key => {
-        this.filtersTeams[key] = this.meta?.teamGroups[teamGroup]?.includes(key) || false;
+        this.filtersTeams[key] = this.dataStore?.meta?.teamGroups[teamGroup]?.includes(key) || false;
       });
       this.hasTeamsFilter = Object.values(this.filtersTeams).some(v => v === true);
     }
   }
   
   getTeamProgressState(activityUuid: string, teamName: string): string {
-    return this.activityStore?.getTeamProgressState(activityUuid, teamName) || '';
-    return this.selectedSector?.activities?.find(a => a.uuid === activityUuid)?.teamsImplemented[teamName] || '';
-
+    return this.dataStore?.progressStore?.getTeamActivityTitle(activityUuid, teamName) || '';
+    // return this.selectedSector?.activities?.find(a => a.uuid === activityUuid)?.teamsImplemented[teamName] || '';
   }
 
   toggleTeamFilter(chip: MatChip) {
@@ -381,8 +388,8 @@ export class CircularHeatmapComponent implements OnInit {
       
     let selectedTeams: string[] = Object.keys(this.filtersTeams).filter(key => this.filtersTeams[key]);
 
-    Object.keys(this.meta?.teamGroups || {}).forEach(group => {
-      let match: boolean = equalArray(selectedTeams, this.meta?.teamGroups[group]);
+    Object.keys(this.dataStore?.meta?.teamGroups || {}).forEach(group => {
+      let match: boolean = equalArray(selectedTeams, this.dataStore?.meta?.teamGroups[group]);
       this.filtersTeamGroups[group] = match;
     });
   }
@@ -480,6 +487,28 @@ export class CircularHeatmapComponent implements OnInit {
     this.reColorHeatmap();
   }
 
+  onProgressChange(
+    activityUuid: Uuid,
+    teamName: TeamName,
+    newProgress: ProgressTitle)
+  {
+    if (!this.dataStore || !this.dataStore.progressStore || !this.dataStore.activityStore) {
+      throw Error('Data store or progress store is not initialized.');
+    }
+
+    this.dataStore.progressStore.setTeamActivityProgressState(
+      activityUuid,
+      teamName,
+      newProgress);
+    // this.reColorHeatmap();
+    let activity: Activity = this.dataStore.activityStore.getActivityByUuid(activityUuid);   
+    let index = this.dimensionLabels.indexOf(activity.dimension)
+      + this.dimensionLabels.length * (activity.level -1) ;
+
+    this.recolorSector(index);
+    // this.recolorSector(activityUuid, teamName);
+  }
+
   loadCircularHeatMap(
     dom_element_to_append_to: string,
     dataset: any,
@@ -513,6 +542,8 @@ export class CircularHeatmapComponent implements OnInit {
       .segmentLabelHeight(segmentLabelHeight);
 
     chart.accessor(function (d: any) {
+      if (d.getSectorProgress() > 0)
+        console.log('Color', d.level, d.dimension, d.value, d.getSectorProgress());
       return d.getSectorProgress();
     });
 
@@ -883,6 +914,21 @@ export class CircularHeatmapComponent implements OnInit {
           teamsImplemented;
       }
     }
+  }
+
+  recolorSector(index: number) {
+    // console.log('recolorSector', index);
+    var colorSector = d3
+      .scaleLinear<string, string>()
+      .domain([0, 1])
+      .range(['white', 'green']);
+
+    let progressValue: number = this.allSectors[index].getSectorProgress();
+    d3.select('#index-' + index).attr(
+      'fill',
+      colorSector(progressValue)
+    );
+    console.log(`Recolor sector ${index} with progress ${(progressValue*100).toFixed(1)}%`);
   }
 
   reColorHeatmap() {

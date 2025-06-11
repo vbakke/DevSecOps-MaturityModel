@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { LoaderService } from '../../service/loader/data-loader.service';
 import * as md from 'markdown-it';
 import { Activity, ActivityStore } from '../../model/activity-store';
+import { DataStore } from 'src/app/model/data-store';
 
 @Component({
   selector: 'app-activity-description',
@@ -36,15 +37,17 @@ export class ActivityDescriptionComponent implements OnInit {
     // Load data
     this.loader
       .load()
-      .then((activityStore: ActivityStore) => {
+      .then((dataStore: DataStore) => {
         // Find the activity with matching UUID (or potentially name)
-        let activity: Activity = activityStore.getActivity(uuid, name);
+        if (!dataStore.activityStore) throw Error("TODO: Must handle these");
+
+        let activity: Activity = dataStore.activityStore.getActivity(uuid, name);
         if (!activity) {
           throw new Error('Activity not found');
         }
 
         // Get meta data
-        const meta = this.loader.getMetaStrings();
+        const meta = dataStore.getMetaStrings();
         this.currentActivity = activity;
         this.KnowledgeLabel = meta.knowledgeLabels[activity.difficultyOfImplementation.knowledge];
         this.TimeLabel = meta.labels[activity.difficultyOfImplementation.time];
