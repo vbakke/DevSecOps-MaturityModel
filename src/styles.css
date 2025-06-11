@@ -9,6 +9,10 @@
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
+.mat-typography h1.mat-display-1 {
+  margin: 0;
+}
+
 /* Slider styling */
 .mat-slider-track-background {
   background-color: var(--slider-track) !important;
