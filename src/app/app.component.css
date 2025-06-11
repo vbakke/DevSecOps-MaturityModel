@@ -13,6 +13,10 @@
 .tag-subtitle {
   font-size: 0.7rem;
 }
+div .github-fork-ribbon:before {
+  background-color: #5a9f51; 
+}
+
 /* --- experimental branch end --- */
 
 .main-container {

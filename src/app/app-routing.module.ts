@@ -19,7 +19,7 @@ const routes: Routes = [
   { path: 'usage/:page', component: UsageComponent },
   { path: 'teams', component: TeamsComponent },
   { path: 'about', component: AboutUsComponent },
-  { path: 'userday', component: UserdayComponent },
+  { path: 'roadmap', component: UserdayComponent },
 ];
 
 @NgModule({
