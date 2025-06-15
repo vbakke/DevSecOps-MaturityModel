@@ -3,7 +3,7 @@ import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
 import { AppModule } from './app/app.module';
 import { environment } from './environments/environment';
-import { getWebInstrumentations, initializeFaro, LogLevel } from '@grafana/faro-web-sdk';
+import { faro, getWebInstrumentations, initializeFaro, LogLevel } from '@grafana/faro-web-sdk';
 import { TracingInstrumentation } from '@grafana/faro-web-tracing';
 
 const localDevelopment:boolean = (window.location.hostname == 'localhost');
@@ -36,6 +36,12 @@ if (environment?.experimental && !localDevelopment) {
       disabledLevels: [LogLevel.DEBUG, LogLevel.TRACE],
     },
   });
+
+  // Identify specific sessions
+  let debugid: string = (new URLSearchParams(location.search)).get('debugid') || '';
+  if (debugid) localStorage.setItem('debugid', debugid);
+  else debugid = localStorage.getItem('debugid') || '';
+  faro.api.setUser({ attributes: {debugid}, });
 
 }
 

@@ -68,3 +68,10 @@
 - Load Yaml
 
 For details and dates, please see the [GitHub log](https://github.com/vbakke/DevSecOps-MaturityModel/commits/experiment/).
+
+## User tracking
+The Experimental edition, and the Experimental edition only, uses Grafana Frontend to log the console log to catch bugs, especially from mobile devices. 
+
+Geolocation is not enabled, so no user identifiable data is stored.
+
+You may block this debug logging by using an ad-blocker. 
