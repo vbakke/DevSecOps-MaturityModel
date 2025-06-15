@@ -41,7 +41,12 @@ if (environment?.experimental && !localDevelopment) {
   let debugid: string = (new URLSearchParams(location.search)).get('debugid') || '';
   if (debugid) localStorage.setItem('debugid', debugid);
   else debugid = localStorage.getItem('debugid') || '';
-  faro.api.setUser({ attributes: {debugid}, });
+  faro.api.setUser(
+    { attributes: {
+      debugid: debugid,
+      debugfamily: debugid.split('-')[0],
+      }, 
+    });
 
 }
 
