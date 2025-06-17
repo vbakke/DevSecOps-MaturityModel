@@ -10,6 +10,7 @@ import { MatChip, MatChipList } from '@angular/material/chips';
 import { deepCopy } from 'src/app/util/util';
 import { ModalMessageComponent, DialogInfo } from '../modal-message/modal-message.component';
 import { DataStore } from 'src/app/model/data-store';
+import { perfNow } from 'src/app/util/util';
 
 export interface MatrixRow {
   Category: string;
@@ -153,12 +154,14 @@ export class MatrixComponent implements OnInit {
   toggleTagFilters(chip: MatChip) {
     chip.toggleSelected();
     this.filtersTag[chip.value] = chip.selected;
+    console.log(`${perfNow()}: Matrix: Chip flip Tag '${chip.value}: ${chip.selected}`);
     this.updateActivitiesBeingDisplayed();
   }
 
   toggleDimensionFilters(chip: MatChip) {
     chip.toggleSelected();
     this.filtersDim[chip.value] = chip.selected;
+    console.log(`${perfNow()}: Matrix: Chip flip Dim '${chip.value}: ${chip.selected}`);
     this.updateActivitiesBeingDisplayed();
   }
 
@@ -249,6 +252,7 @@ export class MatrixComponent implements OnInit {
     const navigationExtras: NavigationExtras = {
       queryParams: { uuid: uuid },
     };
+    console.log(`${perfNow()}: Matrix: Open Details: '${this.dataStore?.activityStore?.getActivityByUuid(uuid).name}'`);
     this.router.navigate([this.Routing], navigationExtras);
   }
 }
