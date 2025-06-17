@@ -367,11 +367,14 @@ export class CircularHeatmapComponent implements OnInit {
     let teamGroup = chip.value.trim();
     if (!chip.selected) {
       chip.toggleSelected();
+      console.log(`${this.perfNow()}: Heat: Chip flip Group '${teamGroup}: ${chip.selected}`);
   
       Object.keys(this.filtersTeams).forEach(key => {
         this.filtersTeams[key] = this.dataStore?.meta?.teamGroups[teamGroup]?.includes(key) || false;
       });
       this.hasTeamsFilter = Object.values(this.filtersTeams).some(v => v === true);
+    } else {
+      console.log(`${this.perfNow()}: Heat: Chip flip Group '${teamGroup}: already on`);
     }
   }
   
@@ -383,6 +386,7 @@ export class CircularHeatmapComponent implements OnInit {
   toggleTeamFilter(chip: MatChip) {
     chip.toggleSelected();
     this.filtersTeams[chip.value.trim()] = chip.selected;
+    console.log(`${this.perfNow()}: Heat: Chip flip Team '${chip.value}: ${chip.selected}`);
     
     this.hasTeamsFilter = Object.values(this.filtersTeams).some(v => v === true);
       
@@ -839,14 +843,15 @@ export class CircularHeatmapComponent implements OnInit {
     }
   }
   onPanelOpened(activity: any) {
-    console.log('Panel opened', activity);
+    console.log(`${this.perfNow()}: Heat: Card Panel opened: '${activity.name}'`);
   }
   onPanelClosed(activity: any) {
-    console.log('Panel closed', activity);
+    console.log(`${this.perfNow()}: Heat: Card Panel closed: '${activity.name}'`);
   }
   
   openActivityDetails(dimension: string, activityName: string) {
     // Find the activity in the selected sector
+    console.log(`${this.perfNow()}: Heat: Open Overlay: '${activityName}'`);
     if (!this.showActivityCard || !this.showActivityCard.activities) {
       this.old_activityDetails = null;
       this.showOverlay = true;
@@ -878,6 +883,7 @@ export class CircularHeatmapComponent implements OnInit {
 
   closeOverlay() {
     this.showOverlay = false;
+    console.log(`${this.perfNow()}: Heat: Close Overlay:  '${this.old_activityDetails.name}'`);
   }
 
   toggleFilters() {

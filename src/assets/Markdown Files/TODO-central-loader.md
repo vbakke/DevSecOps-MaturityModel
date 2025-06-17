@@ -13,18 +13,22 @@
 
 
 ## Later
-### Dependency graph
-- Dependency graph: Add to CircularHeatmap Details
-- Dependency graph: Make it clickable
 ### Mapping
 - Mapping: Refactor to adhere to new data structure. (Page currently broken)
-### Matrix
-- Matrix: Remember filters, when moving back from details
 ### Teams
+- Teams: Refactor to adhere to new data structure. (Page currently broken)
 - Teams: Allow editing teams names in browser
 - Teams: Store teams names in localstorage
 - Teams: Export teams YAML from teams page
 - Teams: View timeline for a team (?)
+### Matrix
+- Matrix: Fix markdown rendering
+- Matrix: Add a Close/Back button
+- Matrix: Brushup layout of details page
+- Matrix: Remember filters, when moving back from details
+### Dependency graph
+- Dependency graph: Add to CircularHeatmap Details
+- Dependency graph: Make it clickable
 ## Documentation
 - Doc: Update `Usage`
 - Doc: Update `README.md`
