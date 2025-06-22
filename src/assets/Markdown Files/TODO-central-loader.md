@@ -5,9 +5,9 @@
 - Heatmap: Fix: asterisk marks when modified
 
 ## Next
-- Export TeamProgress yaml
-- Read previous local storage for backwards compatibility 
-- Filters
+- Heatmap: Export TeamProgress yaml
+- Heatmap: Read previous local storage for backwards compatibility 
+- Heatmap: Filters
     - filter teams
     - filter none => all
 

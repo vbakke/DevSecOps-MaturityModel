@@ -2,17 +2,20 @@ import { YamlService } from '../service/yaml-loader/yaml-loader.service';
 import { isEmptyObj } from '../util/util';
 import { TeamProgress, Progress, TeamNames, ProgressDefinition, Uuid, TeamName, ProgressTitle, TeamProgressFile } from './meta';
 
+type ActivityMap = Record<Uuid, string>;
+
 const LOCALSTORAGE_KEY: string = 'progress';
 
 export class ProgressStore {
   private yamlService: YamlService = new YamlService();
+  private _activityMap: ActivityMap = {};
   private _progress: Progress = {};
   private _tempProgress: Progress = {};
   private _progressDefinition: ProgressDefinition | null = null;
   private _progressTitles: ProgressTitle[] | null = null;
   private _progressTitlesDescOrder: ProgressTitle[] | null = null;
 
-  public init(teams: TeamNames, progressDefinition: ProgressDefinition) {
+  public init(progressDefinition: ProgressDefinition): void {
     // Sort the progress titles, from most completed, to not started
     this._progressDefinition = progressDefinition;
     this._progressTitles = Object.keys(progressDefinition)
@@ -20,6 +23,10 @@ export class ProgressStore {
     this._progressTitlesDescOrder = this._progressTitles.slice().reverse();
   }
 
+  public setActivityMap(activityMap: ActivityMap): void {
+    this._activityMap = activityMap;
+  }
+  
   public getProgressData(): Progress {
     return this._progress;
   }
@@ -177,17 +184,25 @@ export class ProgressStore {
       console.log(` - ${progress.padEnd(11)}: ${this._progress?.[activityUuid]?.[teamName]?.[progress]?.toISOString()?.substring(0, 10)} ${this._tempProgress?.[activityUuid]?.[teamName]?.[progress]?.toISOString()?.substring(0, 10)}`);
     }
   }
+
   public saveToLocalStorage() {
-    let yamlStr: string = this.toProgressYamlString(this._progress, 'veb')
+    let yamlStr: string = this.toProgressYamlString(this._progress)
     localStorage.setItem(LOCALSTORAGE_KEY, yamlStr);
   }
-  
-  private toProgressYamlString(progress: Progress, uuidMap?: string, indent: number = 2): string {
+
+  private getActivityName(activityUuid: Uuid): string | null {
+    if (this._activityMap) { 
+      return this._activityMap[activityUuid] || null;
+    }
+    return null;
+  }
+    
+  private toProgressYamlString(progress: Progress, indent: number = 2): string {
     let str = 'progress:\n';
     let tab = ' '.repeat(indent);
     for (let activityUuid in progress) {
-
-      let comment: string = (uuidMap) ? `  # ${uuidMap}` : '';
+      let activityName: string | null = this.getActivityName(activityUuid);
+      let comment: string = activityName ? `  # ${activityName}` : '';
       str += tab + `${activityUuid}:${comment}\n`;
 
       for (let teamName in progress[activityUuid]) {
@@ -200,6 +215,7 @@ export class ProgressStore {
     }
     return str;
   }
+
   public retrieveLocalStorage(): TeamProgressFile | null {
     let yamlStr: string | null = localStorage.getItem(LOCALSTORAGE_KEY);
     if (yamlStr == null) return null;
