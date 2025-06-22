@@ -17,7 +17,7 @@ progress:
     B:
       Planned: 2025-01-01
       Started: 2025-02-01
-      Implemented: 2025-03-01
+      # Implemented: 2025-03-01
     C:
       Planned: 2025-03-01
       Started: 2025-04-01
