@@ -1,16 +1,11 @@
 
 ## Doing
 - Heatmap: Local Storage details
-- Heatmap: Fix: don't store 'Not started'
 - Heatmap: Fix: asterisk marks when modified
 
 ## Next
 - Heatmap: Export TeamProgress yaml
 - Heatmap: Read previous local storage for backwards compatibility 
-- Heatmap: Filters
-    - filter teams
-    - filter none => all
-
 
 ## Later
 ### Mapping

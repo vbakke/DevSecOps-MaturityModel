@@ -26,7 +26,7 @@ export class ProgressStore {
   public setActivityMap(activityMap: ActivityMap): void {
     this._activityMap = activityMap;
   }
-  
+
   public getProgressData(): Progress {
     return this._progress;
   }
@@ -72,23 +72,6 @@ export class ProgressStore {
     if (!orgDate) return true
     
     return inDate.getTime() < orgDate.getTime();
-  }
-
-
-  public getTeamActivityProgressState_WHY(activityUuid: string, teamName: string): ProgressTitle {
-    // Return the progressTitle with the most recent date
-    let teamProgress: TeamProgress = this._progress?.[activityUuid]?.[teamName];
-    if (!teamProgress) return '';
-
-    let newestProgressTitle: ProgressTitle = '';
-    let maxDate: Date = new Date(0);
-    for (let key in teamProgress) {
-      if (teamProgress[key].getTime() > maxDate.getTime()) {
-        maxDate = teamProgress[key];
-        newestProgressTitle = key;
-      } 
-    }
-    return newestProgressTitle;
   }
 
   public getTeamProgress(activityUuid: Uuid, teamName: TeamName): TeamProgress {
@@ -203,15 +186,29 @@ export class ProgressStore {
     for (let activityUuid in progress) {
       let activityName: string | null = this.getActivityName(activityUuid);
       let comment: string = activityName ? `  # ${activityName}` : '';
-      str += tab + `${activityUuid}:${comment}\n`;
+      
+      let str_activity: string = '';
 
       for (let teamName in progress[activityUuid]) {
-        str += tab + tab + `'${teamName}':\n`;
+        let str_team: string = "";
         for (let title in progress[activityUuid][teamName]) {
-          let date: string = (progress[activityUuid][teamName][title] as Date).toISOString().substring(0, 10);
-          str += tab + tab + tab + `'${title}': ${date}\n`;
+          if (title !== this._progressTitles?.[0]) {
+            let date: string = (progress[activityUuid][teamName][title] as Date).toISOString().substring(0, 10);
+            str_team += tab + tab + tab + `'${title}': ${date}\n`;
+          }
+        }
+        // Add team progress to activity, only if team has progress 
+        if (str_team) {
+          str_activity += tab + tab + `'${teamName}':\n`;
+          str_activity += str_team;
         }
       }
+      if (str_activity) {
+        // Add activity progress, only if any progress exists
+        str += tab + `${activityUuid}:${comment}\n`;
+        str += str_activity;
+      }
+
     }
     return str;
   }
