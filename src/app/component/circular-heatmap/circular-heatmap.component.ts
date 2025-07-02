@@ -369,10 +369,17 @@ export class CircularHeatmapComponent implements OnInit {
       chip.toggleSelected();
       console.log(`${this.perfNow()}: Heat: Chip flip Group '${teamGroup}: ${chip.selected}`);
   
+      // Update the team selections based on the team group selection
+      let selectedTeams: TeamName[] = [];
       Object.keys(this.filtersTeams).forEach(key => {
         this.filtersTeams[key] = this.dataStore?.meta?.teamGroups[teamGroup]?.includes(key) || false;
+        if (this.filtersTeams[key]) {
+          selectedTeams.push(key);
+        }
+        SectorViewController.setVisibleTeams(selectedTeams);
       });
       this.hasTeamsFilter = Object.values(this.filtersTeams).some(v => v === true);
+      this.reColorHeatmap();
     } else {
       console.log(`${this.perfNow()}: Heat: Chip flip Group '${teamGroup}: already on`);
     }
@@ -380,7 +387,10 @@ export class CircularHeatmapComponent implements OnInit {
   
   getTeamProgressState(activityUuid: string, teamName: string): string {
     return this.dataStore?.progressStore?.getTeamActivityTitle(activityUuid, teamName) || '';
-    // return this.selectedSector?.activities?.find(a => a.uuid === activityUuid)?.teamsImplemented[teamName] || '';
+  }
+
+  getBackedupTeamProgressState(activityUuid: string, teamName: string): string {
+    return this.dataStore?.progressStore?.getTeamActivityTitle(activityUuid, teamName, true) || '';
   }
 
   toggleTeamFilter(chip: MatChip) {
@@ -391,11 +401,15 @@ export class CircularHeatmapComponent implements OnInit {
     this.hasTeamsFilter = Object.values(this.filtersTeams).some(v => v === true);
       
     let selectedTeams: string[] = Object.keys(this.filtersTeams).filter(key => this.filtersTeams[key]);
+    SectorViewController.setVisibleTeams(selectedTeams);
 
+    // Update team group filter, if one matches selection
     Object.keys(this.dataStore?.meta?.teamGroups || {}).forEach(group => {
       let match: boolean = equalArray(selectedTeams, this.dataStore?.meta?.teamGroups[group]);
       this.filtersTeamGroups[group] = match;
     });
+
+    this.reColorHeatmap()
   }
 
   toggleTeamGroupSelection(chip: MatChip) {
@@ -546,8 +560,6 @@ export class CircularHeatmapComponent implements OnInit {
       .segmentLabelHeight(segmentLabelHeight);
 
     chart.accessor(function (d: any) {
-      if (d.getSectorProgress() > 0)
-        console.log('Color', d.level, d.dimension, d.value, d.getSectorProgress());
       return d.getSectorProgress();
     });
 
@@ -932,12 +944,18 @@ export class CircularHeatmapComponent implements OnInit {
     let progressValue: number = this.allSectors[index].getSectorProgress();
     d3.select('#index-' + index).attr(
       'fill',
-      colorSector(progressValue)
+      isNaN(progressValue) ? '#DCDCDC' : colorSector(progressValue)
     );
     console.log(`Recolor sector ${index} with progress ${(progressValue*100).toFixed(1)}%`);
   }
 
   reColorHeatmap() {
+    for (let index = 0; index < this.allSectors.length; index++) {
+      this.recolorSector(index);
+    }
+  }
+
+  OBSOLETE_reColorHeatmap() {
     console.log('recolor');
     var teamsCount = this.old_teamVisible.length;
 

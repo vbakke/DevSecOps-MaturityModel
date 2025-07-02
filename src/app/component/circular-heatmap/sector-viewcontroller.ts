@@ -57,11 +57,11 @@ export class SectorViewController {
     }
 
     // Calculate the progress of an activity, across all visible teams
-    private getActivityProgress(uuid: Uuid, teams: TeamNames): number {
+    private getActivityProgress(uuid: Uuid, teams: TeamNames, getBackupValue: boolean = false): number {
       let activity: ActivityProgress = SectorViewController._allProgress?.[uuid] || {};
       let progress: number = 0;
       for (const team of teams) {
-        progress += SectorViewController._progressStore?.getTeamActivityProgressValue(uuid, team) || 0;
+        progress += SectorViewController._progressStore?.getTeamActivityProgressValue(uuid, team, getBackupValue) || 0;
       }
       return progress / teams.length;
     }

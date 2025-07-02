@@ -74,12 +74,12 @@ export class ProgressStore {
     return inDate.getTime() < orgDate.getTime();
   }
 
-  public getTeamProgress(activityUuid: Uuid, teamName: TeamName): TeamProgress {
-    // Return the team progress for the given activity and team
-    // if (!this._progress?.[activityUuid]) return {};
-    // if (!this._progress[activityUuid][teamName]) return {};
-    
-    return this._progress?.[activityUuid]?.[teamName];
+  public getTeamProgress(activityUuid: Uuid, teamName: TeamName, returnBackupValue: boolean = false): TeamProgress {
+    if (returnBackupValue) {
+      return this._tempProgress?.[activityUuid]?.[teamName];
+    } else {
+      return this._progress?.[activityUuid]?.[teamName];
+    }
   }
 
   public getTeamProgressTitle(activityUuid: Uuid, teamName: TeamName): ProgressTitle {
@@ -96,15 +96,15 @@ export class ProgressStore {
     return this._progressTitles[0];
   }
 
-  public getTeamActivityProgressValue(activityUuid: Uuid, teamName: TeamName): number {
-    let teamProgress: TeamProgress = this.getTeamProgress(activityUuid, teamName);
+  public getTeamActivityProgressValue(activityUuid: Uuid, teamName: TeamName, getBackupValue: boolean): number {
+    let teamProgress: TeamProgress = this.getTeamProgress(activityUuid, teamName, getBackupValue);
     return this.getProgressValue(teamProgress);
   }
 
-  public getTeamActivityTitle(activityUuid: Uuid, teamName: TeamName): ProgressTitle {
+  public getTeamActivityTitle(activityUuid: Uuid, teamName: TeamName, returnBackupValue: boolean = false): ProgressTitle {
     // Return the team activity title for the given activity and team
     if (this._progressTitles == null) return '';
-    let teamProgress: TeamProgress = this.getTeamProgress(activityUuid, teamName);
+    let teamProgress: TeamProgress = this.getTeamProgress(activityUuid, teamName, returnBackupValue);
     if (teamProgress == null) return this._progressTitles[0];
     for (const title of this._progressTitlesDescOrder || []) {
       if (teamProgress[title] !== undefined && this._progressDefinition) {
@@ -222,7 +222,8 @@ export class ProgressStore {
 
   /**
    * Clear progress for a team's activity, from startIndex to endIndex.
-   * It will store a backup of the progress in _tempProgress, in case the dates need to be restored.
+   * It will store a backup of the progress in _tempProgress, in case 
+   * these dates need to be restored.
    */
   private clearTeamActivityProgress(
     activityUuid: Uuid,
@@ -301,6 +302,7 @@ export class ProgressStore {
     }
     console.log(`Restored ${teamName}. Temporary store: `, this._tempProgress);
   }
+  
   private today(): Date {
     let now = new Date();
     return  new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));

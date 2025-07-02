@@ -27,7 +27,7 @@ describe('ProgressSliderComponent', () => {
   });
 
   it('should initialize with the correct initial step', () => {
-    component.initialValue = 1;
+    component.originalValue = 1;
     component.ngOnInit();
     expect(component.currentValue).toBe(1);
   });

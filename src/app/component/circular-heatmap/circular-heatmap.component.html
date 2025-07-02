@@ -256,17 +256,20 @@
                       <label class="team-label">
                       {{ team.key }}:
                     </label>
-                          <progress-slider
+                    <!-- [initial]="getBackedupTeamProgressState(activity['uuid'], team.key)" -->
+                        <progress-slider
+                          [DBG_name]="activity['name']"
                           [steps]="progressStates"
-                          [initial]="getTeamProgressState(activity['uuid'], team.key)"
+                          [state]="getTeamProgressState(activity['uuid'], team.key)"
+                          [originalState]="getBackedupTeamProgressState(activity['uuid'], team.key)"
                           (progressChange)="onProgressChange(activity['uuid'], team.key, $event)"
-                          ></progress-slider>
+                        ></progress-slider>
                     </li>
                   </ng-container>
                 </ul>
                 <div>
                   <span >* Has been modified</span><br/>
-                  <span >** Has been modified to less complete stage then before</span>
+                  <span >** Has been modified to less complete stage than before</span>
                 </div>
               </ng-template>
             </mat-expansion-panel>

@@ -8,17 +8,25 @@ import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 })
 
 export class ProgressSliderComponent implements OnInit {
+  @Input() DBG_name: string = '';
   @Input() steps: string[] = [];
-  @Input() initial: string = '';
+  @Input() state: string = '';
+  @Input() originalState: string = '';
   @Output() progressChange = new EventEmitter<string>();
   
-  initialValue: number = 0;
+  originalValue: number = 0;
   currentValue: number = 0;
 
   ngOnInit() {
-    this.initialValue = this.steps.indexOf(this.initial);
-    if (this.initialValue === -1) this.initialValue = 0;
-    this.currentValue = this.initialValue;
+    this.currentValue = this.steps.indexOf(this.state);
+    this.originalValue = this.steps.indexOf(this.originalState);
+
+    if (this.currentValue === -1) this.currentValue = 0;
+    if (this.originalValue === -1) this.originalValue = 0;
+    
+    if (this.originalValue <= 0) this.originalValue = this.currentValue; 
+
+    console.log(`ProgressSliderComponent: ${this.DBG_name}: previous: ${this.originalValue}, current: ${this.currentValue} (${this.state},${this.originalState})`);
   }
 
   getCurrent() {
@@ -26,7 +34,7 @@ export class ProgressSliderComponent implements OnInit {
   }
 
   hasChanged(): boolean {
-    return this.initialValue != this.currentValue;
+    return this.originalValue != this.currentValue;
   }
 
   onSlide(event: any) {
