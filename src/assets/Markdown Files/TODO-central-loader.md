@@ -1,17 +1,21 @@
 
 ## Doing
-- Heatmap: Local Storage details
-- Heatmap: Fix: don't store 'Not started'
-- Heatmap: Fix: asterisk marks when modified
+
 
 ## Next
-- Export TeamProgress yaml
-- Read previous local storage for backwards compatibility 
-- Filters
-    - filter teams
-    - filter none => all
-
-
+- Heatmap: Export TeamProgress yaml
+- Heatmap: Fix: asterisk marks when modified
+  - ViewController needs to know about changes vs temp storage
+- Heatmap: Local Storage details
+  - Go though responsibility to SectorViewController
+    - What is the responsibility?
+    - What functions are outside responsibility?
+    - What functionality should be within  responsibility?
+    - Move SectorViewController to ...
+  - General tidy
+  - Remove unnecessary console logs
+- Move page components to ./pages/...
+  
 ## Later
 ### Mapping
 - Mapping: Refactor to adhere to new data structure. (Page currently broken)
@@ -26,6 +30,10 @@
 - Matrix: Add a Close/Back button
 - Matrix: Brushup layout of details page
 - Matrix: Remember filters, when moving back from details
+### Heatmap:
+- Heatmap: meta-yaml: If progress definition is missing, default to 0% + 100% 
+- Heatmap: Revert to boolean checkboxes, if definition is only 0% and 100%
+- Heatmap: Read previous local storage for backwards compatibility 
 ### Dependency graph
 - Dependency graph: Add to CircularHeatmap Details
 - Dependency graph: Make it clickable
@@ -43,6 +51,7 @@
 - Circular, Card: Add Complete symbol per activity
 
 # Done
+- Heatmap: Fix: Update map when teams are selected
 - Store TeamProgress to localStorage
 - Load localStorage TeamProgress
 - Load TeamProgress yaml
@@ -72,10 +81,3 @@
 - Load Yaml
 
 For details and dates, please see the [GitHub log](https://github.com/vbakke/DevSecOps-MaturityModel/commits/experiment/).
-
-## User tracking
-The Experimental edition, and the Experimental edition only, uses Grafana Frontend to log the console log to catch bugs, especially from mobile devices. 
-
-Geolocation is not enabled, so no user identifiable data is stored.
-
-You may block this debug logging by using an ad-blocker. 

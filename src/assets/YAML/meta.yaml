@@ -1,5 +1,7 @@
 ---
-checkForDsommUpdates: true  # Yet to be implemented
+¤-allowCheckDsommActivityUpdateInBrowser: true  # Yet to be implemented
+¤-dsommActivityUrl: https://git...io/dsomm/master....
+
 progressDefinition:
   "Not started": 0%
   Planned: 10%
@@ -9,6 +11,8 @@ progressDefinition:
 #   Low maturity: 0%
 #   Medium maturity: 40%
 #   High maturity: 100% 
+
+¤-allowChangeTeamNameInBrowser: true  # Yet to be implemented
 teams: 
   $ref: 'default/teams.yaml#/teams'
 teamGroups:

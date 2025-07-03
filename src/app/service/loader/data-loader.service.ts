@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { perfNow } from 'src/app/util/util';
 import { YamlService } from '../yaml-loader/yaml-loader.service';
-import { MetaFile, MetaStrings, Progress, TeamProgressFile } from 'src/app/model/meta';
-import { ActivityStore, Data } from 'src/app/model/activity-store';
+import { MetaFile, MetaStrings, Progress, TeamProgressFile, Uuid } from 'src/app/model/meta';
+import { Activity, ActivityStore, Data } from 'src/app/model/activity-store';
 import { ProgressStore } from 'src/app/model/progress-store';
 import { DataStore } from 'src/app/model/data-store';
 
@@ -36,10 +36,18 @@ export class LoaderService {
       // Load meta.yaml first
       this.dataStore.meta = await this.loadMeta();
       console.warn('TODO: MOVE THIS TO DATASTORE...');
-      this.dataStore.progressStore?.init(this.dataStore.meta.teams, this.dataStore.meta.progressDefinition);
+      this.dataStore.progressStore?.init(this.dataStore.meta.progressDefinition);
       
       // Then load activities
       this.dataStore.addActivities(await this.loadActivities(this.dataStore.meta));
+
+      // Add a activity name lookup table for the progress store
+      let activityMap: Record<Uuid, string> = {};
+      this.dataStore.activityStore?.getAllActivities().forEach((activity: Activity) => {
+        activityMap[activity.uuid] = activity.name;
+      });
+      this.dataStore.progressStore?.setActivityMap(activityMap);
+
 
       // Load the progress for each team's activities
       let teamProgress: TeamProgressFile = await this.loadTeamProgress(this.dataStore.meta);

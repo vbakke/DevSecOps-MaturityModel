@@ -2,22 +2,29 @@ import { YamlService } from '../service/yaml-loader/yaml-loader.service';
 import { isEmptyObj } from '../util/util';
 import { TeamProgress, Progress, TeamNames, ProgressDefinition, Uuid, TeamName, ProgressTitle, TeamProgressFile } from './meta';
 
+type ActivityMap = Record<Uuid, string>;
+
 const LOCALSTORAGE_KEY: string = 'progress';
 
 export class ProgressStore {
   private yamlService: YamlService = new YamlService();
+  private _activityMap: ActivityMap = {};
   private _progress: Progress = {};
   private _tempProgress: Progress = {};
   private _progressDefinition: ProgressDefinition | null = null;
   private _progressTitles: ProgressTitle[] | null = null;
   private _progressTitlesDescOrder: ProgressTitle[] | null = null;
 
-  public init(teams: TeamNames, progressDefinition: ProgressDefinition) {
+  public init(progressDefinition: ProgressDefinition): void {
     // Sort the progress titles, from most completed, to not started
     this._progressDefinition = progressDefinition;
     this._progressTitles = Object.keys(progressDefinition)
             .sort((a, b) => progressDefinition[a] - progressDefinition[b]);
     this._progressTitlesDescOrder = this._progressTitles.slice().reverse();
+  }
+
+  public setActivityMap(activityMap: ActivityMap): void {
+    this._activityMap = activityMap;
   }
 
   public getProgressData(): Progress {
@@ -67,29 +74,12 @@ export class ProgressStore {
     return inDate.getTime() < orgDate.getTime();
   }
 
-
-  public getTeamActivityProgressState_WHY(activityUuid: string, teamName: string): ProgressTitle {
-    // Return the progressTitle with the most recent date
-    let teamProgress: TeamProgress = this._progress?.[activityUuid]?.[teamName];
-    if (!teamProgress) return '';
-
-    let newestProgressTitle: ProgressTitle = '';
-    let maxDate: Date = new Date(0);
-    for (let key in teamProgress) {
-      if (teamProgress[key].getTime() > maxDate.getTime()) {
-        maxDate = teamProgress[key];
-        newestProgressTitle = key;
-      } 
+  public getTeamProgress(activityUuid: Uuid, teamName: TeamName, returnBackupValue: boolean = false): TeamProgress {
+    if (returnBackupValue) {
+      return this._tempProgress?.[activityUuid]?.[teamName];
+    } else {
+      return this._progress?.[activityUuid]?.[teamName];
     }
-    return newestProgressTitle;
-  }
-
-  public getTeamProgress(activityUuid: Uuid, teamName: TeamName): TeamProgress {
-    // Return the team progress for the given activity and team
-    // if (!this._progress?.[activityUuid]) return {};
-    // if (!this._progress[activityUuid][teamName]) return {};
-    
-    return this._progress?.[activityUuid]?.[teamName];
   }
 
   public getTeamProgressTitle(activityUuid: Uuid, teamName: TeamName): ProgressTitle {
@@ -106,15 +96,15 @@ export class ProgressStore {
     return this._progressTitles[0];
   }
 
-  public getTeamActivityProgressValue(activityUuid: Uuid, teamName: TeamName): number {
-    let teamProgress: TeamProgress = this.getTeamProgress(activityUuid, teamName);
+  public getTeamActivityProgressValue(activityUuid: Uuid, teamName: TeamName, getBackupValue: boolean): number {
+    let teamProgress: TeamProgress = this.getTeamProgress(activityUuid, teamName, getBackupValue);
     return this.getProgressValue(teamProgress);
   }
 
-  public getTeamActivityTitle(activityUuid: Uuid, teamName: TeamName): ProgressTitle {
+  public getTeamActivityTitle(activityUuid: Uuid, teamName: TeamName, returnBackupValue: boolean = false): ProgressTitle {
     // Return the team activity title for the given activity and team
     if (this._progressTitles == null) return '';
-    let teamProgress: TeamProgress = this.getTeamProgress(activityUuid, teamName);
+    let teamProgress: TeamProgress = this.getTeamProgress(activityUuid, teamName, returnBackupValue);
     if (teamProgress == null) return this._progressTitles[0];
     for (const title of this._progressTitlesDescOrder || []) {
       if (teamProgress[title] !== undefined && this._progressDefinition) {
@@ -177,29 +167,52 @@ export class ProgressStore {
       console.log(` - ${progress.padEnd(11)}: ${this._progress?.[activityUuid]?.[teamName]?.[progress]?.toISOString()?.substring(0, 10)} ${this._tempProgress?.[activityUuid]?.[teamName]?.[progress]?.toISOString()?.substring(0, 10)}`);
     }
   }
+
   public saveToLocalStorage() {
-    let yamlStr: string = this.toProgressYamlString(this._progress, 'veb')
+    let yamlStr: string = this.toProgressYamlString(this._progress)
     localStorage.setItem(LOCALSTORAGE_KEY, yamlStr);
   }
-  
-  private toProgressYamlString(progress: Progress, uuidMap?: string, indent: number = 2): string {
+
+  private getActivityName(activityUuid: Uuid): string | null {
+    if (this._activityMap) { 
+      return this._activityMap[activityUuid] || null;
+    }
+    return null;
+  }
+    
+  private toProgressYamlString(progress: Progress, indent: number = 2): string {
     let str = 'progress:\n';
     let tab = ' '.repeat(indent);
     for (let activityUuid in progress) {
-
-      let comment: string = (uuidMap) ? `  # ${uuidMap}` : '';
-      str += tab + `${activityUuid}:${comment}\n`;
+      let activityName: string | null = this.getActivityName(activityUuid);
+      let comment: string = activityName ? `  # ${activityName}` : '';
+      
+      let str_activity: string = '';
 
       for (let teamName in progress[activityUuid]) {
-        str += tab + tab + `'${teamName}':\n`;
+        let str_team: string = "";
         for (let title in progress[activityUuid][teamName]) {
-          let date: string = (progress[activityUuid][teamName][title] as Date).toISOString().substring(0, 10);
-          str += tab + tab + tab + `'${title}': ${date}\n`;
+          if (title !== this._progressTitles?.[0]) {
+            let date: string = (progress[activityUuid][teamName][title] as Date).toISOString().substring(0, 10);
+            str_team += tab + tab + tab + `'${title}': ${date}\n`;
+          }
+        }
+        // Add team progress to activity, only if team has progress 
+        if (str_team) {
+          str_activity += tab + tab + `'${teamName}':\n`;
+          str_activity += str_team;
         }
       }
+      if (str_activity) {
+        // Add activity progress, only if any progress exists
+        str += tab + `${activityUuid}:${comment}\n`;
+        str += str_activity;
+      }
+
     }
     return str;
   }
+
   public retrieveLocalStorage(): TeamProgressFile | null {
     let yamlStr: string | null = localStorage.getItem(LOCALSTORAGE_KEY);
     if (yamlStr == null) return null;
@@ -209,7 +222,8 @@ export class ProgressStore {
 
   /**
    * Clear progress for a team's activity, from startIndex to endIndex.
-   * It will store a backup of the progress in _tempProgress, in case the dates need to be restored.
+   * It will store a backup of the progress in _tempProgress, in case 
+   * these dates need to be restored.
    */
   private clearTeamActivityProgress(
     activityUuid: Uuid,
@@ -288,6 +302,7 @@ export class ProgressStore {
     }
     console.log(`Restored ${teamName}. Temporary store: `, this._tempProgress);
   }
+  
   private today(): Date {
     let now = new Date();
     return  new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
