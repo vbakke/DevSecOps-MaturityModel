@@ -1,6 +1,5 @@
 
 ## Doing
-- Heatmap: Fix: Update map when teams are selected
 
 
 ## Next
@@ -52,6 +51,7 @@
 - Circular, Card: Add Complete symbol per activity
 
 # Done
+- Heatmap: Fix: Update map when teams are selected
 - Store TeamProgress to localStorage
 - Load localStorage TeamProgress
 - Load TeamProgress yaml
