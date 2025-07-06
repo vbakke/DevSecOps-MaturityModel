@@ -168,9 +168,17 @@ export class ProgressStore {
     }
   }
 
+  public asYamlString(): string {
+    return this.toProgressYamlString(this._progress);
+  }
+
   public saveToLocalStorage() {
-    let yamlStr: string = this.toProgressYamlString(this._progress)
+    let yamlStr: string = this.toProgressYamlString(this._progress);
     localStorage.setItem(LOCALSTORAGE_KEY, yamlStr);
+  }
+
+  public deleteBrowserStoredTeamProgress(): void {
+    localStorage.removeItem(LOCALSTORAGE_KEY);
   }
 
   private getActivityName(activityUuid: Uuid): string | null {
@@ -213,8 +221,13 @@ export class ProgressStore {
     return str;
   }
 
-  public retrieveLocalStorage(): TeamProgressFile | null {
+  public retrieveStoredTeamProgressYaml(): string | null {
     let yamlStr: string | null = localStorage.getItem(LOCALSTORAGE_KEY);
+    return yamlStr;
+  }
+
+  public retrieveStoredTeamProgress(): TeamProgressFile | null {
+    let yamlStr: string | null = this.retrieveStoredTeamProgressYaml();
     if (yamlStr == null) return null;
 
     return this.yamlService.parse(yamlStr);
