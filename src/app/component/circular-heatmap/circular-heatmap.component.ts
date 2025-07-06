@@ -902,7 +902,27 @@ export class CircularHeatmapComponent implements OnInit {
     this.showFilters = !this.showFilters;
   }
 
-  saveEditedYAMLfile() {
+  exportTeamProgress() {
+    // Remove focus from the button that becomes aria unavailable (avoids ugly console error message)
+    const buttonElement = document.activeElement as HTMLElement;
+    buttonElement.blur();
+    
+    let yamlStr: string | null = this.dataStore?.progressStore?.asYamlString() || null;
+    if (!yamlStr) {
+      this.displayMessage(new DialogInfo('No team progress data available', 'Export Error'));
+      return;
+    }
+    
+    let file = new Blob([yamlStr], { type: 'application/yaml; charset=utf-8' });
+    var link = document.createElement('a');
+    link.href = window.URL.createObjectURL(file);
+    link.download = this.dataStore?.meta?.teamProgressFile?.split('/')?.pop() || 'team-progress.yaml';
+
+    link.click();
+    link.remove();
+  }
+
+  OBSOLETE_saveEditedYAMLfile() {
     this.setTeamsStatus(this.old_YamlObject, this.old_teamList, this.old_ALL_CARD_DATA);
     let yamlStr = yaml.dump(this.old_YamlObject);
 
@@ -1008,7 +1028,7 @@ export class CircularHeatmapComponent implements OnInit {
       .afterClosed()
       .subscribe(data => {
         if (data === 'Delete') {
-          localStorage.removeItem('dataset');
+          this.dataStore?.progressStore?.deleteBrowserStoredTeamProgress();
           location.reload(); // Make sure all load routines are initialized
         }
       });
