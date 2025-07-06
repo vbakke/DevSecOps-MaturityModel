@@ -16,7 +16,7 @@ if (environment?.experimental && !localDevelopment) {
     url: 'https://faro-collector-prod-eu-north-0.grafana.net/collect/a7eda57dbf6b581662f2bf43a70c7508',
     app: {
       name: 'dsomm',
-      version: '1.0.2',
+      version: '1.0.3',
       environment: localDevelopment ? 'development' : 'experimental',
     },
     sessionTracking: {
@@ -43,11 +43,13 @@ if (environment?.experimental && !localDevelopment) {
   else debugid = localStorage.getItem('debugid') || '';
   faro.api.setUser(
     { attributes: {
-      debugid: debugid,
-      debugfamily: debugid.split('-')[0],
+        debugid: debugid,
+        debugfamily: debugid.split('-')[0],
+        debugreferrer: document.referrer,
       }, 
     });
-
+    if (debugid) console.log('Faro debugid:', debugid);
+    if (document.referrer) console.log('Faro referrer:', document.referrer);
 }
 
 
