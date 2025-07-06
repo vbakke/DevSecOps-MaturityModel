@@ -28,7 +28,12 @@ export class AppComponent implements OnInit {
           let commitDate: string = gitinfo?.commit?.commit?.author?.date;
           if (commitDate) {
             let element = document.querySelector('.tag-subtitle');
-            if (element) element.textContent = 'Updated: ' + commitDate?.replace('T', ' ');
+            if (element) {
+              element.textContent = 'Updated: ' + commitDate?.replace('T', ' ');
+              if (localStorage.getItem('debugid')) {
+                element.textContent += ' (id: ' + localStorage.getItem('debugid') + ')';
+              }
+            }
           }
       });
     }
