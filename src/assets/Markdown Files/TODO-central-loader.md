@@ -44,10 +44,15 @@
 - Doc: Update `INSTALL.md`
 ## Misc
 - Fix dependsOn that is uuid (e.g. 83057028-0b77-4d2e-8135-40969768ae88)
-- Sort linear list of activities (sorted by level, dim)
 - Move META_FILE constant from data service to main app
 - Filter: tags: Fix update on SPACE key (trouble)
-- Circular, Card: Add Complete symbol per activity
+- Heatmap, Card: Add Complete-symbol per activity
+- Check if loader can be optimized by load in yaml in parallel
+## Align DSOMM-data and DSOMM
+- DSOMM-data: Sort linear list of activities (sorted by dim, level)
+- DSOMM-data: Update generated filename and data structure to adhere to this new DSOMM standard
+- DSOMM-data: Include version number in generated yaml file
+- DSOMM: Read latest "generated.yaml" from DSOMM-data's github repo, to check for any new releases
 
 # Done
 - Heatmap: Export TeamProgress yaml

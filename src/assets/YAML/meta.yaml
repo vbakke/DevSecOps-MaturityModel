@@ -20,8 +20,8 @@ teamGroups:
 
 teamProgressFile: 'team-progress.yaml' 
 activityFiles:
-    - generated/generated.yaml 
-    # - default/activities.yaml 
+    # - generated/generated.yaml 
+    - default/activities.yaml 
     # - custom/custom-activities.yaml  # For customizing your own activities
     # - custom/test-ignore-activities.yaml
 
