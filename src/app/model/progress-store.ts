@@ -32,7 +32,6 @@ export class ProgressStore {
   }
 
   public addProgressData(newProgress: Progress): void {
-    console.log(newProgress);
     if (!newProgress) return;
 
     if (isEmptyObj(this._progress)) {

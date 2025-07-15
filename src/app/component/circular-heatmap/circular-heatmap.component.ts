@@ -966,7 +966,7 @@ export class CircularHeatmapComponent implements OnInit {
       'fill',
       isNaN(progressValue) ? '#DCDCDC' : colorSector(progressValue)
     );
-    console.log(`Recolor sector ${index} with progress ${(progressValue*100).toFixed(1)}%`);
+    // console.log(`Recolor sector ${index} with progress ${(progressValue*100).toFixed(1)}%`);
   }
 
   reColorHeatmap() {
