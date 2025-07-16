@@ -52,3 +52,4 @@ export class SectorService {
     return teams.length ? progress / teams.length : 0;
   }
 }
+

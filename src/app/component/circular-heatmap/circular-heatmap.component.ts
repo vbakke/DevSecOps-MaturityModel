@@ -19,8 +19,9 @@ import {
 } from '../modal-message/modal-message.component';
 import { Activity, ActivityStore } from 'src/app/model/activity-store';
 import { Uuid, ProgressDefinition, TeamName, ProgressTitle } from 'src/app/model/meta';
-import { SectorViewController } from './sector-viewcontroller';
+import { SectorService } from '../../service/sector-service';
 import { DataStore } from 'src/app/model/data-store';
+import { Sector } from 'src/app/model/sector';
 
 
 export interface old_activitySchema {
@@ -82,14 +83,15 @@ export class CircularHeatmapComponent implements OnInit {
   filtersTeamGroups: Record<string, boolean> = {};
   hasTeamsFilter: boolean = false;
   maxLevel: number = 0;
-  allSectors: SectorViewController[] = [];
   dimensionLabels: string[] = [];
-  selectedSector: SectorViewController | null = null;
   progressStates: string[] = [];
+  allSectors: Sector[] = [];
+  selectedSector: Sector | null = null;
 
   constructor(
     private old_yaml: ymlService,
     private loader: LoaderService,
+    private sectorService: SectorService,
     private router: Router,
     public modal: ModalMessageComponent
   ) { }
@@ -116,8 +118,8 @@ export class CircularHeatmapComponent implements OnInit {
         this.filtersTeamGroups['All'] = true;
 
         let progressDefinition: ProgressDefinition = dataStore.meta?.progressDefinition || {};
-        SectorViewController.init(dataStore.progressStore, dataStore.meta?.teams || [], dataStore?.progressStore?.getProgressData() || {}, progressDefinition);
-        this.progressStates = SectorViewController.getProgressStates();
+        this.sectorService.init(dataStore.progressStore, dataStore.meta?.teams || [], dataStore?.progressStore?.getProgressData() || {}, progressDefinition);
+        this.progressStates = this.sectorService.getProgressStates();
 
         this.setYamlData(dataStore);
 
@@ -153,14 +155,14 @@ export class CircularHeatmapComponent implements OnInit {
     
     // Prepare all sectors: one for each (dimension, level) pair
     this.allSectors = [];
-    for (let lvl = 1; lvl <= this.maxLevel; lvl++) {
+    for (let level = 1; level <= this.maxLevel; level++) {
       for (let dimName of this.dimensionLabels) {
-        const activities: Activity[] = dataStore?.activityStore?.getActivities(dimName, lvl) || [];
-        this.allSectors.push(new SectorViewController(
-          dimName,
-          'Level ' + lvl,
-          activities,
-        ));
+        const activities: Activity[] = dataStore?.activityStore?.getActivities(dimName, level) || [];
+        this.allSectors.push({
+          dimension: dimName,
+          level: level,
+          activities: activities,
+          });
       }
     }
   }    
@@ -376,7 +378,7 @@ export class CircularHeatmapComponent implements OnInit {
         if (this.filtersTeams[key]) {
           selectedTeams.push(key);
         }
-        SectorViewController.setVisibleTeams(selectedTeams);
+        this.sectorService.setVisibleTeams(selectedTeams);
       });
       this.hasTeamsFilter = Object.values(this.filtersTeams).some(v => v === true);
       this.reColorHeatmap();
@@ -401,7 +403,7 @@ export class CircularHeatmapComponent implements OnInit {
     this.hasTeamsFilter = Object.values(this.filtersTeams).some(v => v === true);
       
     let selectedTeams: string[] = Object.keys(this.filtersTeams).filter(key => this.filtersTeams[key]);
-    SectorViewController.setVisibleTeams(selectedTeams);
+    this.sectorService.setVisibleTeams(selectedTeams);
 
     // Update team group filter, if one matches selection
     Object.keys(this.dataStore?.meta?.teamGroups || {}).forEach(group => {
@@ -527,6 +529,10 @@ export class CircularHeatmapComponent implements OnInit {
     // this.recolorSector(activityUuid, teamName);
   }
 
+  getSectorProgress(sector: Sector): number {
+    return this.sectorService.getSectorProgress(sector.activities);
+  }
+
   loadCircularHeatMap(
     dom_element_to_append_to: string,
     dataset: any,
@@ -559,8 +565,8 @@ export class CircularHeatmapComponent implements OnInit {
       .segmentLabels(dimLabels)
       .segmentLabelHeight(segmentLabelHeight);
 
-    chart.accessor(function (d: any) {
-      return d.getSectorProgress();
+    chart.accessor(function (sector: Sector) {
+      return _self.getSectorProgress(sector);
     });
 
     var svg = d3
@@ -961,7 +967,7 @@ export class CircularHeatmapComponent implements OnInit {
       .domain([0, 1])
       .range(['white', 'green']);
 
-    let progressValue: number = this.allSectors[index].getSectorProgress();
+    let progressValue: number = this.sectorService.getSectorProgress(this.allSectors[index].activities);
     d3.select('#index-' + index).attr(
       'fill',
       isNaN(progressValue) ? '#DCDCDC' : colorSector(progressValue)
