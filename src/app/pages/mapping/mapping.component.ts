@@ -8,14 +8,16 @@ import * as XLSX from 'xlsx';
 import { LoaderService } from 'src/app/service/loader/data-loader.service';
 import { DialogInfo, ModalMessageComponent } from 'src/app/component/modal-message/modal-message.component';
 import { DataStore } from 'src/app/model/data-store';
+import { Uuid } from 'src/app/model/meta';
 
 export interface MappingRow {
+  uuid: Uuid;
   dimension: string;
   subDimension: string;
   activityName: string;
-  samm2: string[] | string;
-  ISO17: string[] | string;
-  ISO22: string[] | string;
+  samm2: string[];
+  ISO17: string[];
+  ISO22: string[];
   description?: string;
   risk?: string;
   measure?: string;
@@ -27,9 +29,6 @@ export interface MappingRow {
   comments?: string;
   assessment?: string;
   level?: number;
-  implementation?: any;
-  teamImplementation?: { [key: string]: boolean };
-  teamsEvidence?: { [key: string]: string };
 }
 
 // Enum for sort mode
@@ -48,7 +47,7 @@ enum SortMode {
 export class MappingComponent implements OnInit, AfterViewInit {
   allMappings: MappingRow[] = [];
   dataSource = new MatTableDataSource<MappingRow>([]);
-  currentSort: SortMode = SortMode.Activity;
+  // currentSort: SortMode = SortMode.Activity;
 
   //labels
   knowledgeLabels: string[] = [];
@@ -64,7 +63,7 @@ export class MappingComponent implements OnInit, AfterViewInit {
     'ISO22',
   ];
   separatorKeysCodes: number[] = [ENTER, COMMA];
-  SortCtrl = new FormControl(SortMode.Activity);
+  // SortCtrl = new FormControl(SortMode.Activity);
 
   @ViewChild('chipInput') chipInput!: ElementRef<HTMLInputElement>;
   @ViewChild(MatSort, { static: false }) sort!: MatSort;
@@ -72,7 +71,6 @@ export class MappingComponent implements OnInit, AfterViewInit {
   dataStore: DataStore = new DataStore();
 
   constructor(
-    private yaml: ymlService,
     private loader: LoaderService,
     public modal: ModalMessageComponent
   ) {}
@@ -82,7 +80,6 @@ export class MappingComponent implements OnInit, AfterViewInit {
       .load()
       .then((dataStore: DataStore) => {
         this.setYamlData(dataStore);
-        this.allMappings = this.transformDataStore(dataStore);
         this.updateDataSource();
       })
       .catch(err => {
@@ -92,10 +89,10 @@ export class MappingComponent implements OnInit, AfterViewInit {
         }
       });
 
-    this.SortCtrl.valueChanges.subscribe((sort: SortMode) => {
-      this.currentSort = sort;
-      this.updateDataSource();
-    });
+    // this.SortCtrl.valueChanges.subscribe((sort: SortMode) => {
+    //   this.currentSort = sort;
+    //   this.updateDataSource();
+    // });
   }
 
   ngAfterViewInit() {
@@ -116,7 +113,9 @@ export class MappingComponent implements OnInit, AfterViewInit {
   }
 
   setYamlData(dataStore: DataStore) {
-    this.dataStore = dataStore;
+    this.dataStore = dataStore;    
+    this.allMappings = this.transformDataStore(dataStore);
+    this.allTeams = dataStore.meta?.teams || [];
   }
 
   // Transform DataStore to MappingRow[]
@@ -127,6 +126,7 @@ export class MappingComponent implements OnInit, AfterViewInit {
 
     return dataStore.activityStore.getAllActivities().map(activity => {
       return {
+        uuid: activity.uuid || '',
         dimension: activity.category || '',
         subDimension: activity.dimension || '',
         activityName: activity.name || '',
@@ -144,7 +144,7 @@ export class MappingComponent implements OnInit, AfterViewInit {
         comments: activity.comments || '',
         assessment: activity.assessment || '',
         level: activity.level || 0,
-        implementation: activity.implementation || {},
+        teamImplementation: activity.implementation || {},
         // teamsEvidence: activity.teamsEvidence || {},
       };
     });
@@ -158,7 +158,7 @@ export class MappingComponent implements OnInit, AfterViewInit {
 
   exportToExcel() {
     let element = document.getElementById('excel-table');
-    const ws: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
+    const ws: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element, { raw: true });
     const wb: XLSX.WorkBook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
     XLSX.writeFile(wb, 'Planned-Activities-Sorted-By-ISO17.xlsx');

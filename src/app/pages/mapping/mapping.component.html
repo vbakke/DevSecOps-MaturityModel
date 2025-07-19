@@ -7,14 +7,6 @@
           <mat-icon>file_download</mat-icon>
         </button>
       </section>
-      <section class="sort-section">
-        <mat-button-toggle-group [formControl]="SortCtrl" aria-label="Sort By">
-          <mat-button-toggle value="sortByActivity">Activity</mat-button-toggle>
-          <mat-button-toggle value="sortBySAMM">SAMM</mat-button-toggle>
-          <mat-button-toggle value="sortByISO">ISO 27001:2017</mat-button-toggle>
-          <mat-button-toggle value="sortByISO22">ISO 27001:2022</mat-button-toggle>
-        </mat-button-toggle-group>
-      </section>
     </div>
   </div>
 
@@ -76,7 +68,7 @@
   </table>
 
   <!-- Excel export table remains as is for now -->
-  <!-- <table id="excel-table" class="hide">
+  <table id="excel-table" class="hide">
     <tr>
       <th>Dimension</th>
       <th>Sub Dimension</th>
@@ -89,7 +81,6 @@
       <th>Resources</th>
       <th>Time</th>
       <th>Usefulness</th>
-      <th>Implementation</th>
       <th>Assessment</th>
       <th>Comments</th>
       <th>Depends On</th>
@@ -97,14 +88,12 @@
       <th>ISO 27001:2017</th>
       <th>ISO 27001:2022</th>
       <th *ngFor="let team of allTeams">
-        {{ team + '- Implemented' }}
-      </th>
-      <th *ngFor="let team of allTeams">
-        {{ team + '- Evidence' }}
+        {{ team + ' - Status' }}
       </th>
     </tr>
+
     <tr *ngFor="let item of allMappings">
-      <!-- checking if item is defined and set & truncating at 32767 characters per cell to fit to excel limitations- ->
+      <!-- checking if item is defined and set & truncating at 32767 characters per cell to fit to excel limitations-->
       <td>
         <ng-container *ngIf="item.dimension && item.dimension.length > 0">
           {{ item.dimension | slice : 0 : 32767 }}
@@ -161,12 +150,6 @@
         </ng-container>
       </td>
       <td>
-        <ng-container
-          *ngIf="item.implementation && item.implementation.length > 0">
-          {{ item.implementation | slice : 0 : 32767 }}
-        </ng-container>
-      </td>
-      <td>
         <ng-container *ngIf="item.assessment && item.assessment.length > 0">
           {{ item.assessment | slice : 0 : 32767 }}
         </ng-container>
@@ -188,7 +171,7 @@
       </td>
       <td>
         <ng-container *ngIf="item.ISO17 && item.ISO17.length > 0">
-          {{ item.ISO17 | slice : 0 : 32767 }}
+          {{ '\t' + item.ISO17 | slice : 0 : 32767 }}
         </ng-container>
       </td>
       <td>
@@ -196,16 +179,11 @@
           {{ item.ISO22 | slice : 0 : 32767 }}
         </ng-container>
       </td>
-      <td *ngFor="let key of allTeams">
-        <ng-container *ngIf="item.teamImplementation">
-          {{ item.teamImplementation[key] }}
-        </ng-container>
-      </td>
-      <td *ngFor="let key of allTeams">
-        <ng-container *ngIf="item.teamsEvidence">
-          {{ item.teamsEvidence[key] }}
+      <td *ngFor="let team of allTeams">
+        <ng-container *ngIf="dataStore.progressStore">
+          {{ dataStore.progressStore.getTeamActivityTitle(item.uuid, team) }}
         </ng-container>
       </td>
     </tr>
-  </table> -->
+  </table>
 </div>

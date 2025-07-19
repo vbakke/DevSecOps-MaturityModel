@@ -95,7 +95,7 @@ export class ProgressStore {
     return this._progressTitles[0];
   }
 
-  public getTeamActivityProgressValue(activityUuid: Uuid, teamName: TeamName, getBackupValue: boolean): number {
+  public getTeamActivityProgressValue(activityUuid: Uuid, teamName: TeamName, getBackupValue: boolean = false): number {
     let teamProgress: TeamProgress = this.getTeamProgress(activityUuid, teamName, getBackupValue);
     return this.getProgressValue(teamProgress);
   }

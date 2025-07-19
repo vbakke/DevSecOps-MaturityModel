@@ -14,8 +14,6 @@
 - Use DOMPurify to check markdown before innerHTML
 
 ## ToDo
-### Mapping
-- Mapping: Refactor to adhere to new data structure. (Page currently broken)
 ### Teams
 - Teams: Refactor to adhere to new data structure. (Page currently broken)
 - Teams: Allow editing teams names in browser
@@ -45,6 +43,7 @@
 - Refactor: Labels for knowledge, time, resources, and usefulness (used by both Matrix and Heatmap)
 - Move META_FILE constant from data service to main app
 - Check if loader can be optimized by load in yaml in parallel
+- Proxy Grafana Faro data: https://grafana.com/docs/grafana-cloud/monitor-applications/frontend-observability/instrument/data-proxy/  
 
 ## Align DSOMM-data and DSOMM
 - DSOMM-data: Sort linear list of activities (sorted by dim, level)
@@ -67,6 +66,9 @@
 
 
 # Done
+- Mapping: Refactor to adhere to new data structure. 
+- Mapping: Refactor ExportToExcel
+- Mapping: ExportToExcel: Fix duplicate lines in export  (The column ISO 27001:2017 is not flattened)
 - Misc: Move page "components" to ./pages/
 - Heatmap: Fix references not showing in activity details
 - Heatmap: Remove old obsolete code
