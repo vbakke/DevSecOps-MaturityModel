@@ -22,29 +22,7 @@ import { Uuid, ProgressDefinition, TeamName, ProgressTitle } from 'src/app/model
 import { SectorService } from '../../service/sector-service';
 import { DataStore } from 'src/app/model/data-store';
 import { Sector } from 'src/app/model/sector';
-
-
-export interface old_activitySchema {
-  uuid: string;
-  activityName: string;
-  teamsImplemented: any;
-}
-
-export interface old_cardSchema {
-  Dimension: string;
-  SubDimension: string;
-  Level: string;
-  'Done%': number;
-  Activity: old_activitySchema[];
-}
-
-type old_ProjectData = {
-  Activity: old_activitySchema[];
-  Dimension: string;
-  Done: number;
-  Level: string;
-  SubDimension: string;
-}[];
+import { perfNow } from 'src/app/util/util';
 
 @Component({
   selector: 'app-circular-heatmap',
@@ -59,22 +37,13 @@ export class CircularHeatmapComponent implements OnInit {
   showFilters: boolean = true;
   showActivityCard: any = null;
 
-  old_cardHeader: string = '';
-  old_cardSubheader: string = '';
-  old_currentDimension: string = '';
-  old_activityData: any[] = [];
-  old_ALL_CARD_DATA: old_cardSchema[] = [];
-  old_radial_labels: string[] = [];
-  old_YamlObject: any;
-  old_teamList: any;
-  old_teamGroups: any;
-  old_selectedTeamChips: string[] = ['All'];
-  old_teamVisible: string[] = [];
-  old_segment_labels: string[] = [];
-  old_activityDetails: any;
-  @ViewChildren(MatChip) chips!: QueryList<MatChip>;
-  matChipsArray: MatChip[] = [];
-  // meta: MetaFile | null = null;
+  showActivityDetails: Activity | null = null;
+  TimeLabel: string = '';
+  KnowledgeLabel: string = '';
+  ResourceLabel: string = '';
+  UsefulnessLabel: string = '';
+
+
   dataStore: DataStore | null = null;
 
   // New properties for refactored data
@@ -89,7 +58,6 @@ export class CircularHeatmapComponent implements OnInit {
   selectedSector: Sector | null = null;
 
   constructor(
-    private old_yaml: ymlService,
     private loader: LoaderService,
     private sectorService: SectorService,
     private router: Router,
@@ -98,14 +66,11 @@ export class CircularHeatmapComponent implements OnInit {
 
 
   ngOnInit(): void {
-    console.log(`${this.perfNow()}s: ngOnInit`);
+    console.log(`${perfNow()}s: ngOnInit`);
     // Ensure that Levels and Teams load before MaturityData
     // using promises, since ngOnInit does not support async/await
     this.loader.load()
       .then((dataStore: DataStore) => {
-        console.log(`${this.perfNow()}s: set filters: ${this.chips?.length}`);
-        this.matChipsArray = this.chips.toArray();
-        // this.meta = this.loader.meta;
         if (!dataStore.activityStore) {
           throw Error("TODO: Ooops! Dette må håndteres");
         }
@@ -144,10 +109,6 @@ export class CircularHeatmapComponent implements OnInit {
     this.modal.openDialog(dialogInfo);
   }
 
-  consolelog(message: string) {
-    console.log(message);
-  }
-
   setYamlData(dataStore: DataStore) {
     this.dataStore = dataStore;
     this.maxLevel = dataStore.getMaxLevel();
@@ -177,199 +138,11 @@ export class CircularHeatmapComponent implements OnInit {
     return filters;
   }
 
-
-  private OBSOLETE_LoadMaturityDataFromGeneratedYaml() {
-    return new Promise<void>((resolve, reject) => {
-      console.log(`${this.perfNow()}s: LoadMaturityData Fetch`);
-      this.old_yaml.setURI('./assets/YAML/generated/generated.yaml');
-      this.old_yaml.getJson().subscribe(async data => {
-        console.log(`${this.perfNow()}s: LoadMaturityData Downloaded`);
-        const activityStore: ActivityStore = new ActivityStore(); // await this.loader.load();
-        this.old_YamlObject = activityStore.data;
-        this.OBSOLETE_AddSegmentLabels(this.old_YamlObject);
-        const localStorageData = this.getDatasetFromBrowserStorage();
-
-        // Initialize the card array
-        let segmentTotalCount = this.old_segment_labels.length;
-        let cardTotalCount = segmentTotalCount * this.maxLevelOfMaturity;
-        this.old_ALL_CARD_DATA = new Array(cardTotalCount).fill(null);
-
-        // Process each card / sector
-        let subdimCount = -1;
-        for (let dim in this.old_YamlObject) {
-          for (let subdim in this.old_YamlObject[dim]) {
-            subdimCount++;
-            console.log(subdimCount, subdim);
-            let activities: Map<number, old_activitySchema[]> =
-              this.OBSOLETE_processActivities(
-                this.old_YamlObject[dim][subdim],
-                localStorageData
-              );
-
-            for (
-              let level: number = 1;
-              level <= this.maxLevelOfMaturity;
-              level++
-            ) {
-              // Create and store each card (with activities for that level)
-              var cardSchemaData: old_cardSchema = {
-                Dimension: dim,
-                SubDimension: subdim,
-                Level: 'Level ' + level,
-                'Done%': -1,
-                Activity: activities.get(level) || [],
-              };
-
-              // Store cards in sequential slots, by dimension then level
-              let levelIndex = (level - 1) * segmentTotalCount;
-              this.old_ALL_CARD_DATA[levelIndex + subdimCount] = cardSchemaData;
-            }
-          }
-        }
-
-        console.log('ALL CARD DATA', this.old_ALL_CARD_DATA);
-        // this.loadCircularHeatMap(
-        //   this.old_ALL_CARD_DATA,
-        //   '#chart',
-        //   this.old_radial_labels,
-        //   this.old_segment_labels
-        // );
-        // this.noActivitytoGrey();
-        console.log(`${this.perfNow()}s: LoadMaturityData End`);
-        resolve();
-      });
-    });
-  }
-
-  /**
-   * Returns activities of one subdimension, separated by maturity level.
-   * Source of activities is the cards from the server.
-   *
-   * Status of Team Implementation is merged from both server status and
-   * locally stored changes.
-   */
-  private OBSOLETE_processActivities(
-    card: any,
-    localStorageData: any
-  ): Map<number, old_activitySchema[]> {
-    let activities: Map<number, old_activitySchema[]> = new Map();
-    for (let activityName in card) {
-      let currentActivity: any = card[activityName];
-      let level: number = currentActivity.level;
-      var uuid = currentActivity?.uuid;
-
-      // Initialize a status for all genuine teams
-      let genuineTeams: any = {};
-      this.old_teamList.forEach((singleTeam: string) => {
-        genuineTeams[singleTeam] = false;
-      });
-
-      // Read server and locally stored teams statuses as well
-      var teamsFromYaml: any = currentActivity.teamsImplemented;
-      var teamsFromLocalstorage: any = this.OBSOLETE_getTeamImplementedFromJson(
-        localStorageData,
-        activityName
-      );
-
-      // Combine the lot, where local changes takes priority
-      var combinedTeamsImplemented = Object.assign(
-        {},
-        genuineTeams,
-        teamsFromYaml,
-        teamsFromLocalstorage
-      );
-
-      // Store each activity, split by maturity level
-      if (!activities.has(level)) activities.set(level, []);
-      activities.get(level)?.push({
-        uuid: uuid,
-        activityName: activityName,
-        teamsImplemented: combinedTeamsImplemented,
-      });
-    }
-    return activities;
-  }
-
-  private OBSOLETE_getTeamImplementedFromJson(
-    data: old_ProjectData,
-    activityName: string
-  ): any | undefined {
-    if (data) {
-      // Find the activity in data that matches the activityName
-      const card = data.find(project =>
-        project.Activity.find(
-          activity => activity.activityName === activityName
-        )
-      );
-
-      if (card) {
-        return card.Activity.find(
-          activity => activity.activityName === activityName
-        )?.teamsImplemented;
-      }
-    }
-
-    return undefined;
-  }
-
-  private OBSOLETE_AddSegmentLabels(yampObject: any[]) {
-    for (let dim in yampObject) {
-      for (let subdim in yampObject[dim]) {
-        this.old_segment_labels.push(subdim);
-      }
-    }
-    console.log(this.old_segment_labels);
-  }
-
-  private OBSOLETE_LoadTeamsFromMetaYaml() {
-    return new Promise<void>((resolve, reject) => {
-      console.log(`${this.perfNow()}s: LoadTeamsFromMetaYaml Fetch`);
-      this.old_yaml.setURI('./assets/YAML/meta.yaml');
-      this.old_yaml.getJson().subscribe(data => {
-        console.log(`${this.perfNow()}s: LoadTeamsFromMetaYaml Downloaded`);
-        this.old_YamlObject = data;
-
-        this.old_teamList = this.old_YamlObject['old_teams']; // Genuine teams (the true source)
-        this.old_teamGroups = this.old_YamlObject['old_teamGroups'];
-        this.old_teamVisible = [...this.old_teamList];
-
-        // Ensure that all team names in the groups are genuine team names
-        for (let team in this.old_teamGroups) {
-          this.old_teamGroups[team] = this.old_teamGroups[team].filter((t: string) =>
-            this.old_teamList.includes(t)
-          );
-          if (this.old_teamGroups[team].length == 0) delete this.old_teamGroups[team];
-        }
-        resolve();
-      });
-    });
-  }
-
-  private OBSOLETE_LoadMaturityLevels() {
-    return new Promise<void>((resolve, reject) => {
-      console.log(`${this.perfNow()}s: LoadMaturityLevels Fetch`);
-      this.old_yaml.setURI('./assets/YAML/meta.yaml');
-      // Function sets column header
-      this.old_yaml.getJson().subscribe(data => {
-        console.log(`${this.perfNow()}s: LoadMaturityLevels Downloaded`);
-        this.old_YamlObject = data;
-
-        // Levels header
-        for (let x in this.old_YamlObject['strings']['en']['maturityLevels']) {
-          var y = parseInt(x) + 1;
-          this.old_radial_labels.push('Level ' + y);
-          this.maxLevelOfMaturity = y;
-        }
-        resolve();
-      });
-    });
-  }
-
   toggleTeamGroupFilter(chip: MatChip) {
     let teamGroup = chip.value.trim();
     if (!chip.selected) {
       chip.toggleSelected();
-      console.log(`${this.perfNow()}: Heat: Chip flip Group '${teamGroup}: ${chip.selected}`);
+      console.log(`${perfNow()}: Heat: Chip flip Group '${teamGroup}: ${chip.selected}`);
   
       // Update the team selections based on the team group selection
       let selectedTeams: TeamName[] = [];
@@ -383,22 +156,14 @@ export class CircularHeatmapComponent implements OnInit {
       this.hasTeamsFilter = Object.values(this.filtersTeams).some(v => v === true);
       this.reColorHeatmap();
     } else {
-      console.log(`${this.perfNow()}: Heat: Chip flip Group '${teamGroup}: already on`);
+      console.log(`${perfNow()}: Heat: Chip flip Group '${teamGroup}: already on`);
     }
   }
   
-  getTeamProgressState(activityUuid: string, teamName: string): string {
-    return this.dataStore?.progressStore?.getTeamActivityTitle(activityUuid, teamName) || '';
-  }
-
-  getBackedupTeamProgressState(activityUuid: string, teamName: string): string {
-    return this.dataStore?.progressStore?.getTeamActivityTitle(activityUuid, teamName, true) || '';
-  }
-
   toggleTeamFilter(chip: MatChip) {
     chip.toggleSelected();
     this.filtersTeams[chip.value.trim()] = chip.selected;
-    console.log(`${this.perfNow()}: Heat: Chip flip Team '${chip.value}: ${chip.selected}`);
+    console.log(`${perfNow()}: Heat: Chip flip Team '${chip.value}: ${chip.selected}`);
     
     this.hasTeamsFilter = Object.values(this.filtersTeams).some(v => v === true);
       
@@ -414,97 +179,12 @@ export class CircularHeatmapComponent implements OnInit {
     this.reColorHeatmap()
   }
 
-  toggleTeamGroupSelection(chip: MatChip) {
-    chip.toggleSelected();
-    let currChipValue = chip.value.trim();
-
-    if (chip.selected) {
-      this.old_selectedTeamChips = [currChipValue];
-      if (currChipValue == 'All') {
-        this.old_teamVisible = [...this.old_teamList];
-      } else {
-        this.old_teamVisible = [];
-
-        (
-          Object.keys(this.old_teamGroups) as (keyof typeof this.old_teamGroups)[]
-        ).forEach((key, index) => {
-          if (key === currChipValue) {
-            console.log('group selected');
-            this.old_teamVisible = [...this.old_teamGroups[key]];
-          }
-        });
-      }
-    } else {
-      this.old_selectedTeamChips = this.old_selectedTeamChips.filter(
-        o => o !== currChipValue
-      );
-    }
-    console.log('Selected Chips', this.old_selectedTeamChips);
-    console.log('Team Visible', this.old_teamVisible);
-    console.log('All chips', this.matChipsArray);
-
-    // Update heatmap based on selection
-    this.updateChips(true);
+  getTeamProgressState(activityUuid: string, teamName: string): string {
+    return this.dataStore?.progressStore?.getTeamActivityTitle(activityUuid, teamName) || '';
   }
 
-  toggleTeamSelection(chip: MatChip) {
-    chip.toggleSelected();
-    let currChipValue = chip.value.trim();
-    let prevSelectedChip = this.old_selectedTeamChips;
-    if (chip.selected) {
-      this.old_teamVisible.push(currChipValue);
-      this.old_selectedTeamChips = [];
-    } else {
-      this.old_selectedTeamChips = [];
-      this.old_teamVisible = this.old_teamVisible.filter(o => o !== currChipValue);
-    }
-    console.log('Selected Chips', this.old_selectedTeamChips);
-    console.log('Team Visible', this.old_teamVisible);
-    console.log('Team List', this.old_teamList);
-    console.log('All chips', this.matChipsArray);
-    // Update heatmap based on selection
-    this.updateChips(prevSelectedChip);
-  }
-
-  updateChips(fromTeamGroup: any) {
-    // Re select chips
-    this.matChipsArray.forEach(chip => {
-      let currChipValue = chip.value.trim();
-
-      if (this.old_teamVisible.includes(currChipValue)) {
-        console.log(currChipValue);
-        chip.selected = true;
-      } else {
-        if (!this.old_selectedTeamChips.includes(currChipValue)) {
-          chip.selected = false;
-        }
-      }
-    });
-    this.reColorHeatmap();
-  }
-  // Team Filter ENDS
-
-  teamCheckbox(activityIndex: number, teamKey: any) {
-    let _self = this;
-    var index = 0;
-    for (var i = 0; i < this.old_ALL_CARD_DATA.length; i++) {
-      if (
-        this.old_ALL_CARD_DATA[i]['SubDimension'] === this.old_cardHeader &&
-        this.old_ALL_CARD_DATA[i]['Level'] === this.old_cardSubheader
-      ) {
-        index = i;
-        break;
-      }
-    }
-    this.old_ALL_CARD_DATA[index]['Activity'][activityIndex]['teamsImplemented'][
-      teamKey
-    ] =
-      !this.old_ALL_CARD_DATA[index]['Activity'][activityIndex]['teamsImplemented'][
-        teamKey
-      ];
-
-    this.saveDataset();
-    this.reColorHeatmap();
+  getBackedupTeamProgressState(activityUuid: string, teamName: string): string {
+    return this.dataStore?.progressStore?.getTeamActivityTitle(activityUuid, teamName, true) || '';
   }
 
   onProgressChange(
@@ -520,13 +200,11 @@ export class CircularHeatmapComponent implements OnInit {
       activityUuid,
       teamName,
       newProgress);
-    // this.reColorHeatmap();
     let activity: Activity = this.dataStore.activityStore.getActivityByUuid(activityUuid);   
     let index = this.dimensionLabels.indexOf(activity.dimension)
       + this.dimensionLabels.length * (activity.level -1) ;
 
     this.recolorSector(index);
-    // this.recolorSector(activityUuid, teamName);
   }
 
   getSectorProgress(sector: Sector): number {
@@ -842,14 +520,6 @@ export class CircularHeatmapComponent implements OnInit {
     svg.select(cursor).attr('d', path);
   }
 
-  noActivitytoGrey(): void {
-    for (var x = 0; x < this.old_ALL_CARD_DATA.length; x++) {
-      if (this.old_ALL_CARD_DATA[x]['Done%'] == -1) {
-        d3.select('#index-' + x).attr('fill', '#DCDCDC');
-      }
-    }
-  }
-
   defineStringValues(
     dataToCheck: string,
     valueOfDataIfUndefined: string
@@ -860,18 +530,22 @@ export class CircularHeatmapComponent implements OnInit {
       return valueOfDataIfUndefined;
     }
   }
+
   onPanelOpened(activity: any) {
-    console.log(`${this.perfNow()}: Heat: Card Panel opened: '${activity.name}'`);
+    console.log(`${perfNow()}: Heat: Card Panel opened: '${activity.name}'`);
   }
   onPanelClosed(activity: any) {
-    console.log(`${this.perfNow()}: Heat: Card Panel closed: '${activity.name}'`);
+    console.log(`${perfNow()}: Heat: Card Panel closed: '${activity.name}'`);
   }
   
   openActivityDetails(dimension: string, activityName: string) {
     // Find the activity in the selected sector
-    console.log(`${this.perfNow()}: Heat: Open Overlay: '${activityName}'`);
+    console.log(`${perfNow()}: Heat: Open Overlay: '${activityName}'`);
+    if (!this.dataStore) { 
+      console.error(`Data store is not initialized. Cannot open activity ${activityName}`);
+      return;
+    }
     if (!this.showActivityCard || !this.showActivityCard.activities) {
-      this.old_activityDetails = null;
       this.showOverlay = true;
       return;
     }
@@ -879,29 +553,21 @@ export class CircularHeatmapComponent implements OnInit {
       (a: any) => a.activityName === activityName || a.name === activityName
     );
     if (!activity) {
-      this.old_activityDetails = null;
       this.showOverlay = true;
       return;
     }
     // Prepare navigationExtras and details
-    let navigationExtras = {
-      dimension: this.showActivityCard.dimension,
-      level: this.showActivityCard.levelName,
-      activityName: activity.activityName || activity.name,
-    };
-    this.old_activityDetails = {
-      ...activity,
-      navigationExtras,
-      description: this.defineStringValues(activity.description, activity.description),
-      risk: this.defineStringValues(activity.risk, activity.risk),
-      measure: this.defineStringValues(activity.measure, activity.measure),
-    };
+    this.showActivityDetails = activity;
+    this.KnowledgeLabel = this.dataStore.getMetaString('knowledgeLabels', activity.difficultyOfImplementation.knowledge);
+    this.TimeLabel = this.dataStore.getMetaString('labels', activity.difficultyOfImplementation.time);
+    this.ResourceLabel = this.dataStore.getMetaString('labels', activity.difficultyOfImplementation.resources);
+    this.UsefulnessLabel = this.dataStore.getMetaString('labels', activity.usefulness);
     this.showOverlay = true;
   }
 
   closeOverlay() {
     this.showOverlay = false;
-    console.log(`${this.perfNow()}: Heat: Close Overlay:  '${this.old_activityDetails.name}'`);
+    // console.log(`${perfNow()}: Heat: Close Overlay:  '${this.old_activityDetails.name}'`);
   }
 
   toggleFilters() {
@@ -928,38 +594,6 @@ export class CircularHeatmapComponent implements OnInit {
     link.remove();
   }
 
-  OBSOLETE_saveEditedYAMLfile() {
-    this.setTeamsStatus(this.old_YamlObject, this.old_teamList, this.old_ALL_CARD_DATA);
-    let yamlStr = yaml.dump(this.old_YamlObject);
-
-    let file = new Blob([yamlStr], { type: 'text/csv;charset=utf-8' });
-    var link = document.createElement('a');
-    link.href = window.URL.createObjectURL(file);
-    link.download = 'generated.yaml';
-    link.click();
-    link.remove();
-  }
-
-  setTeamsStatus(yamlObject: any, teamList: string[], card_data: old_cardSchema[]) {
-    // Loop through all activities from the card_data
-    for (let card of card_data) {
-      for (let activity of card.Activity) {
-        let dim: string = card.Dimension;
-        let subdim: string = card.SubDimension;
-        let activityName: string = activity.activityName;
-        let teamsImplemented: any = {};
-
-        // Get the state for all genuine teams of the activity
-        for (let team of teamList) {
-          teamsImplemented[team] = activity?.teamsImplemented[team] || false;
-        }
-        // Save the teams' state to the yaml object
-        yamlObject[dim][subdim][activityName].teamsImplemented =
-          teamsImplemented;
-      }
-    }
-  }
-
   recolorSector(index: number) {
     // console.log('recolorSector', index);
     var colorSector = d3
@@ -978,43 +612,6 @@ export class CircularHeatmapComponent implements OnInit {
   reColorHeatmap() {
     for (let index = 0; index < this.allSectors.length; index++) {
       this.recolorSector(index);
-    }
-  }
-
-  OBSOLETE_reColorHeatmap() {
-    console.log('recolor');
-    var teamsCount = this.old_teamVisible.length;
-
-    for (var index = 0; index < this.old_ALL_CARD_DATA.length; index++) {
-      var activities = this.old_ALL_CARD_DATA[index]['Activity'];
-      let cntAll: number = teamsCount * activities.length;
-      let cntTrue: number = 0;
-      var _self = this;
-      for (var i = 0; i < activities.length; i++) {
-        for (var teamname of this.old_teamVisible) {
-          if (activities[i]['teamsImplemented'][teamname]) {
-            cntTrue++;
-            // console.log(`Counting ${activities[i].activityName}: ${teamname} (${cntTrue})`);
-          }
-        }
-      }
-
-      var colorSector = d3
-        .scaleLinear<string, string>()
-        .domain([0, 1])
-        .range(['white', 'green']);
-
-      if (cntAll !== 0) {
-        this.old_ALL_CARD_DATA[index]['Done%'] = cntTrue / cntAll;
-        // console.log(`${this.ALL_CARD_DATA[index].SubDimension} ${this.ALL_CARD_DATA[index].Level} Done: ${cntTrue}/${cntAll} = ${(cntTrue / cntAll*100).toFixed(1)}%`);
-        d3.select('#index-' + index).attr('fill', function (p) {
-          return colorSector(_self.old_ALL_CARD_DATA[index]['Done%']);
-        });
-      } else {
-        this.old_ALL_CARD_DATA[index]['Done%'] = -1;
-        // console.log(`${this.ALL_CARD_DATA[index].SubDimension} ${this.ALL_CARD_DATA[index].Level} None`);
-        d3.select('#index-' + index).attr('fill', '#DCDCDC');
-      }
     }
   }
 
@@ -1040,19 +637,8 @@ export class CircularHeatmapComponent implements OnInit {
       });
   }
 
-  saveDataset() {
-    localStorage.setItem('dataset', JSON.stringify(this.old_ALL_CARD_DATA));
-  }
-
-  loadDataset() {
-    var content = this.getDatasetFromBrowserStorage();
-    if (content != null) {
-      this.old_ALL_CARD_DATA = content;
-    }
-  }
-
   getDatasetFromBrowserStorage(): any {
-    console.log(`${this.perfNow()}s: getDatasetFromBrowserStorage() ####`);
+    console.log(`${perfNow()}s: getDatasetFromBrowserStorage() ####`);
     // @ts-ignore
     if (this.old_ALL_CARD_DATA?.length && this.old_ALL_CARD_DATA[0]?.Task != null) {
       console.log('Found outdated dataset, removing');
@@ -1064,10 +650,6 @@ export class CircularHeatmapComponent implements OnInit {
       return JSON.parse(content);
     }
     return null;
-  }
-
-  perfNow(): string {
-    return (performance.now() / 1000).toFixed(3);
   }
 
   unsorted() {
