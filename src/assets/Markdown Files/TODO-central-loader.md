@@ -11,7 +11,6 @@
     - What functionality should be within its responsibility?
     - Move SectorViewController to ...
   - General tidy
-- Move page components to ./pages/...
 - Use DOMPurify to check markdown before innerHTML
 
 ## ToDo
@@ -68,6 +67,7 @@
 
 
 # Done
+- Misc: Move page "components" to ./pages/
 - Heatmap: Fix references not showing in activity details
 - Heatmap: Remove old obsolete code
 - Heatmap: Export TeamProgress yaml

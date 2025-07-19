@@ -11,7 +11,7 @@ import * as md from 'markdown-it';
 import {
   ModalMessageComponent,
   DialogInfo,
-} from '../modal-message/modal-message.component';
+} from '../../component/modal-message/modal-message.component';
 import { Activity, ActivityStore } from 'src/app/model/activity-store';
 import { Uuid, ProgressDefinition, TeamName, ProgressTitle } from 'src/app/model/meta';
 import { SectorService } from '../../service/sector-service';

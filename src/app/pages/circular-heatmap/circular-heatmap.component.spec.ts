@@ -5,7 +5,7 @@ import { LoaderService } from 'src/app/service/loader/data-loader.service';
 import { CircularHeatmapComponent } from './circular-heatmap.component';
 import { RouterTestingModule } from '@angular/router/testing';
 import { MatChip } from '@angular/material/chips';
-import { ModalMessageComponent } from '../modal-message/modal-message.component';
+import { ModalMessageComponent } from '../../component/modal-message/modal-message.component';
 
 describe('CircularHeatmapComponent', () => {
   let component: CircularHeatmapComponent;
