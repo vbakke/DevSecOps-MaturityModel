@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { perfNow } from 'src/app/util/util';
 
 @Component({
   selector: 'app-about-us',
@@ -7,4 +8,7 @@ import { Component } from '@angular/core';
 })
 export class AboutUsComponent {
   constructor() {}
+  ngOnInit() {
+    console.log(`${perfNow()}: Page loaded: About Us`);
+  }
 }

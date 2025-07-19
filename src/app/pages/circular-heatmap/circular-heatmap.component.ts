@@ -61,7 +61,7 @@ export class CircularHeatmapComponent implements OnInit {
 
 
   ngOnInit(): void {
-    console.log(`${perfNow()}s: ngOnInit`);
+    console.log(`${perfNow()}s: Loading Circular Heatmap`);
     // Ensure that Levels and Teams load before MaturityData
     // using promises, since ngOnInit does not support async/await
     this.loader.load()
@@ -90,6 +90,7 @@ export class CircularHeatmapComponent implements OnInit {
           this.dimensionLabels,
           this.maxLevel
         );
+        console.log(`${perfNow()}: Page loaded: Circular Heatmap`);
       })
       .catch(err => {
         this.displayMessage(new DialogInfo(err.message, 'An error occurred'));

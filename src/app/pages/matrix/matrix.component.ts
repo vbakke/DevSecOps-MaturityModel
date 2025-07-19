@@ -65,6 +65,7 @@ export class MatrixComponent implements OnInit {
       .load()
       .then((dataStore: DataStore) => {
         this.setYamlData(dataStore);
+        console.log(`${perfNow()}: Page loaded: Matrix`);
       })
       .catch(err => {
         this.displayMessage(new DialogInfo(err.message, 'An error occurred'));

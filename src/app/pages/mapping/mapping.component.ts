@@ -9,6 +9,7 @@ import { LoaderService } from 'src/app/service/loader/data-loader.service';
 import { DialogInfo, ModalMessageComponent } from 'src/app/component/modal-message/modal-message.component';
 import { DataStore } from 'src/app/model/data-store';
 import { Uuid } from 'src/app/model/meta';
+import { perfNow } from 'src/app/util/util';
 
 export interface MappingRow {
   uuid: Uuid;
@@ -83,6 +84,7 @@ export class MappingComponent implements OnInit, AfterViewInit {
       .then((dataStore: DataStore) => {
         this.setYamlData(dataStore);
         this.dataSource.filterPredicate = this.filterFunction;
+        console.log(`${perfNow()}: Page loaded: Mapping`);
       })
       .catch(err => {
         this.displayMessage(new DialogInfo(err.message, 'An error occurred'));
