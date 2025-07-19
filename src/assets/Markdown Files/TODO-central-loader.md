@@ -56,7 +56,6 @@
 - Heatmap, Card: Add Complete-symbol per activity
 - Heatmap: Update url on open details + read querystring on open
 - Heatmap: Add 'Not applicable' as a status for a team
-- Mapping: Add filters based on mapping values
 - Matrix: Brushup layout of details page
 - Matrix: Remember filters, when moving back from details
 - Matrix: Dependency graph: Make it clickable
@@ -66,6 +65,7 @@
 
 
 # Done
+- Mapping: Add search filters 
 - Mapping: Refactor to adhere to new data structure. 
 - Mapping: Refactor ExportToExcel
 - Mapping: ExportToExcel: Fix duplicate lines in export  (The column ISO 27001:2017 is not flattened)

@@ -1,55 +1,42 @@
 .content{
   width: 100%;
-  /*background-color: gainsboro;*/
 }
 
-.mat-form-field{
-  margin: 20px;
-  width: 50%;
-  /*background-color: coral;*/
+.actions-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 24px 20px 0 20px;
+  flex-wrap: wrap;
 }
- 
+
+.search-box {
+  flex: 1 1 320px;
+  min-width: 220px;
+  max-width: 400px;
+}
+
+.export-btn {
+  margin-left: auto;
+  min-width: 140px;
+}
+
 .matrix-table{
   margin: 20px;
 }
 
-.mat-cell{
-  padding: 20px;
+.mat-cell, .mat-header-cell{
+  padding: 20px 10px;
   width: 12.5%;  
   max-width: 12.5%;  
   word-wrap: break-word;
 }
 
 .mat-header-cell{
-  padding: 10px;
-  width: 12.5%;  
-  max-width: 12.5%;  
-  word-wrap: break-word;
   font-size: 16px;  
   font-weight: bold;
 }
 
-.sort-section{
-  margin: 30px;
-  margin-right: 60px;
-  float: right;  
-}
-
-.filterandsort{
-  /*background-color: brown;*/
-}
-
 .hide{
   display: none;
-}
-
-.export-button{
-  margin: 30px;
-  margin-top: 35px;
-  float: right;
-}
-
-.right-section{
-  /*background-color: mediumorchid;*/
-  float: right;
 }

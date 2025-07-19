@@ -63,12 +63,14 @@ export class MappingComponent implements OnInit, AfterViewInit {
     'ISO22',
   ];
   separatorKeysCodes: number[] = [ENTER, COMMA];
-  // SortCtrl = new FormControl(SortMode.Activity);
 
   @ViewChild('chipInput') chipInput!: ElementRef<HTMLInputElement>;
   @ViewChild(MatSort, { static: false }) sort!: MatSort;
 
   dataStore: DataStore = new DataStore();
+
+  searchTerms: string[] = [];
+  searchCtrl = new FormControl('');
 
   constructor(
     private loader: LoaderService,
@@ -80,7 +82,7 @@ export class MappingComponent implements OnInit, AfterViewInit {
       .load()
       .then((dataStore: DataStore) => {
         this.setYamlData(dataStore);
-        this.updateDataSource();
+        this.dataSource.filterPredicate = this.filterFunction;
       })
       .catch(err => {
         this.displayMessage(new DialogInfo(err.message, 'An error occurred'));
@@ -88,11 +90,6 @@ export class MappingComponent implements OnInit, AfterViewInit {
           console.warn(err);
         }
       });
-
-    // this.SortCtrl.valueChanges.subscribe((sort: SortMode) => {
-    //   this.currentSort = sort;
-    //   this.updateDataSource();
-    // });
   }
 
   ngAfterViewInit() {
@@ -114,8 +111,9 @@ export class MappingComponent implements OnInit, AfterViewInit {
 
   setYamlData(dataStore: DataStore) {
     this.dataStore = dataStore;    
-    this.allMappings = this.transformDataStore(dataStore);
     this.allTeams = dataStore.meta?.teams || [];
+    this.allMappings = this.transformDataStore(dataStore);
+    this.dataSource.data = this.allMappings;
   }
 
   // Transform DataStore to MappingRow[]
@@ -149,18 +147,62 @@ export class MappingComponent implements OnInit, AfterViewInit {
       };
     });
   }
-
-  // Filtering and sorting logic
-  updateDataSource() {
-    let data = this.allMappings;
-    this.dataSource.data = data;
-  }
-
+  
   exportToExcel() {
     let element = document.getElementById('excel-table');
     const ws: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element, { raw: true });
     const wb: XLSX.WorkBook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
     XLSX.writeFile(wb, 'Planned-Activities-Sorted-By-ISO17.xlsx');
+  }
+  
+  //-----------------------------
+  // Filtering and sorting logic
+  //-----------------------------
+  applyFilter(event: KeyboardEvent) {
+    const input = (event.target as HTMLInputElement);
+    const value = input.value.trim();
+    if (event.key === 'Enter' && value) {
+      if (!this.searchTerms.includes(value.toLowerCase())) {
+        this.searchTerms.push(value.toLowerCase());
+        this.updateFilter();
+      }
+      input.value = '';
+      this.searchCtrl.setValue('');
+    } else if (!value && this.searchTerms.length === 0) {
+      this.dataSource.filter = '';
+    }
+  }
+
+  removeSearchTerm(term: string) {
+    this.searchTerms = this.searchTerms.filter(t => t !== term);
+    this.updateFilter();
+  }
+
+  clearFilter() {
+    this.searchTerms = [];
+    this.dataSource.filter = '';
+    this.searchCtrl.setValue('');
+  }
+
+  GROUP_SEP = '\x1F';
+
+  updateFilter() {
+    this.dataSource.filter = this.searchTerms.join(this.GROUP_SEP);
+  }
+
+  filterFunction(data: MappingRow, filter: string): boolean {
+    // Split filter into terms, require all terms to match
+    const terms = filter.split(this.GROUP_SEP).filter(t => t);
+    const dataStr = [
+        data.dimension,
+        data.subDimension,
+        data.activityName,
+        (data.samm2 || []).join(' '),
+        (data.ISO17 || []).join(' '),
+        (data.ISO22 || []).join(' ')
+      ].join(' ').toLowerCase();
+
+    return terms.every(term => dataStr.includes(term));
   }
 }
