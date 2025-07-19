@@ -1,15 +1,10 @@
 import {
   Component,
   OnInit,
-  ViewChildren,
-  QueryList,
-  ChangeDetectorRef,
 } from '@angular/core';
-import { ymlService } from 'src/app/service/yaml-parser/yaml-parser.service';
 import { equalArray } from 'src/app/util/util';
 import { LoaderService } from 'src/app/service/loader/data-loader.service';
 import * as d3 from 'd3';
-import * as yaml from 'js-yaml';
 import { Router } from '@angular/router';
 import { MatChip } from '@angular/material/chips';
 import * as md from 'markdown-it';

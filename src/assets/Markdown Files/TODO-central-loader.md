@@ -1,4 +1,3 @@
-
 ## Doing
 
 
@@ -9,13 +8,13 @@
   - Go though responsibility to SectorViewController
     - What is the responsibility?
     - What functions are outside responsibility?
-    - What functionality should be within  responsibility?
+    - What functionality should be within its responsibility?
     - Move SectorViewController to ...
   - General tidy
-  - Remove unnecessary console logs
 - Move page components to ./pages/...
-  
-## Later
+- Use DOMPurify to check markdown before innerHTML
+
+## ToDo
 ### Mapping
 - Mapping: Refactor to adhere to new data structure. (Page currently broken)
 ### Teams
@@ -23,38 +22,54 @@
 - Teams: Allow editing teams names in browser
 - Teams: Store teams names in localstorage
 - Teams: Export teams YAML from teams page
-- Teams: View timeline for a team (?)
+### Dark Mode
+- Merge in Dark Mode [PR #381](https://github.com/devsecopsmaturitymodel/DevSecOps-MaturityModel/pull/381)
 ### Matrix
 - Matrix: Fix markdown rendering
 - Matrix: Add a Close/Back button
-- Matrix: Brushup layout of details page
-- Matrix: Remember filters, when moving back from details
 ### Heatmap:
 - Heatmap: meta-yaml: If progress definition is missing, default to 0% + 100% 
 - Heatmap: Revert to boolean checkboxes, if definition is only 0% and 100%
 - Heatmap: Read previous local storage for backwards compatibility 
+- Heatmap: Input Teams' evidence
 ### Dependency graph
 - Dependency graph: Add to CircularHeatmap Details
-- Dependency graph: Make it clickable
-## Documentation
+- Matrix: Dependency graph: Render in center of page
+### Documentation
 - Doc: Update `Usage`
 - Doc: Update `README.md`
 - Doc: Update `About Us`
 - Doc: Update `Development.md`
 - Doc: Update `INSTALL.md`
-## Misc
+### Misc
 - Fix dependsOn that is uuid (e.g. 83057028-0b77-4d2e-8135-40969768ae88)
+- Refactor: Labels for knowledge, time, resources, and usefulness (used by both Matrix and Heatmap)
 - Move META_FILE constant from data service to main app
-- Filter: tags: Fix update on SPACE key (trouble)
-- Heatmap, Card: Add Complete-symbol per activity
 - Check if loader can be optimized by load in yaml in parallel
+
 ## Align DSOMM-data and DSOMM
 - DSOMM-data: Sort linear list of activities (sorted by dim, level)
 - DSOMM-data: Update generated filename and data structure to adhere to this new DSOMM standard
 - DSOMM-data: Include version number in generated yaml file
 - DSOMM: Read latest "generated.yaml" from DSOMM-data's github repo, to check for any new releases
 
+# Later
+- Filter: Bug: SPACE key does not trigger
+- Heatmap, Card: Add Complete-symbol per activity
+- Heatmap: Update url on open details + read querystring on open
+- Heatmap: Add 'Not applicable' as a status for a team
+- Mapping: Add filters based on mapping values
+- Matrix: Brushup layout of details page
+- Matrix: Remember filters, when moving back from details
+- Matrix: Dependency graph: Make it clickable
+- Misc: What is the activities.yaml comment field for? Should it be displayed to the user?
+- Teams: View active initiatives for a team (>0% and <100%)
+- Teams: View timeline for a team 
+
+
 # Done
+- Heatmap: Fix references not showing in activity details
+- Heatmap: Remove old obsolete code
 - Heatmap: Export TeamProgress yaml
 - Heatmap: Fix: Update map when teams are selected
 - Store TeamProgress to localStorage
@@ -93,3 +108,4 @@ The Experimental edition, and the Experimental edition only, uses Grafana Fronte
 Geolocation is not enabled, so no user identifiable data is stored.
 
 You may block this debug logging by using an ad-blocker. 
+

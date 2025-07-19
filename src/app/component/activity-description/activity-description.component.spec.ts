@@ -89,11 +89,11 @@ describe('ActivityDescriptionComponent', () => {
 
   it('check if implementation guide is being generated', () => {
     const testImplementationGuide = 'Sample Implementation Guide';
-    component.currentActivity.implementatonGuide = testImplementationGuide;
+    component.currentActivity.implementationGuide = testImplementationGuide;
     fixture.detectChanges();
     const HTMLElement: HTMLElement = fixture.nativeElement;
-    const contentDisplayedinParagraphTag = HTMLElement.querySelector('#implementatonGuide')!;
-    expect(contentDisplayedinParagraphTag.textContent).toContain(testImplementationGuide);
+    const contentDisplayedInParagraphTag = HTMLElement.querySelector('#implementationGuide')!;
+    expect(contentDisplayedInParagraphTag.textContent).toContain(testImplementationGuide);
   });
 
   it('check if evidence is being generated', () => {

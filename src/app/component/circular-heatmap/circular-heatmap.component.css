@@ -130,7 +130,7 @@ progress-slider {
   position: relative;
 }
 
-.ng-star-inserted span {
+.smaller-italics {
     font-size: smaller;
     font-style: italic;
 }
