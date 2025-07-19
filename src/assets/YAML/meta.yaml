@@ -42,7 +42,6 @@ strings:
         'Level 5: Advanced deployment of security practices at scale',
       ]
     labels: ['Very Low', 'Low', 'Medium', 'High', 'Very High']
-    hardness: ['Very soft', 'Soft', 'Medium', 'High', 'Very high']
     knowledgeLabels:
       [
         'Very Low (one discipline)',
