@@ -36,7 +36,10 @@ export class SectorService {
   }
 
   getSectorProgress(activities: Activity[]): number {
-    const teams = this.visibleTeams.length === 0 ? this.allTeams : this.visibleTeams;
+    if (!activities || activities.length === 0) {
+      return NaN;
+    }
+        const teams = this.visibleTeams.length === 0 ? this.allTeams : this.visibleTeams;
     let progress = 0;
     for (const activity of activities) {
       progress += this.getActivityProgress(activity.uuid, teams);
