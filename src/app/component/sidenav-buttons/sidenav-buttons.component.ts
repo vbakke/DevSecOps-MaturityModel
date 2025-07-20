@@ -13,7 +13,7 @@ export class SidenavButtonsComponent {
     'Usage',
     'Teams',
     'About Us',
-    'DSOMM User Day 2024',
+    'Experimental Roadmap',
   ];
   Icons: string[] = [
     'pie_chart',
@@ -31,7 +31,7 @@ export class SidenavButtonsComponent {
     '/usage',
     '/teams',
     '/about',
-    '/userday',
+    '/roadmap',
   ];
   constructor() {}
 }

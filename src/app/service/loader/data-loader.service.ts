@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { perfNow } from 'src/app/util/util';
 import { YamlService } from '../yaml-loader/yaml-loader.service';
-import { Meta, MetaStrings } from 'src/app/model/meta';
-import { ActivityStore, Data } from 'src/app/model/activity-store';
+import { MetaFile, MetaStrings, Progress, TeamProgressFile, Uuid } from 'src/app/model/meta';
+import { Activity, ActivityStore, Data } from 'src/app/model/activity-store';
+import { ProgressStore } from 'src/app/model/progress-store';
+import { DataStore } from 'src/app/model/data-store';
 
 export class DataValidationError extends Error {
   constructor(message: string) {
@@ -14,67 +16,85 @@ export class DataValidationError extends Error {
 export class LoaderService {
   private META_FILE: string = '/assets/YAML/meta.yaml';
   private debug: boolean = true;
-  private cachedActivityStore: ActivityStore | null = null;
-  public meta: Meta | null = null;
+  // public meta: MetaFile | null = null;
+  private dataStore: DataStore | null = null;
+  // private cachedActivityStore: ActivityStore | null = null;
+  // private cachedProgressStore: ProgressStore | null = null;
 
   constructor(private yamlService: YamlService) {}
 
-  public getLevels(): string[] {
-    if (!this.cachedActivityStore) {
-      throw new Error('Activities not loaded. Call load() first.');
-    }
-    let maxLvl: number = this.cachedActivityStore.getMaxLevel();
-    return this.getMetaStrings().maturityLevels.slice(0, maxLvl);
-  }
-
-  getMetaStrings(): MetaStrings {
-    if (this.meta == null) {
-      throw Error('Meta yaml has not yet been loaded successfully');
-    }
-
-    let lang: string = this.meta.lang || 'en';
-    if (!this.meta.strings?.hasOwnProperty(lang)) {
-      lang = Object(this.meta?.strings).keys()[0];
-      this.meta.lang = lang;
-    }
-    return this.meta?.strings[lang];
-  }
-  
-  public async load(): Promise<ActivityStore> {
+  public async load(): Promise<DataStore> {
     // Return cached data if available
-    if (this.cachedActivityStore) {
-      return this.cachedActivityStore;
+    if (this.dataStore) {
+      return this.dataStore;
     }
 
+    // Initialize a new DataStore and load data
+    this.dataStore = new DataStore();
     try {
       if (this.debug) console.log(`${perfNow()}s: ----- Load Service Begin -----`);
       
       // Load meta.yaml first
-      this.meta = await this.loadMeta();
+      this.dataStore.meta = await this.loadMeta();
+      console.warn('TODO: MOVE THIS TO DATASTORE...');
+      this.dataStore.progressStore?.init(this.dataStore.meta.progressDefinition);
       
       // Then load activities
-      this.cachedActivityStore = await this.loadActivities(this.meta);
-      
+      this.dataStore.addActivities(await this.loadActivities(this.dataStore.meta));
+
+      // Add a activity name lookup table for the progress store
+      let activityMap: Record<Uuid, string> = {};
+      this.dataStore.activityStore?.getAllActivities().forEach((activity: Activity) => {
+        activityMap[activity.uuid] = activity.name;
+      });
+      this.dataStore.progressStore?.setActivityMap(activityMap);
+
+
+      // Load the progress for each team's activities
+      let teamProgress: TeamProgressFile = await this.loadTeamProgress(this.dataStore.meta);
+      this.dataStore.addProgressData(teamProgress.progress);
+      let browserProgress: TeamProgressFile | null = this.dataStore.progressStore?.retrieveStoredTeamProgress() || null;
+      if (browserProgress != null) {
+        this.dataStore.addProgressData(browserProgress?.progress);
+      }   
+
+      // TODO: Load old yaml format (generated.yaml)
+      // TODO: Load old yaml format (localStorage)
       if (this.debug) console.log(`${perfNow()}s: ----- Load Service End -----`);
-      return this.cachedActivityStore;
+
+      return this.dataStore;
     } catch (err) {
       // Clear cache on error
-      this.clearCache();
+      // this.dataStore.clearCache();
       throw err;
     }
   }
 
-  private async loadMeta(): Promise<Meta> {
+  private async loadMeta(): Promise<MetaFile> {
     if (this.debug) {
       console.log(`${perfNow()} s: Load meta: ${this.META_FILE}`);
     }
-    let meta: Meta = await this.yamlService.loadYaml(this.META_FILE);
+    let meta: MetaFile = await this.yamlService.loadYaml(this.META_FILE);
 
     if (!meta.activityFiles) {
       throw Error("The meta.yaml has no 'activityFiles' to be loaded");
     }
+    if (!meta.teamProgressFile) {
+      throw Error("The meta.yaml has no 'teamProgressFile' to be loaded");
+    }
     
+    // Recalculate percentages of progress definition
+    this.recalculateProgressDefinition(meta);
+
+    // Remove group teams not specified 
+    Object.keys(meta.teamGroups).forEach(group => {
+      meta.teamGroups[group] = meta.teamGroups[group].filter(team => meta.teams.includes(team));
+    });
+    // Insert key: 'All' with value: [], in the first position of the meta.teamGroups Record<string, string[]>
+    meta.teamGroups = { 'All': [], ...meta.teamGroups };
+
     // Resolve paths relative to meta.yaml
+    meta.teamProgressFile = this.yamlService.makeFullPath(meta.teamProgressFile, this.META_FILE);
     meta.activityFiles = meta.activityFiles.map(file => 
       this.yamlService.makeFullPath(file, this.META_FILE)
     );
@@ -82,8 +102,13 @@ export class LoaderService {
     if (this.debug) console.log(`${perfNow()} s: meta loaded`);
     return meta;
   }
+  
+  private async loadTeamProgress(meta: MetaFile): Promise<TeamProgressFile> {
+    if (this.debug) console.log(`${perfNow()} s: Loading `);
+    return this.yamlService.loadYamlUnresolvedRefs(meta.teamProgressFile);
+  }
 
-  private async loadActivities(meta: Meta): Promise<ActivityStore> {
+  private async loadActivities(meta: MetaFile): Promise<ActivityStore> {
     const activityStore = new ActivityStore();
     const errors: string[] = [];
     let usingHistoricYamlFile = false;
@@ -118,12 +143,51 @@ export class LoaderService {
   }
 
   public clearCache(): void {
-    this.cachedActivityStore = null;
-    this.meta = null;
+    // this.cachedActivityStore = null;
+    // this.meta = null;
   }
 
-  public forceReload(): Promise<ActivityStore> {
+  public forceReload(): Promise<DataStore> {
     this.clearCache();
     return this.load();
   }
+
+  private recalculateProgressDefinition(meta: MetaFile) {
+    let errors: string[] = [];
+
+    for (let state of Object.keys(meta.progressDefinition)) {
+      let value: string | number = meta.progressDefinition[state];
+      if (typeof value === 'string') {
+        let isPercentage: boolean = (value as string).includes('%');
+        value = parseFloat(value);
+        if (isPercentage) { 
+          value = value / 100;
+        }
+        if (value > 1 || value < 0) {
+          errors.push(`The progress value for '${state}' must be between 0% and 100%`);
+          continue;
+        }
+      }
+      meta.progressDefinition[state] = value;
+    }
+    
+    if (Math.min(...Object.values(meta.progressDefinition)) !== 0) {
+      errors.push(`The meta.progressDefinition must specify a name for 0% completed`);
+    }
+    if (Math.max(...Object.values(meta.progressDefinition)) !== 1) {
+      errors.push(`The meta.progressDefinition must specify a name for 100% completed`);
+    }
+
+    if (errors.length > 0) {
+      throw new DataValidationError(
+        'Data validation error for progress definition in meta.yaml: \n\n- ' +
+          errors.join('\n- ')
+      );
+    }
+  }
+
+
+
+
+  
 }

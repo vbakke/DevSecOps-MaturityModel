@@ -4,6 +4,7 @@ import * as d3 from 'd3';
 import { LoaderService } from '../../service/loader/data-loader.service';
 import { ActivityStore } from 'src/app/model/activity-store';
 import { Activity } from 'src/app/model/activity-store';
+import { DataStore } from 'src/app/model/data-store';
 
 export interface graphNodes {
   id: string;
@@ -30,7 +31,7 @@ export class DependencyGraphComponent implements OnInit {
   COLOR_OF_NODE: string = '#55bc55';
   BORDER_COLOR_OF_NODE: string = 'black';
   simulation: any;
-  activityStore: Partial<ActivityStore> = {};
+  dataStore: Partial<DataStore> = {};
   graphData: graph = { nodes: [], links: [] };
   visited: Set<string> = new Set();
 
@@ -39,9 +40,12 @@ export class DependencyGraphComponent implements OnInit {
   constructor(private loader: LoaderService) {}
 
   ngOnInit(): void {
-    this.loader.load().then((activityStore: ActivityStore) => {
-      this.activityStore = activityStore;
-      let activity: Activity = activityStore.getActivityByName(this.activityName);
+    this.loader.load().then((dataStore: DataStore) => {
+      this.dataStore = this.dataStore;
+      if (!dataStore.activityStore) {
+        throw Error("Must handel this");
+      }
+      let activity: Activity = dataStore.activityStore.getActivityByName(this.activityName);
       if (activity) {
         this.graphData = { nodes: [], links: [] };
         this.populateGraphWithActivitiesCurrentActivityDependsOn(activity);
@@ -66,7 +70,7 @@ export class DependencyGraphComponent implements OnInit {
   }
 
   populateGraphWithActivitiesThatDependsOnCurrentActivity(currentActivity: Activity) {
-    const all: Activity[] = this.activityStore?.getAllActivities?.() ?? [];
+    const all: Activity[] = this.dataStore.activityStore?.getAllActivities?.() ?? [];
     for (const activity of all) {
       if (activity.dependsOn?.includes(currentActivity.name)) {
         this.addNode(activity.name);

@@ -1,18 +1,27 @@
 ---
-checkForDsommUpdates: true
-progress:
+¤-allowCheckDsommActivityUpdateInBrowser: true  # Yet to be implemented
+¤-dsommActivityUrl: https://git...io/dsomm/master....
+
+progressDefinition:
+  "Not started": 0%
   Planned: 10%
   Started: 30%
   Implemented: 100% 
-$teams: 
+# progress:
+#   Low maturity: 0%
+#   Medium maturity: 40%
+#   High maturity: 100% 
+
+¤-allowChangeTeamNameInBrowser: true  # Yet to be implemented
+teams: 
   $ref: 'default/teams.yaml#/teams'
-$teamGroups:
+teamGroups:
   $ref: 'default/teams.yaml#/teamGroups'
 
-teamProgressFile: 'teamprogress.yaml' 
+teamProgressFile: 'team-progress.yaml' 
 activityFiles:
-    - generated/generated.yaml 
-    # - default/activities.yaml 
+    # - generated/generated.yaml 
+    - default/activities.yaml 
     # - custom/custom-activities.yaml  # For customizing your own activities
     # - custom/test-ignore-activities.yaml
 
@@ -33,7 +42,6 @@ strings:
         'Level 5: Advanced deployment of security practices at scale',
       ]
     labels: ['Very Low', 'Low', 'Medium', 'High', 'Very High']
-    hardness: ['Very soft', 'Soft', 'Medium', 'High', 'Very high']
     knowledgeLabels:
       [
         'Very Low (one discipline)',
@@ -42,8 +50,3 @@ strings:
         'High (two disciplines)',
         'Very High (three or more disciplines)',
       ]
-teams: ['Default', 'B', 'C']
-teamGroups:
-  GroupA: ['Default', 'B']
-  GroupB: ['B', 'C']
-  GroupC: ['Default', 'C']

@@ -1,5 +1,7 @@
 import { appendHashElement } from '../util/ArrayHash';
+import { isEmptyObj } from '../util/util';
 import { IgnoreList } from './ignore-list';
+import { TeamProgress, Progress } from './meta';
 
 export type Data = Record<string, Category>;
 export type Category = Record<string, Dimension>;
@@ -16,20 +18,28 @@ export interface Activity {
   risk: string;
   measure: string;
   tags: string[];
-  implementatonGuide: string;
+  implementationGuide: string;
   difficultyOfImplementation: DifficultyOfImplementation;
   usefulness: number;
+  knowledge: number;
+  resources: number;
+  time: number;
   dependsOn: string[];
   comments: string;
   implementation: Implementation[];
   evidence: string;
   teamsEvidence: Object;
-  assessment: string;  iso: string[];
-  iso22: string[];
-  samm: string[];
-  openCRE: string[];
+  assessment: string;
+  references: FrameworkReferences;
   isImplemented: boolean;
   teamsImplemented: Record<string, any>;
+}
+
+export interface FrameworkReferences {
+  iso27001_2017: string[];
+  iso27001_2022: string[];
+  samm2: string[];
+  openCRE: string[];
 }
 
 // export interface activityDescription {
@@ -40,7 +50,7 @@ export interface Activity {
 //   description: string;
 //   risk: string;
 //   measure: string;
-//   implementatonGuide: string;
+//   implementationGuide: string;
 //   iso: string[];
 //   iso22: string[];
 //   samm: string[];
@@ -79,10 +89,15 @@ export class ActivityStore {
   private _categoryNames: string[] = [];
   private _allDimensions: Record<string, Activity[]> = {};
   private _maxLevel: number = -1;
+  private _progress: Progress = {};
 
   public getData(): Data {
     return this.data;
   }
+
+  // public getProgress(): Progress {
+  //   return this._progress;
+  // }
 
   public getAllActivities(): Activity[] {
     return this._activityList;
@@ -120,6 +135,8 @@ export class ActivityStore {
   public getMaxLevel(): number {
     return this._maxLevel;
   }
+
+
 
   public addActivityFile(yaml: Data, errors: string[]) {
     let activityList: Activity[] = [];
@@ -191,8 +208,9 @@ export class ActivityStore {
 
   /**
    * Prepare activities loaded from a YAML file.
-   *  - Add category, dimension and activity name to activity object
-   *  - unless ignored, then add it to the ignoreList
+   *  
+   * Add category, dimension and activity name to activity object,
+   * unless ignored, then add it to the ignoreList
    */
   prepareActivities(
     yaml: Data,
@@ -222,11 +240,23 @@ export class ActivityStore {
             }
             continue;
           }
-
           // console.log(`  - ${categoryName} -- ${dimName} -- ${activityName}`);
+
+          // Rename properties to match the Activity interface
           activity.category = categoryName;
           activity.dimension = dimName;
           activity.name = activityName;
+          if (activity.references) {
+            let references: any = activity.references;
+            if (references.hasOwnProperty('iso27001-2017')){
+              references.iso27001_2017 = references['iso27001-2017'];
+              delete references['iso27001-2017'];
+            }
+            if (references.hasOwnProperty('iso27001-2022')){
+              references.iso27001_2022 = references['iso27001-2022'];
+              delete references['iso27001-2022'];
+            }
+          }
 
           activityList.push(activity);
         }
@@ -343,4 +373,6 @@ export class ActivityStore {
 
     Object.assign(existingActivity, newActivity);
   }
+
 }
+
