@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { perfNow } from 'src/app/util/util';
 
 @Component({
   selector: 'app-usage',
@@ -20,5 +21,6 @@ export class UsageComponent implements OnInit {
         }
       });
     }
+    console.log(`${perfNow()}: Page loaded: Usage`);
   }
 }

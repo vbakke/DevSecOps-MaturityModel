@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ymlService } from 'src/app/service/yaml-parser/yaml-parser.service';
-import * as yaml from 'js-yaml';
+import { perfNow } from 'src/app/util/util';
 
 @Component({
   selector: 'app-teams',
@@ -26,6 +26,7 @@ export class TeamsComponent implements OnInit {
 
       console.log('teamList', this.teamList);
       console.log('teamGroups', this.teamGroups);
+      console.log(`${perfNow()}: Page loaded: Teams`);
     });
   }
 

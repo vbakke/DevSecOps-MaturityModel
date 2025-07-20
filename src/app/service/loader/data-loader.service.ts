@@ -28,8 +28,9 @@ export class LoaderService {
     if (this.dataStore) {
       return this.dataStore;
     }
-    this.dataStore = new DataStore();
 
+    // Initialize a new DataStore and load data
+    this.dataStore = new DataStore();
     try {
       if (this.debug) console.log(`${perfNow()}s: ----- Load Service Begin -----`);
       
@@ -64,7 +65,7 @@ export class LoaderService {
       return this.dataStore;
     } catch (err) {
       // Clear cache on error
-      this.dataStore.clearCache();
+      // this.dataStore.clearCache();
       throw err;
     }
   }

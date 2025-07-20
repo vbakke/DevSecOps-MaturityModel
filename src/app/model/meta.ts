@@ -13,7 +13,6 @@ export interface MetaFile {
 export interface MetaStrings {
   labels: string[];
   maturityLevels: string[];
-  hardness: string[];
   knowledgeLabels: string[];
 }
 

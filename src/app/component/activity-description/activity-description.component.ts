@@ -18,7 +18,7 @@ export class ActivityDescriptionComponent implements OnInit {
   TimeLabel: string = '';
   KnowledgeLabel: string = '';
   ResourceLabel: string = '';
-  UsefullnessLabel: string = '';
+  UsefulnessLabel: string = '';
   SAMMVersion: string = 'OWASP SAMM VERSION 2';
   ISOVersion: string = 'ISO 27001:2017';
   ISO22Version: string = 'ISO 27001:2022';
@@ -49,10 +49,10 @@ export class ActivityDescriptionComponent implements OnInit {
         // Get meta data
         const meta = dataStore.getMetaStrings();
         this.currentActivity = activity;
-        this.KnowledgeLabel = meta.knowledgeLabels[activity.difficultyOfImplementation.knowledge];
-        this.TimeLabel = meta.labels[activity.difficultyOfImplementation.time];
-        this.ResourceLabel = meta.labels[activity.difficultyOfImplementation.resources];
-        this.UsefullnessLabel = meta.labels[activity.usefulness];
+        this.KnowledgeLabel = dataStore.getMetaString('knowledgeLabels', activity.difficultyOfImplementation.knowledge);
+        this.TimeLabel = dataStore.getMetaString('labels', activity.difficultyOfImplementation.time);
+        this.ResourceLabel = dataStore.getMetaString('labels', activity.difficultyOfImplementation.resources);
+        this.UsefulnessLabel = dataStore.getMetaString('labels', activity.usefulness);
 
         this.openall();
       })

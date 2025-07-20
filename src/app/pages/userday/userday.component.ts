@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { perfNow } from 'src/app/util/util';
 
 @Component({
   selector: 'app-userday',
@@ -7,4 +8,8 @@ import { Component } from '@angular/core';
 })
 export class UserdayComponent {
   constructor() {}
+
+  ngOnInit() {
+    console.log(`${perfNow()}: Page loaded: Userday`);
+  }
 }

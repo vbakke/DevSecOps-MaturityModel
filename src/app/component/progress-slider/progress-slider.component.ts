@@ -26,7 +26,7 @@ export class ProgressSliderComponent implements OnInit {
     
     if (this.originalValue <= 0) this.originalValue = this.currentValue; 
 
-    console.log(`ProgressSliderComponent: ${this.DBG_name}: previous: ${this.originalValue}, current: ${this.currentValue} (${this.state},${this.originalState})`);
+    // console.log(`ProgressSliderComponent: ${this.DBG_name}: previous: ${this.originalValue}, current: ${this.currentValue} (${this.state},${this.originalState})`);
   }
 
   getCurrent() {

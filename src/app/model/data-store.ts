@@ -15,10 +15,6 @@ export class DataStore {
     this.progressStore = new ProgressStore();
   }
 
-  public clearCache() {
-    // TODO: Clear what ever has been cached 
-  }
-
   public addActivities(activities: ActivityStore): void {
     this.activityStore = activities;
   }
@@ -37,6 +33,17 @@ export class DataStore {
       this.meta.lang = lang;
     }
     return this.meta?.strings[lang];
+  }
+
+  public getMetaString(name: keyof MetaStrings, index: number): string {
+    let meta: MetaStrings = this.getMetaStrings();
+    if (!meta.hasOwnProperty(name)) {
+      throw Error(`Meta string '${name}' not found in meta.yaml`);
+    }
+    if (index < 0 || index >= meta[name].length) {
+      return index.toString();
+    }
+    return meta[name][index];
   }
 
   public getMaxLevel(): number {

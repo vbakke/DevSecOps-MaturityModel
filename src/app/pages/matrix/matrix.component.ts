@@ -8,7 +8,7 @@ import { Activity, ActivityStore, Data } from 'src/app/model/activity-store';
 import { UntilDestroy } from '@ngneat/until-destroy';
 import { MatChip, MatChipList } from '@angular/material/chips';
 import { deepCopy } from 'src/app/util/util';
-import { ModalMessageComponent, DialogInfo } from '../modal-message/modal-message.component';
+import { ModalMessageComponent, DialogInfo } from '../../component/modal-message/modal-message.component';
 import { DataStore } from 'src/app/model/data-store';
 import { perfNow } from 'src/app/util/util';
 
@@ -65,6 +65,7 @@ export class MatrixComponent implements OnInit {
       .load()
       .then((dataStore: DataStore) => {
         this.setYamlData(dataStore);
+        console.log(`${perfNow()}: Page loaded: Matrix`);
       })
       .catch(err => {
         this.displayMessage(new DialogInfo(err.message, 'An error occurred'));

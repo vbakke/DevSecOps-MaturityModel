@@ -20,8 +20,8 @@ teamGroups:
 
 teamProgressFile: 'team-progress.yaml' 
 activityFiles:
-    - generated/generated.yaml 
-    # - default/activities.yaml 
+    # - generated/generated.yaml 
+    - default/activities.yaml 
     # - custom/custom-activities.yaml  # For customizing your own activities
     # - custom/test-ignore-activities.yaml
 
@@ -42,7 +42,6 @@ strings:
         'Level 5: Advanced deployment of security practices at scale',
       ]
     labels: ['Very Low', 'Low', 'Medium', 'High', 'Very High']
-    hardness: ['Very soft', 'Soft', 'Medium', 'High', 'Very high']
     knowledgeLabels:
       [
         'Very Low (one discipline)',
