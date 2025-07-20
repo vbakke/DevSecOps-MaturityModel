@@ -13,10 +13,10 @@ if (environment.production) {
 
 if (environment?.experimental && !localDevelopment) {
   initializeFaro({
-    url: 'https://faro-collector-prod-eu-north-0.grafana.net/collect/a7eda57dbf6b581662f2bf43a70c7508',
+    url: '/faro-logs', // Use the Cloudflare proxy endpoint
     app: {
       name: 'dsomm',
-      version: '1.0.6',
+      version: '1.1.0',
       environment: localDevelopment ? 'development' : 'experimental',
     },
     sessionTracking: {
