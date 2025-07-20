@@ -2,23 +2,18 @@
 
 
 ## Next
-- Heatmap: Fix: asterisk marks when modified
-  - ViewController needs to know about changes vs temp storage
-- Heatmap: Local Storage details
-  - Go though responsibility to SectorViewController
-    - What is the responsibility?
-    - What functions are outside responsibility?
-    - What functionality should be within its responsibility?
-    - Move SectorViewController to ...
-  - General tidy
-- Use DOMPurify to check markdown before innerHTML
-
-## ToDo
 ### Teams
 - Teams: Refactor to adhere to new data structure. (Page currently broken)
 - Teams: Allow editing teams names in browser
 - Teams: Store teams names in localstorage
 - Teams: Export teams YAML from teams page
+
+- Heatmap: Fix: asterisk marks when modified
+  - ViewController needs to know about changes vs temp storage
+- Heatmap: Run Markdown on yaml text
+- Use DOMPurify to check markdown before innerHTML
+
+## ToDo
 ### Dark Mode
 - Merge in Dark Mode [PR #381](https://github.com/devsecopsmaturitymodel/DevSecOps-MaturityModel/pull/381)
 ### Matrix
