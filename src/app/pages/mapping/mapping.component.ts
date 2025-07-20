@@ -11,6 +11,8 @@ import { DataStore } from 'src/app/model/data-store';
 import { Uuid } from 'src/app/model/meta';
 import { perfNow } from 'src/app/util/util';
 
+const GROUP_SEP = '\x1F';
+
 export interface MappingRow {
   uuid: Uuid;
   dimension: string;
@@ -155,7 +157,8 @@ export class MappingComponent implements OnInit, AfterViewInit {
     const ws: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element, { raw: true });
     const wb: XLSX.WorkBook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-    XLSX.writeFile(wb, 'Planned-Activities-Sorted-By-ISO17.xlsx');
+    XLSX.writeFile(wb, 'DSOMM - Activities.xlsx');
+    console.log(`${perfNow()}: Mapping: Exported to Excel`);
   }
   
   //-----------------------------
@@ -182,20 +185,21 @@ export class MappingComponent implements OnInit, AfterViewInit {
   }
 
   clearFilter() {
+    console.log(`${perfNow()}: Mapping: Clear search filter`);
     this.searchTerms = [];
     this.dataSource.filter = '';
     this.searchCtrl.setValue('');
   }
 
-  GROUP_SEP = '\x1F';
 
   updateFilter() {
-    this.dataSource.filter = this.searchTerms.join(this.GROUP_SEP);
+    this.dataSource.filter = this.searchTerms.join(GROUP_SEP);
+    console.log(`${perfNow()}: Mapping: Search filter: ${this.dataSource.filter?.replace(GROUP_SEP, ', ')}`);
   }
 
   filterFunction(data: MappingRow, filter: string): boolean {
     // Split filter into terms, require all terms to match
-    const terms = filter.split(this.GROUP_SEP).filter(t => t);
+    const terms = filter.split(GROUP_SEP).filter(t => t);
     const dataStr = [
         data.dimension,
         data.subDimension,

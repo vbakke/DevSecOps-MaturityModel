@@ -269,8 +269,10 @@ export class CircularHeatmapComponent implements OnInit {
         // Assign showActivityCard to the sector if it has activities, else null
         if (_self.selectedSector && _self.selectedSector.activities && _self.selectedSector.activities.length > 0) {
           _self.showActivityCard = _self.selectedSector;
+          console.log(`${perfNow()}: Heat: Clicked sector: '${_self.selectedSector.dimension}' Level: ${_self.selectedSector.level}`);
         } else {
           _self.showActivityCard = null;
+          console.log(`${perfNow()}: Heat: Clicked disabled sector: '${_self?.selectedSector?.dimension}' Level: ${_self?.selectedSector?.level}`);
         }
       })
       .on('mouseover', function () {
