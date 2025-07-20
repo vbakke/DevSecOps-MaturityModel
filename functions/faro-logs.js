@@ -13,7 +13,7 @@ export async function onRequest(context) {
 
   // Replace with your actual Grafana Faro endpoint
   // const GRAFANA_FARO_URL = 'https://faro-collector-prod-eu-west-0.grafana.net/collect';
-  const GRAFANA_FARO_URL = 'https://faro-collector-prod-eu-north-0.grafana.net/collect/a7eda57dbf6b581662f2bf43a70c7508;
+  const GRAFANA_FARO_URL = 'https://faro-collector-prod-eu-north-0.grafana.net/collect/a7eda57dbf6b581662f2bf43a70c7508';
 
   // Forward headers except host/origin
   const headers = new Headers(request.headers);
