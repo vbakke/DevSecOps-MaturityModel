@@ -35,17 +35,20 @@ export class YamlService {
    *  Load a yaml file, and convert it to an object
    */
   public async loadYamlUnresolvedRefs(url: string): Promise<any> {
-    console.log(perfNow() + ': DEBUG: Fetching ' + url);
+    console.log(perfNow() + ': YAML: Fetching ' + url);
     const response: Response = await fetch(url);
-
+    
     if (!response.ok) {
       throw new Error(
         `Failed to fetch the '${url}' YAML file: ${response.statusText}`
       );
     }
     const yamlText: string = await response.text();
-
-    return yamlParse(yamlText);
+    
+    console.log(perfNow() + ': YAML: Retrieved ' + url);
+    let yaml: any = yamlParse(yamlText);
+    console.log(perfNow() + ': YAML: Parsed ' + url);
+    return yaml;
   }
 
   /**

@@ -61,7 +61,7 @@ export class CircularHeatmapComponent implements OnInit {
 
 
   ngOnInit(): void {
-    console.log(`${perfNow()}s: Loading Circular Heatmap`);
+    console.log(`${perfNow()}s: Heat: Loading yamls...`);
     // Ensure that Levels and Teams load before MaturityData
     // using promises, since ngOnInit does not support async/await
     this.loader.load()

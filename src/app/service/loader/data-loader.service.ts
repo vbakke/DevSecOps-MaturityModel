@@ -15,7 +15,7 @@ export class DataValidationError extends Error {
 @Injectable({ providedIn: 'root' })
 export class LoaderService {
   private META_FILE: string = '/assets/YAML/meta.yaml';
-  private debug: boolean = true;
+  private debug: boolean = false;
   // public meta: MetaFile | null = null;
   private dataStore: DataStore | null = null;
   // private cachedActivityStore: ActivityStore | null = null;
@@ -32,7 +32,7 @@ export class LoaderService {
     // Initialize a new DataStore and load data
     this.dataStore = new DataStore();
     try {
-      if (this.debug) console.log(`${perfNow()}s: ----- Load Service Begin -----`);
+      if (this.debug) console.log(`${perfNow()}: ----- Load Service Begin -----`);
       
       // Load meta.yaml first
       this.dataStore.meta = await this.loadMeta();
@@ -60,7 +60,7 @@ export class LoaderService {
 
       // TODO: Load old yaml format (generated.yaml)
       // TODO: Load old yaml format (localStorage)
-      if (this.debug) console.log(`${perfNow()}s: ----- Load Service End -----`);
+      console.log(`${perfNow()}: YAML: All YAML files loaded`);
 
       return this.dataStore;
     } catch (err) {
@@ -72,7 +72,7 @@ export class LoaderService {
 
   private async loadMeta(): Promise<MetaFile> {
     if (this.debug) {
-      console.log(`${perfNow()} s: Load meta: ${this.META_FILE}`);
+      console.log(`${perfNow()}: Load meta: ${this.META_FILE}`);
     }
     let meta: MetaFile = await this.yamlService.loadYaml(this.META_FILE);
 
@@ -104,7 +104,7 @@ export class LoaderService {
   }
   
   private async loadTeamProgress(meta: MetaFile): Promise<TeamProgressFile> {
-    if (this.debug) console.log(`${perfNow()} s: Loading `);
+    if (this.debug) console.log(`${perfNow()}s: Loading Team Progress: ${meta.teamProgressFile}`);
     return this.yamlService.loadYamlUnresolvedRefs(meta.teamProgressFile);
   }
 
