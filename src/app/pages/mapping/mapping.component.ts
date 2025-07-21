@@ -81,6 +81,7 @@ export class MappingComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
+    console.log(`${perfNow()}s: Mapping: Loading yamls...`);
     this.loader
       .load()
       .then((dataStore: DataStore) => {

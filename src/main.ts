@@ -16,7 +16,7 @@ if (environment?.experimental && !localDevelopment) {
     url: 'https://faro-collector-prod-eu-north-0.grafana.net/collect/a7eda57dbf6b581662f2bf43a70c7508',
     app: {
       name: 'dsomm',
-      version: '1.0.6',
+      version: '1.1.1',
       environment: localDevelopment ? 'development' : 'experimental',
     },
     sessionTracking: {
