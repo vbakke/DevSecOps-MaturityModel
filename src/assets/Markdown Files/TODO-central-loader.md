@@ -1,12 +1,13 @@
 ## Doing
 
 
+
 ## Next
 ### Teams
-- Teams: Refactor to adhere to new data structure. (Page currently broken)
 - Teams: Allow editing teams names in browser
 - Teams: Store teams names in localstorage
 - Teams: Export teams YAML from teams page
+- Teams: Move team group 'All' from data-loader-service to Heatmap load
 
 - Heatmap: Fix: asterisk marks when modified
   - ViewController needs to know about changes vs temp storage
@@ -60,6 +61,7 @@
 
 
 # Done
+- Teams: Refactor to adhere to new data structure. 
 - Mapping: Add search filters 
 - Mapping: Refactor to adhere to new data structure. 
 - Mapping: Refactor ExportToExcel
@@ -101,8 +103,4 @@ For details and dates, please see the [GitHub log](https://github.com/vbakke/Dev
 
 ## User tracking
 The Experimental edition, and the Experimental edition only, uses Grafana Frontend to log the console log to catch bugs, especially from mobile devices. 
-
-Geolocation is not enabled, so no user identifiable data is stored.
-
-You may block this debug logging by using an ad-blocker. 
 
