@@ -13,7 +13,7 @@ import {
   DialogInfo,
 } from '../../component/modal-message/modal-message.component';
 import { Activity, ActivityStore } from 'src/app/model/activity-store';
-import { Uuid, ProgressDefinition, TeamName, ProgressTitle } from 'src/app/model/meta';
+import { Uuid, ProgressDefinition, TeamName, ProgressTitle, TeamGroups } from 'src/app/model/meta';
 import { SectorService } from '../../service/sector-service';
 import { DataStore } from 'src/app/model/data-store';
 import { Sector } from 'src/app/model/sector';
@@ -45,6 +45,7 @@ export class CircularHeatmapComponent implements OnInit {
   dimLabels: string[] = [];
   filtersTeams: Record<string, boolean> = {};
   filtersTeamGroups: Record<string, boolean> = {};
+  teamGroups: TeamGroups = {};
   hasTeamsFilter: boolean = false;
   maxLevel: number = 0;
   dimensionLabels: string[] = [];
@@ -61,7 +62,7 @@ export class CircularHeatmapComponent implements OnInit {
 
 
   ngOnInit(): void {
-    console.log(`${perfNow()}s: Heat: Loading yamls...`);
+    console.log(`${perfNow()}: Heat: Loading yamls...`);
     // Ensure that Levels and Teams load before MaturityData
     // using promises, since ngOnInit does not support async/await
     this.loader.load()
@@ -74,8 +75,11 @@ export class CircularHeatmapComponent implements OnInit {
         }
 
         this.filtersTeams = this.buildFilters(dataStore.meta?.teams as string[]);
-        this.filtersTeamGroups = this.buildFilters(Object.keys(dataStore.meta?.teamGroups || {}));
-        this.filtersTeamGroups['All'] = true;
+        // Insert key: 'All' with value: [], in the first position of the meta.teamGroups Record
+        const allTeamsGroupName: string = dataStore.getMetaString('allTeamsGroupName') || 'All';
+        this.teamGroups = {[allTeamsGroupName]: [], ...dataStore.meta?.teamGroups || {}};
+        this.filtersTeamGroups = this.buildFilters(Object.keys(this.teamGroups));
+        this.filtersTeamGroups[allTeamsGroupName] = true;
 
         let progressDefinition: ProgressDefinition = dataStore.meta?.progressDefinition || {};
         this.sectorService.init(dataStore.progressStore, dataStore.meta?.teams || [], dataStore?.progressStore?.getProgressData() || {}, progressDefinition);
@@ -143,7 +147,7 @@ export class CircularHeatmapComponent implements OnInit {
       // Update the team selections based on the team group selection
       let selectedTeams: TeamName[] = [];
       Object.keys(this.filtersTeams).forEach(key => {
-        this.filtersTeams[key] = this.dataStore?.meta?.teamGroups[teamGroup]?.includes(key) || false;
+        this.filtersTeams[key] = this.teamGroups[teamGroup]?.includes(key) || false;
         if (this.filtersTeams[key]) {
           selectedTeams.push(key);
         }
@@ -167,10 +171,12 @@ export class CircularHeatmapComponent implements OnInit {
     this.sectorService.setVisibleTeams(selectedTeams);
 
     // Update team group filter, if one matches selection
-    Object.keys(this.dataStore?.meta?.teamGroups || {}).forEach(group => {
-      let match: boolean = equalArray(selectedTeams, this.dataStore?.meta?.teamGroups[group]);
+    Object.keys(this.teamGroups || {}).forEach(group => {
+      let match: boolean = equalArray(selectedTeams, this.teamGroups[group]);
+      console.log(`${perfNow()}: Heat: Team group '${group}', selected: ${selectedTeams}: match: ${match}`);
       this.filtersTeamGroups[group] = match;
     });
+    this.filtersTeamGroups = this.filtersTeamGroups;
 
     this.reColorHeatmap()
   }

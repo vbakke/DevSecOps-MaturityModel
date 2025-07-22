@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { ymlService } from 'src/app/service/yaml-parser/yaml-parser.service';
+import { DialogInfo, ModalMessageComponent } from 'src/app/component/modal-message/modal-message.component';
+import { DataStore } from 'src/app/model/data-store';
+import { TeamGroups, TeamNames } from 'src/app/model/meta';
+import { LoaderService } from 'src/app/service/loader/data-loader.service';
 import { perfNow } from 'src/app/util/util';
 
 @Component({
@@ -8,30 +11,40 @@ import { perfNow } from 'src/app/util/util';
   styleUrls: ['./teams.component.css'],
 })
 export class TeamsComponent implements OnInit {
-  YamlObject: any;
-  teamList: any;
-  teamGroups: Map<string, string[]> = new Map();
+  dataStore: DataStore = new DataStore();
+  teams: TeamNames = [];
+  teamGroups: TeamGroups = {};
 
-  constructor(private yaml: ymlService) {}
+  constructor(
+        private loader: LoaderService,
+        public modal: ModalMessageComponent    
+  ) {}
 
   ngOnInit(): void {
-    this.yaml.setURI('./assets/YAML/meta.yaml');
-    // Function sets column header
-    this.yaml.getJson().subscribe(data => {
-      this.YamlObject = data;
-
-      console.log(this.YamlObject);
-      this.teamList = this.YamlObject['teams'];
-      this.teamGroups = this.YamlObject['teamGroups'];
-
-      console.log('teamList', this.teamList);
-      console.log('teamGroups', this.teamGroups);
-      console.log(`${perfNow()}: Page loaded: Teams`);
-    });
+    console.log(`${perfNow()}: Teams: Loading yamls...`);
+    this.loader
+      .load()
+      .then((dataStore: DataStore) => {
+        this.setYamlData(dataStore);
+        console.log(`${perfNow()}: Page loaded: Teams`);
+      })
+      .catch(err => {
+        this.displayMessage(new DialogInfo(err.message, 'An error occurred'));
+        if (err.hasOwnProperty('stack')) {
+          console.warn(err);
+        }
+      });
   }
 
-  getTeamArray(key: string): string[] {
-    return this.teamGroups.get(key) || [];
+  
+  displayMessage(dialogInfo: DialogInfo) {
+    this.modal.openDialog(dialogInfo);
+  }
+
+  setYamlData(dataStore: DataStore) {
+    this.dataStore = dataStore;
+    this.teams = dataStore?.meta?.teams || [];
+    this.teamGroups = dataStore?.meta?.teamGroups || {};
   }
 
   unsorted() {

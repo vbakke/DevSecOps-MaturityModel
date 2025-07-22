@@ -61,7 +61,7 @@ export class MatrixComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log(`${perfNow()}s: Matrix: Loading yamls...`);
+    console.log(`${perfNow()}: Matrix: Loading yamls...`);
     this.loader
       .load()
       .then((dataStore: DataStore) => {
