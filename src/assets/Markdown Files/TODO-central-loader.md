@@ -1,26 +1,25 @@
 ## Doing
 
 
-
 ## Next
 ### Teams
 - Teams: Allow editing teams names in browser
 - Teams: Store teams names in localstorage
 - Teams: Export teams YAML from teams page
-- Teams: Move team group 'All' from data-loader-service to Heatmap load
 
+
+## ToDo
 - Heatmap: Fix: asterisk marks when modified
   - ViewController needs to know about changes vs temp storage
 - Heatmap: Run Markdown on yaml text
 - Use DOMPurify to check markdown before innerHTML
-
-## ToDo
 ### Dark Mode
 - Merge in Dark Mode [PR #381](https://github.com/devsecopsmaturitymodel/DevSecOps-MaturityModel/pull/381)
 ### Matrix
 - Matrix: Fix markdown rendering
 - Matrix: Add a Close/Back button
 ### Heatmap:
+- Heatmap: Bug: Selecting a team group does not always get deselected when flipping teams
 - Heatmap: meta-yaml: If progress definition is missing, default to 0% + 100% 
 - Heatmap: Revert to boolean checkboxes, if definition is only 0% and 100%
 - Heatmap: Read previous local storage for backwards compatibility 
@@ -61,6 +60,7 @@
 
 
 # Done
+- Teams: Move team group 'All' from data-loader-service to Heatmap load
 - Teams: Refactor to adhere to new data structure. 
 - Mapping: Add search filters 
 - Mapping: Refactor to adhere to new data structure. 

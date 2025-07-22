@@ -11,6 +11,7 @@ export interface MetaFile {
 
 
 export interface MetaStrings {
+  allTeamsGroupName: string;
   labels: string[];
   maturityLevels: string[];
   knowledgeLabels: string[];

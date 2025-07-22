@@ -90,8 +90,6 @@ export class LoaderService {
     Object.keys(meta.teamGroups).forEach(group => {
       meta.teamGroups[group] = meta.teamGroups[group].filter(team => meta.teams.includes(team));
     });
-    // Insert key: 'All' with value: [], in the first position of the meta.teamGroups Record<string, string[]>
-    meta.teamGroups = { 'All': [], ...meta.teamGroups };
 
     // Resolve paths relative to meta.yaml
     meta.teamProgressFile = this.yamlService.makeFullPath(meta.teamProgressFile, this.META_FILE);
