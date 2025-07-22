@@ -35,15 +35,20 @@ export class DataStore {
     return this.meta?.strings[lang];
   }
 
-  public getMetaString(name: keyof MetaStrings, index: number): string {
+  public getMetaString(name: keyof MetaStrings, index: number = 0): string {
     let meta: MetaStrings = this.getMetaStrings();
     if (!meta.hasOwnProperty(name)) {
       throw Error(`Meta string '${name}' not found in meta.yaml`);
     }
-    if (index < 0 || index >= meta[name].length) {
-      return index.toString();
+    if (Array.isArray(meta[name])) {
+      if (index < 0 || index >= meta[name].length) {
+        return index.toString();
+      }
+      return meta[name][index];
+    } else if (typeof meta[name] === 'string') {
+      return meta[name] as string;
     }
-    return meta[name][index];
+    throw Error(`Meta string '${name}' is not a string or array in meta.yaml`);
   }
 
   public getMaxLevel(): number {

@@ -17,8 +17,8 @@ teams:
   $ref: 'default/teams.yaml#/teams'
 teamGroups:
   $ref: 'default/teams.yaml#/teamGroups'
-
 teamProgressFile: 'team-progress.yaml' 
+
 activityFiles:
     # - generated/generated.yaml 
     - default/activities.yaml 
@@ -33,6 +33,7 @@ activityFiles:
 lang: en
 strings:
   en:
+    allTeamsGroupName: 'All teams'
     maturityLevels:
       [
         'Level 1: Basic understanding of security practices',
