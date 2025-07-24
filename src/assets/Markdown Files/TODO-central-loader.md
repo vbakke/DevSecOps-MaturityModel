@@ -56,8 +56,8 @@
 - Matrix: Dependency graph: Make it clickable
 - Misc: What is the activities.yaml comment field for? Should it be displayed to the user?
 - Teams: View active initiatives for a team (>0% and <100%)
-- Teams: View timeline for a team 
-
+- Teams: View timeline for a team
+- Meta.yaml: Allow admins to rename the terms 'Team' and 'Team Group' (e.g. 'App' and 'Team')
 
 # Done
 - Teams: Move team group 'All' from data-loader-service to Heatmap load
