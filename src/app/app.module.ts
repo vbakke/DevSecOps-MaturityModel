@@ -30,6 +30,7 @@ import {
   MAT_DIALOG_DATA,
   MatDialogRef,
 } from '@angular/material/dialog';
+import { TeamsGroupsEditorModule } from './component/teams-groups-editor/teams-groups-editor.module';
 
 @NgModule({
   declarations: [
@@ -59,6 +60,7 @@ import {
     MatDialogModule,
     ReactiveFormsModule,
     HttpClientModule,
+    TeamsGroupsEditorModule,
   ],
   providers: [
     ymlService,

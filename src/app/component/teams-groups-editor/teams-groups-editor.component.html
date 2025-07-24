@@ -1,0 +1,50 @@
+<!-- Main layout for teams/groups editor -->
+<div class="editor-header">
+  <h2>Teams &amp; Groups Editor</h2>
+  <em>Very experimental... work in progress :)</em>
+</div>
+<div class="editor-container">
+  <div class="editor-list-panel">
+    <div class="editor-list-header">
+      <span>Teams</span>
+      <button mat-icon-button color="primary" (click)="onAddTeam()" [disabled]="!editMode" title="Add Team">
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
+    <app-selectable-list
+      [items]="teams"
+      [selectedItemId]="selectedTeamId"
+      [highlightedItemIds]="highlightedTeamIds"
+      [editMode]="editMode"
+      [addLabel]="''"
+      [typeLabel]="''"
+      (itemSelected)="onTeamSelected($event)"
+      (renameItem)="onRenameTeam($event)"
+      (deleteItem)="onDeleteTeam($event)">
+    </app-selectable-list>
+  </div>
+  <div class="editor-list-panel">
+    <div class="editor-list-header">
+      <span>Groups</span>
+      <button mat-icon-button color="primary" (click)="onAddGroup()" [disabled]="!editMode" title="Add Group">
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
+    <app-selectable-list
+      [items]="groups"
+      [selectedItemId]="selectedGroupId"
+      [highlightedItemIds]="highlightedGroupIds"
+      [editMode]="editMode"
+      [addLabel]="''"
+      [typeLabel]="''"
+      (itemSelected)="onGroupSelected($event)"
+      (renameItem)="onRenameGroup($event)"
+      (deleteItem)="onDeleteGroup($event)">
+    </app-selectable-list>
+  </div>
+</div>
+<div class="editor-footer">
+  <button mat-raised-button color="accent" (click)="editMode = !editMode">
+    {{ editMode ? 'Exit Edit Mode' : 'Enter Edit Mode' }}
+  </button>
+</div>
