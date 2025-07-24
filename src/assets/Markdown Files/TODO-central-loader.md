@@ -1,12 +1,17 @@
 ## Doing
 - Teams: Allow editing teams names in browser
-
+  - Exit edit mode -> Save+Cancel
+  - Store changed names in dataStore (to be used in other pages)
+  - Click outside lists must clear selections
+  - Color green
+  - Edit mode -> Edit + Pencil
+  - Plus sign should only be visible in Editmo mode
 
 ## Next
 ### Teams
 - Teams: Store teams names in localstorage
 - Teams: Export teams YAML from teams page
-
+- Teams: Display some core info about the selected team/group
 
 ## ToDo
 - Heatmap: Fix: asterisk marks when modified
