@@ -1,0 +1,14 @@
+<!-- Generic selectable list for teams or groups -->
+<div class="selectable-list">
+  <button (click)="addItem.emit()" *ngIf="editMode">{{ addLabel }} {{ typeLabel }}</button>
+  <ul>
+    <li *ngFor="let item of items"
+        [class.selected]="item.id === selectedItemId"
+        [class.highlighted]="highlightedItemIds.includes(item.id)"
+        (click)="itemSelected.emit(item.id)">
+      {{ item.name }}
+      <button *ngIf="editMode" (click)="$event.stopPropagation(); renameItem.emit(item.id)">Rename</button>
+      <button *ngIf="editMode" (click)="$event.stopPropagation(); deleteItem.emit(item.id)">Delete</button>
+    </li>
+  </ul>
+</div>

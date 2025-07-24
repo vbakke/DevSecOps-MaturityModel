@@ -1,0 +1,27 @@
+<!-- Main layout for teams/groups editor -->
+<div class="editor-container">
+  <app-selectable-list
+    [items]="teams"
+    [selectedItemId]="selectedTeamId"
+    [highlightedItemIds]="highlightedTeamIds"
+    [editMode]="editMode"
+    [addLabel]="'Add'"
+    [typeLabel]="'Team'"
+    (itemSelected)="onTeamSelected($event)"
+    (addItem)="onAddTeam()"
+    (renameItem)="onRenameTeam($event)"
+    (deleteItem)="onDeleteTeam($event)">
+  </app-selectable-list>
+  <app-selectable-list
+    [items]="groups"
+    [selectedItemId]="selectedGroupId"
+    [highlightedItemIds]="highlightedGroupIds"
+    [editMode]="editMode"
+    [addLabel]="'Add'"
+    [typeLabel]="'Group'"
+    (itemSelected)="onGroupSelected($event)"
+    (addItem)="onAddGroup()"
+    (renameItem)="onRenameGroup($event)"
+    (deleteItem)="onDeleteGroup($event)">
+  </app-selectable-list>
+</div>

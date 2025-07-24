@@ -1,0 +1,14 @@
+.selectable-list ul {
+  list-style: none;
+  padding: 0;
+}
+.selectable-list li.selected {
+  background: #1976d2;
+  color: white;
+}
+.selectable-list li.highlighted {
+  background: #bbdefb;
+}
+.selectable-list li:not(.selected):not(.highlighted) {
+  opacity: 0.5;
+}

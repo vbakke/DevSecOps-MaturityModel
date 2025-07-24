@@ -1,19 +1,24 @@
-<div id="team-section">
-  <h2>Team List</h2>
+<div id="team-section" (click)="onEditorBackgroundClick()">
+  <h2>Old List</h2>
   <div class="team-list">
     <ul>
-      <li *ngFor="let team of teams">{{ team }}</li>
+      <li *ngFor="let team of teams">{{ team.name }}</li>
     </ul>
   </div>
-  <h2>Team Group</h2>
-  <div
-    class="group-expand"
-    *ngFor="let group of teamGroups | keyvalue : unsorted">
-    <h3>{{ group.key }}</h3>
-    <div class="team-list">
-      <ul>
-        <li *ngFor="let team of group.value">{{ team }}</li>
-      </ul>
-    </div>
-  </div>
-</div>
+  <h2>New Team list</h2>
+  <app-teams-groups-editor
+    [teams]="teams"
+    [groups]="groups"
+    [highlightedTeamIds]="highlightedTeamIds"
+    [highlightedGroupIds]="highlightedGroupIds"
+    (teamSelected)="onTeamSelected($event)"
+    (groupSelected)="onGroupSelected($event)"
+    (addTeam)="onAddTeam()"
+    (renameTeam)="onRenameTeam($event)"
+    (deleteTeam)="onDeleteTeam($event)"
+    (addGroup)="onAddGroup()"
+    (renameGroup)="onRenameGroup($event)"
+    (deleteGroup)="onDeleteGroup($event)"
+    (click)="$event.stopPropagation()"
+  ></app-teams-groups-editor>
+</div> 
