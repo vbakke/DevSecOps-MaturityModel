@@ -15,10 +15,10 @@ export class TeamsGroupsEditorComponent {
   @Output() teamSelected = new EventEmitter<string>();
   @Output() groupSelected = new EventEmitter<string>();
   @Output() addTeam = new EventEmitter<void>();
-  @Output() renameTeam = new EventEmitter<string>();
+  @Output() renameTeam = new EventEmitter<{id: string, name: string}>();
   @Output() deleteTeam = new EventEmitter<string>();
   @Output() addGroup = new EventEmitter<void>();
-  @Output() renameGroup = new EventEmitter<string>();
+  @Output() renameGroup = new EventEmitter<{id: string, name: string}>();
   @Output() deleteGroup = new EventEmitter<string>();
   editMode = false;
   selectedTeamId: string | null = null;
@@ -37,9 +37,9 @@ export class TeamsGroupsEditorComponent {
     // Update highlightedTeamIds based on group-team membership
   }
   onAddTeam() { this.addTeam.emit(); }
-  onRenameTeam(teamId: string) { this.renameTeam.emit(teamId); }
+  onRenameTeam(event: {id: string, name: string}) { this.renameTeam.emit(event); }
   onDeleteTeam(teamId: string) { this.deleteTeam.emit(teamId); }
   onAddGroup() { this.addGroup.emit(); }
-  onRenameGroup(groupId: string) { this.renameGroup.emit(groupId); }
+  onRenameGroup(event: {id: string, name: string}) { this.renameGroup.emit(event); }
   onDeleteGroup(groupId: string) { this.deleteGroup.emit(groupId); }
 }

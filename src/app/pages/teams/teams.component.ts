@@ -76,8 +76,17 @@ export class TeamsComponent implements OnInit {
   onAddTeam() {
     // Handle add team logic
   }
-  onRenameTeam(teamId: string) {
-    // Handle rename team logic
+  onRenameTeam(event: {id: string, name: string}) {
+    // Find and update the team name in the teams array
+    const idx = this.teams.findIndex(t => t.id === event.id);
+    if (idx !== -1) {
+      this.teams[idx].name = event.name;
+      this.teams[idx].id = event.name;
+      // Also update in teamGroups
+      Object.keys(this.teamGroups).forEach(group => {
+        this.teamGroups[group] = this.teamGroups[group].map(t => t === event.id ? event.name : t);
+      });
+    }
   }
   onDeleteTeam(teamId: string) {
     // Handle delete team logic
@@ -85,8 +94,18 @@ export class TeamsComponent implements OnInit {
   onAddGroup() {
     // Handle add group logic
   }
-  onRenameGroup(groupId: string) {
-    // Handle rename group logic
+  onRenameGroup(event: {id: string, name: string}) {
+    // Find and update the group name in the groups array
+    const idx = this.groups.findIndex(g => g.id === event.id);
+    if (idx !== -1) {
+      this.groups[idx].name = event.name;
+      this.groups[idx].id = event.name;
+      // Also update key in teamGroups
+      if (this.teamGroups[event.id]) {
+        this.teamGroups[event.name] = this.teamGroups[event.id];
+        delete this.teamGroups[event.id];
+      }
+    }
   }
   onDeleteGroup(groupId: string) {
     // Handle delete group logic
