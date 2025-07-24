@@ -1,9 +1,9 @@
 ## Doing
+- Teams: Allow editing teams names in browser
 
 
 ## Next
 ### Teams
-- Teams: Allow editing teams names in browser
 - Teams: Store teams names in localstorage
 - Teams: Export teams YAML from teams page
 
@@ -11,6 +11,7 @@
 ## ToDo
 - Heatmap: Fix: asterisk marks when modified
   - ViewController needs to know about changes vs temp storage
+- Heatmap: Bug: Clicking on grey sector leaves cursor on that sector
 - Heatmap: Run Markdown on yaml text
 - Use DOMPurify to check markdown before innerHTML
 ### Dark Mode
