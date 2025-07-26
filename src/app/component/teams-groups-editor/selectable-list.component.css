@@ -14,11 +14,11 @@
   transition: background 0.2s;
 }
 .selectable-list li.selected {
-  background: #1976d2;
+  background: #66bb6a;
   color: white;
 }
 .selectable-list li.highlighted {
-  background: #bbdefb;
+  background: #66bb6a75;
 }
 .selectable-list li:not(.selected):not(.highlighted) {
   opacity: 0.6;
