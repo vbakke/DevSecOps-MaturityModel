@@ -4,7 +4,6 @@ import { DataStore } from 'src/app/model/data-store';
 import { TeamGroups, TeamNames } from 'src/app/model/meta';
 import { LoaderService } from 'src/app/service/loader/data-loader.service';
 import { perfNow } from 'src/app/util/util';
-import { SelectableListItem } from '../../component/teams-groups-editor/selectable-list.component';
 
 @Component({
   selector: 'app-teams',
@@ -13,8 +12,8 @@ import { SelectableListItem } from '../../component/teams-groups-editor/selectab
 })
 export class TeamsComponent implements OnInit {
   dataStore: DataStore = new DataStore();
-  teams: SelectableListItem[] = [];
-  groups: SelectableListItem[] = [];
+  teams: string[] = [];
+  groups: string[] = [];
   teamGroups: TeamGroups = {};
 
   selectedTeamId: string | null = null;
@@ -50,8 +49,8 @@ export class TeamsComponent implements OnInit {
 
   setYamlData(dataStore: DataStore) {
     this.dataStore = dataStore;
-    this.teams = (dataStore?.meta?.teams || []).map((name: string, idx: number) => ({ id: name, name }));
-    this.groups = Object.keys(dataStore?.meta?.teamGroups || {}).map((name, idx) => ({ id: name, name }));
+    this.teams = dataStore?.meta?.teams || [];
+    this.groups = Object.keys(dataStore?.meta?.teamGroups || {});
     this.teamGroups = dataStore?.meta?.teamGroups || {};
   }
 
@@ -59,32 +58,29 @@ export class TeamsComponent implements OnInit {
     return 0;
   }
 
-  onTeamSelected(teamId: string) {
-    this.selectedTeamId = teamId;
-    this.selectedGroupId = null; // Reset group selection
-    this.highlightedGroupIds = this.groups
-      .filter(group => (this.teamGroups[group.id] || []).includes(teamId))
-      .map(group => group.id);
-    this.highlightedTeamIds = []; // Clear highlighted teams
+  onTeamSelected(teamName: string) {
+    this.selectedTeamId = teamName;
+    this.selectedGroupId = null;
+    this.highlightedGroupIds = this.groups.filter(group => (this.teamGroups[group] || []).includes(teamName));
+    this.highlightedTeamIds = [];
   }
-  onGroupSelected(groupId: string) {
-    this.selectedGroupId = groupId;
-    this.selectedTeamId = null; // Reset team selection
-    this.highlightedTeamIds = (this.teamGroups[groupId] || []);
-    this.highlightedGroupIds = []; // Clear highlighted groups
+  onGroupSelected(groupName: string) {
+    this.selectedGroupId = groupName;
+    this.selectedTeamId = null;
+    this.highlightedTeamIds = (this.teamGroups[groupName] || []);
+    this.highlightedGroupIds = [];
   }
   onAddTeam() {
     // Handle add team logic
   }
-  onRenameTeam(event: {id: string, name: string}) {
-    // Find and update the team name in the teams array
-    const idx = this.teams.findIndex(t => t.id === event.id);
+  onRenameTeam(event: {oldName: string, newName: string}) {
+    // Update team name in teams array
+    const idx = this.teams.indexOf(event.oldName);
     if (idx !== -1) {
-      this.teams[idx].name = event.name;
-      this.teams[idx].id = event.name;
-      // Also update in teamGroups
+      this.teams[idx] = event.newName;
+      // Update references in teamGroups
       Object.keys(this.teamGroups).forEach(group => {
-        this.teamGroups[group] = this.teamGroups[group].map(t => t === event.id ? event.name : t);
+        this.teamGroups[group] = this.teamGroups[group].map(t => t === event.oldName ? event.newName : t);
       });
     }
   }
@@ -94,16 +90,15 @@ export class TeamsComponent implements OnInit {
   onAddGroup() {
     // Handle add group logic
   }
-  onRenameGroup(event: {id: string, name: string}) {
-    // Find and update the group name in the groups array
-    const idx = this.groups.findIndex(g => g.id === event.id);
+  onRenameGroup(event: {oldName: string, newName: string}) {
+    // Update group name in groups array
+    const idx = this.groups.indexOf(event.oldName);
     if (idx !== -1) {
-      this.groups[idx].name = event.name;
-      this.groups[idx].id = event.name;
-      // Also update key in teamGroups
-      if (this.teamGroups[event.id]) {
-        this.teamGroups[event.name] = this.teamGroups[event.id];
-        delete this.teamGroups[event.id];
+      this.groups[idx] = event.newName;
+      // Update key in teamGroups
+      if (this.teamGroups[event.oldName]) {
+        this.teamGroups[event.newName] = this.teamGroups[event.oldName];
+        delete this.teamGroups[event.oldName];
       }
     }
   }

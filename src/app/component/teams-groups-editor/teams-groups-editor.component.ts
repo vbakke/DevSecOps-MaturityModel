@@ -1,6 +1,5 @@
 // Main container for teams/groups editing
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { SelectableListItem } from './selectable-list.component';
 
 @Component({
   selector: 'app-teams-groups-editor',
@@ -8,17 +7,17 @@ import { SelectableListItem } from './selectable-list.component';
   styleUrls: ['./teams-groups-editor.component.css']
 })
 export class TeamsGroupsEditorComponent {
-  @Input() teams: SelectableListItem[] = [];
-  @Input() groups: SelectableListItem[] = [];
+  @Input() teams: string[] = [];
+  @Input() groups: string[] = [];
   @Input() highlightedTeamIds: string[] = [];
   @Input() highlightedGroupIds: string[] = [];
   @Output() teamSelected = new EventEmitter<string>();
   @Output() groupSelected = new EventEmitter<string>();
   @Output() addTeam = new EventEmitter<void>();
-  @Output() renameTeam = new EventEmitter<{id: string, name: string}>();
+  @Output() renameTeam = new EventEmitter<{ oldName: string, newName: string }>();
   @Output() deleteTeam = new EventEmitter<string>();
   @Output() addGroup = new EventEmitter<void>();
-  @Output() renameGroup = new EventEmitter<{id: string, name: string}>();
+  @Output() renameGroup = new EventEmitter<{ oldName: string, newName: string }>();
   @Output() deleteGroup = new EventEmitter<string>();
   editMode = false;
   selectedTeamId: string | null = null;
@@ -37,9 +36,9 @@ export class TeamsGroupsEditorComponent {
     // Update highlightedTeamIds based on group-team membership
   }
   onAddTeam() { this.addTeam.emit(); }
-  onRenameTeam(event: {id: string, name: string}) { this.renameTeam.emit(event); }
+  onRenameTeam(event: { oldName: string, newName: string }) { this.renameTeam.emit(event); }
   onDeleteTeam(teamId: string) { this.deleteTeam.emit(teamId); }
   onAddGroup() { this.addGroup.emit(); }
-  onRenameGroup(event: {id: string, name: string}) { this.renameGroup.emit(event); }
+  onRenameGroup(event: { oldName: string, newName: string }) { this.renameGroup.emit(event); }
   onDeleteGroup(groupId: string) { this.deleteGroup.emit(groupId); }
 }

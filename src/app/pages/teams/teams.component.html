@@ -2,7 +2,7 @@
   <h2>Old List</h2>
   <div class="team-list">
     <ul>
-      <li *ngFor="let team of teams">{{ team.name }}</li>
+      <li *ngFor="let team of teams">{{ team }}</li>
     </ul>
   </div>
   <h2>New Team list</h2>
@@ -21,4 +21,4 @@
     (deleteGroup)="onDeleteGroup($event)"
     (click)="$event.stopPropagation()"
   ></app-teams-groups-editor>
-</div> 
+</div>

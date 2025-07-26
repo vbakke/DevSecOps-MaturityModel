@@ -1,17 +1,12 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 
-export interface SelectableListItem {
-  id: string;
-  name: string;
-}
-
 @Component({
   selector: 'app-selectable-list',
   templateUrl: './selectable-list.component.html',
   styleUrls: ['./selectable-list.component.css']
 })
 export class SelectableListComponent {
-  @Input() items: SelectableListItem[] = [];
+  @Input() items: string[] = [];
   @Input() selectedItemId: string | null = null;
   @Input() highlightedItemIds: string[] = [];
   @Input() editMode = false;
@@ -19,22 +14,22 @@ export class SelectableListComponent {
   @Input() typeLabel = '';
   @Output() itemSelected = new EventEmitter<string>();
   @Output() addItem = new EventEmitter<void>();
-  @Output() renameItem = new EventEmitter<{id: string, name: string}>();
+  @Output() renameItem = new EventEmitter<{oldName: string, newName: string}>();
   @Output() deleteItem = new EventEmitter<string>();
 
   editingId: string | null = null;
   editingName: string = '';
 
-  startEdit(item: SelectableListItem) {
-    this.editingId = item.id;
-    this.editingName = item.name;
+  startEdit(name: string) {
+    this.editingId = name;
+    this.editingName = name;
   }
 
-  saveEdit(item: SelectableListItem) {
-    if (this.editingId && this.editingName.trim() && this.editingName !== item.name) {
-      this.renameItem.emit({ id: this.editingId, name: this.editingName.trim() });
+  saveEdit(name: string) {
+    if (this.editingId && this.editingName.trim() && this.editingName !== name) {
+      this.renameItem.emit({ oldName: this.editingId, newName: this.editingName.trim() });
     }
     this.editingId = null;
     this.editingName = '';
   }
-}
+} 

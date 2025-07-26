@@ -2,19 +2,19 @@
 <div class="selectable-list">
   <button (click)="addItem.emit()" *ngIf="editMode">{{ addLabel }} {{ typeLabel }}</button>
   <ul>
-    <li *ngFor="let item of items"
-        [class.selected]="item.id === selectedItemId"
-        [class.highlighted]="highlightedItemIds.includes(item.id)"
-        (click)="itemSelected.emit(item.id)">
-      <span *ngIf="editMode && editingId === item.id">
-        <input [(ngModel)]="editingName" (keydown.enter)="saveEdit(item)" (blur)="saveEdit(item)" />
+    <li *ngFor="let name of items"
+        [class.selected]="name === selectedItemId"
+        [class.highlighted]="highlightedItemIds.includes(name)"
+        (click)="itemSelected.emit(name)">
+      <span *ngIf="editMode && editingId === name">
+        <input [(ngModel)]="editingName" (keydown.enter)="saveEdit(name)" (blur)="saveEdit(name)" />
       </span>
-      <span *ngIf="!editMode || editingId !== item.id">{{ item.name }}</span>
+      <span *ngIf="!editMode || editingId !== name">{{ name }}</span>
       <span *ngIf="editMode">
-        <button mat-icon-button color="primary" (click)="$event.stopPropagation(); startEdit(item)" title="Rename">
+        <button mat-icon-button (click)="$event.stopPropagation(); startEdit(name)" title="Rename">
           <mat-icon>edit</mat-icon>
         </button>
-        <button mat-icon-button color="warn" (click)="$event.stopPropagation(); deleteItem.emit(item.id)" title="Delete">
+        <button mat-icon-button (click)="$event.stopPropagation(); deleteItem.emit(name)" title="Delete">
           <mat-icon>delete</mat-icon>
         </button>
       </span>
