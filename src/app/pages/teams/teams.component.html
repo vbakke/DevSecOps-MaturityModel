@@ -1,24 +1,39 @@
 <div id="team-section" (click)="onEditorBackgroundClick()">
-  <h2>Old List</h2>
+  <!-- <h2>Old List</h2>
   <div class="team-list">
     <ul>
       <li *ngFor="let team of teams">{{ team }}</li>
     </ul>
-  </div>
+  </div> -->
   <h2>New Team list</h2>
-  <app-teams-groups-editor
+  <teams-groups-editor
     [teams]="teams"
-    [groups]="groups"
+    [teamGroups]="teamGroups"
     [highlightedTeamIds]="highlightedTeamIds"
     [highlightedGroupIds]="highlightedGroupIds"
-    (teamSelected)="onTeamSelected($event)"
-    (groupSelected)="onGroupSelected($event)"
-    (addTeam)="onAddTeam()"
-    (renameTeam)="onRenameTeam($event)"
-    (deleteTeam)="onDeleteTeam($event)"
-    (addGroup)="onAddGroup()"
-    (renameGroup)="onRenameGroup($event)"
-    (deleteGroup)="onDeleteGroup($event)"
+    (changed)="onTeamsChanged($event)"
+
+    (OBSOLETE_teamSelected)="OBSOLETE_onTeamSelected($event)"
+    (OBSOLETE_groupSelected)="OBSOLETE_onGroupSelected($event)"
+    (OBSOLETE_addTeam)="OBSOLETE_onAddTeam()"
+    (OBSOLETE_renameTeam)="OBSOLETE_onRenameTeam($event)"
+    (OBSOLETE_deleteTeam)="OBSOLETE_onDeleteTeam($event)"
+    (OBSOLETE_addGroup)="OBSOLETE_onAddGroup()"
+    (OBSOLETE_renameGroup)="OBSOLETE_onRenameGroup($event)"
+    (OBSOLETE_deleteGroup)="OBSOLETE_onDeleteGroup($event)"
     (click)="$event.stopPropagation()"
-  ></app-teams-groups-editor>
+  ></teams-groups-editor>
+
+  <div>
+    <h3>Page debug</h3>
+    <div>
+      <table>
+        <tr><td>All teams:</td><td>{{ teams }}</td></tr> 
+        <tr>Groups</tr>
+        <tr *ngFor="let group of teamGroups | keyvalue">
+          <td>{{ group.key }} </td><td> {{ group.value }} </td>
+        </tr>
+      </table>
+    </div>
+  </div>  
 </div>

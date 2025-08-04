@@ -1,11 +1,11 @@
 ## Doing
 - Teams: Allow editing teams names in browser
-  - Exit edit mode -> Save+Cancel
+  - Fix rename Team, (in the Groups)
+  - Edit team name needs exit when clicking outside input box
   - Store changed names in dataStore (to be used in other pages)
   - Click outside lists must clear selections
-  - Color green
-  - Edit mode -> Edit + Pencil
-  - Plus sign should only be visible in Editmo mode
+  - Edit mode should only be available if meta.yaml allows it
+  - If Team / Group name is not unique, mark it as invalid
 
 ## Next
 ### Teams

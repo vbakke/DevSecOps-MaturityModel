@@ -1,3 +1,13 @@
+.selectable-list-header {
+
+display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
 .selectable-list ul {
   list-style: none;
   padding: 0;

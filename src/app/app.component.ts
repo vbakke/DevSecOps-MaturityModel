@@ -26,10 +26,11 @@ export class AppComponent implements OnInit {
         .then(async (response) =>  {
           let gitinfo: any  = await response.json();
           let commitDate: string = gitinfo?.commit?.commit?.author?.date;
+          let commitMsg: string = gitinfo?.commit?.commit?.message;
           if (commitDate) {
             let element = document.querySelector('.tag-subtitle');
             if (element) {
-              element.textContent = 'Updated: ' + commitDate?.replace('T', ' ');
+              element.textContent = `Updated: ${commitDate?.replace('T', ' ')}: ${commitMsg}`;
               if (localStorage.getItem('debugid')) {
                 element.textContent += ' (id: ' + localStorage.getItem('debugid') + ')';
               }

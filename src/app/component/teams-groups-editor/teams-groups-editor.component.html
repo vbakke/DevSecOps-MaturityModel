@@ -5,46 +5,65 @@
 </div>
 <div class="editor-container">
   <div class="editor-list-panel">
-    <div class="editor-list-header">
-      <span>Teams</span>
-      <button mat-icon-button color="primary" (click)="onAddTeam()" [disabled]="!editMode" title="Add Team">
-        <mat-icon>add</mat-icon>
-      </button>
-    </div>
     <app-selectable-list
-      [items]="teams"
-      [selectedItemId]="selectedTeamId"
-      [highlightedItemIds]="highlightedTeamIds"
-      [editMode]="editMode"
-      [addLabel]="''"
-      [typeLabel]="''"
+      title="Teams"
+      [items]="localCopyTeams"
+      [selectedItem]="selectedTeamId"
+      [highlightedItems]="highlightedTeamIds"
+      [editMode]="teamsEditMode"
+      [relationshipEditMode]="groupsEditMode"
+      [relationshipState]="isTeamInGroupFn"
       (itemSelected)="onTeamSelected($event)"
+      (addItem)="onAddTeam()"
       (renameItem)="onRenameTeam($event)"
-      (deleteItem)="onDeleteTeam($event)">
-    </app-selectable-list>
+      (deleteItem)="onDeleteTeam($event)"
+      (editModeChange)="onTeamsEditModeChange($event)"
+      (relationshipToggle)="onTeamGroupToggle($event, selectedGroupId)"
+      (save)="onSave()"
+      (cancel)="onCancelEdit()"
+    ></app-selectable-list>
   </div>
   <div class="editor-list-panel">
-    <div class="editor-list-header">
-      <span>Groups</span>
-      <button mat-icon-button color="primary" (click)="onAddGroup()" [disabled]="!editMode" title="Add Group">
-        <mat-icon>add</mat-icon>
-      </button>
-    </div>
     <app-selectable-list
-      [items]="groups"
-      [selectedItemId]="selectedGroupId"
-      [highlightedItemIds]="highlightedGroupIds"
-      [editMode]="editMode"
-      [addLabel]="''"
-      [typeLabel]="''"
+      title="Groups"
+      [items]="localCopyGroupNames"
+      [selectedItem]="selectedGroupId"
+      [highlightedItems]="highlightedGroupIds"
+      [editMode]="groupsEditMode"
+      [relationshipEditMode]="teamsEditMode"
+      [relationshipState]="isGroupForTeamFn"
       (itemSelected)="onGroupSelected($event)"
+      (addItem)="onAddGroup()"
       (renameItem)="onRenameGroup($event)"
-      (deleteItem)="onDeleteGroup($event)">
-    </app-selectable-list>
+      (deleteItem)="onDeleteGroup($event)"
+      (editModeChange)="onGroupsEditModeChange($event)"
+      (relationshipToggle)="onTeamGroupToggle(selectedTeamId, $event)"
+      (save)="onSave()"
+      (cancel)="onCancelEdit()"
+    ></app-selectable-list>
   </div>
 </div>
-<div class="editor-footer">
+<!-- <div class="editor-footer">
   <button mat-raised-button color="primary" (click)="editMode = !editMode">
     {{ editMode ? 'Exit Edit Mode' : 'Enter Edit Mode' }}
   </button>
-</div>
+</div> -->
+
+<div class="editor-debug">
+  <h3>Editor Debug</h3>
+  <div>
+      <table>
+        <tr><td></td><td>Local</td><td>Original</td></tr> 
+        <tr><td>All teams:</td><td>{{ localCopyTeams }}</td><td>{{ teams }}</td></tr> 
+        <tr>Groups</tr>
+        <tr *ngFor="let groupName of localCopyGroupNames">
+          <td>{{ groupName }} </td><td> {{ localCopyTeamGroups[groupName] }} </td><td> {{ teamGroups[groupName] }} </td>
+        </tr>
+        <tr><td>Selected Team </td><td> {{ selectedTeamId }} </td></tr>
+        <tr><td>Selected Group </td><td> {{ selectedGroupId }} </td><td> {{ localCopyTeamGroups[selectedGroupId || ''] }} </td></tr>
+      </table>
+    <p>Teams Edit Mode: {{ teamsEditMode }}</p>
+    <p>Groups Edit Mode: {{ groupsEditMode }}</p>
+    <p>Highlighted Teams: {{ highlightedTeamIds }}</p>
+    <p>Highlighted Groups: {{ highlightedGroupIds }}</p>
+  </div>

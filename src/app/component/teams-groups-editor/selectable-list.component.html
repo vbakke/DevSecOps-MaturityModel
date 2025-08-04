@@ -1,22 +1,50 @@
 <!-- Generic selectable list for teams or groups -->
 <div class="selectable-list">
-  <button (click)="addItem.emit()" *ngIf="editMode">{{ addLabel }} {{ typeLabel }}</button>
+  <div class="selectable-list-header">
+    <span>{{ title }}</span>
+    <button mat-icon-button (click)="toggleEditMode()" title="Edit {{ title }}" color="red" *ngIf="!editMode && !relationshipEditMode">
+      <mat-icon>edit</mat-icon>
+    </button>
+    <span *ngIf="editMode" >
+      <button mat-icon-button (click)="addItem.emit()" title="{{ addLabel }} {{ title }}">
+        <mat-icon>add</mat-icon>
+      </button>
+      <button mat-icon-button (click)="cancel.emit()" title="Cancel, forget changes">
+        <!-- <mat-icon>close</mat-icon> -->
+        <!-- <mat-icon>keyboard_return</mat-icon> -->
+        <!-- <mat-icon>fast_rewind</mat-icon> -->
+        <!-- <mat-icon>replay</mat-icon> -->
+        <mat-icon>undo</mat-icon>
+      </button>
+      <button mat-icon-button (click)="save.emit()" title="Accept changes">
+        <mat-icon>check</mat-icon>
+      </button>
+    </span>
+</div>
   <ul>
     <li *ngFor="let name of items"
-        [class.selected]="name === selectedItemId"
-        [class.highlighted]="highlightedItemIds.includes(name)"
-        (click)="itemSelected.emit(name)">
-      <span *ngIf="editMode && editingId === name">
-        <input [(ngModel)]="editingName" (keydown.enter)="saveEdit(name)" (blur)="saveEdit(name)" />
-      </span>
-      <span *ngIf="!editMode || editingId !== name">{{ name }}</span>
+        [class.selected]="name === selectedItem"
+        [class.highlighted]="highlightedItems.includes(name)"
+        (click)="onItemClicked(name)">
+      <span *ngIf="editMode && editingOrgName === name; then editItem else displayItem"></span>
+      <ng-template #editItem>
+        <input #editInput [(ngModel)]="editingName" (keydown.enter)="saveEditedItem(name)" (blur)="saveEditedItem(name)" />
+      </ng-template>
+      <ng-template #displayItem>
+        <span>{{ name }}</span>
+      </ng-template>
+      <!-- <span *ngIf="!editMode || editingOrgName !== name">{{ name }}</span> -->
       <span *ngIf="editMode">
-        <button mat-icon-button (click)="$event.stopPropagation(); startEdit(name)" title="Rename">
+        <button mat-icon-button (click)="$event.stopPropagation(); startEditItem(name)" title="Rename {{ name }}">
           <mat-icon>edit</mat-icon>
         </button>
-        <button mat-icon-button (click)="$event.stopPropagation(); deleteItem.emit(name)" title="Delete">
+        <button mat-icon-button (click)="$event.stopPropagation(); deleteItem.emit(name)" title="Delete {{ name }}">
           <mat-icon>delete</mat-icon>
         </button>
+      </span>
+      <span *ngIf="relationshipEditMode">
+        <mat-icon *ngIf="highlightedItems.includes(name);  else unselected" color="primary">check_box</mat-icon>
+        <ng-template #unselected><mat-icon>check_box_outline_blank</mat-icon></ng-template>
       </span>
     </li>
   </ul>
