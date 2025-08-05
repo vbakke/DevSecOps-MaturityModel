@@ -1,7 +1,7 @@
 // Main container for teams/groups editing
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { GroupName, TeamGroups, TeamName, TeamNames } from 'src/app/model/meta';
-import { renameArrayElement } from 'src/app/util/util';
+import { perfNow, renameArrayElement } from 'src/app/util/util';
 
 
 enum EditMode { NONE, TEAMS, GROUPS};
@@ -94,6 +94,7 @@ export class TeamsGroupsEditorComponent {
     this.onTeamSelected(newName);
    }
   onRenameTeam(event: { oldName: string, newName: string }) { 
+    console.log(`${perfNow()}: Rename team: ${event.oldName} to ${event.newName}`);
     this.localCopyTeams = renameArrayElement(this.localCopyTeams, event.oldName, event.newName);
     for (let group in this.localCopyTeamGroups) {
       this.localCopyTeamGroups[group] = renameArrayElement(this.localCopyTeamGroups[group], event.oldName, event.newName);
@@ -110,6 +111,7 @@ export class TeamsGroupsEditorComponent {
     this.onGroupSelected(newName);    
    }
   onRenameGroup(event: { oldName: string, newName: string }) { 
+    console.log(`${perfNow()}: Rename team: ${event.oldName} to ${event.newName}`);
     this.localCopyGroupNames = renameArrayElement(this.localCopyGroupNames, event.oldName, event.newName);
     this.localCopyTeamGroups[event.newName] = this.localCopyTeamGroups[event.oldName] || [];
     delete this.localCopyTeamGroups[event.oldName];
@@ -120,6 +122,7 @@ export class TeamsGroupsEditorComponent {
   }
 
   onSave() {
+    console.log(`${perfNow()}: Saving teams and groups`);
     this.editMode = EditMode.NONE;
     this.saveLocalCopy();
     this.highlightedTeams = [];
@@ -130,6 +133,7 @@ export class TeamsGroupsEditorComponent {
   }
 
   onCancelEdit() {
+    console.log(`${perfNow()}: Cancel editing teams and groups`);
     this.editMode = EditMode.NONE;
     this.makeLocalCopy(); // Make a _new_ local copy of the original values
     this.selectedTeamId = null;
