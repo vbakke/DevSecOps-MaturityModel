@@ -1,10 +1,10 @@
 <div id="team-section" (click)="onEditorBackgroundClick()">
-  <!-- <h2>Old List</h2>
+  <h2>Old List</h2>
   <div class="team-list">
     <ul>
       <li *ngFor="let team of teams">{{ team }}</li>
     </ul>
-  </div> -->
+  </div>
   <h2>New Team list</h2>
   <teams-groups-editor
     [teams]="teams"
@@ -15,7 +15,7 @@
     (click)="$event.stopPropagation()"
   ></teams-groups-editor>
 
-  <div>
+  <!-- <div>
     <h3>Page debug</h3>
     <div>
       <table>
@@ -26,5 +26,5 @@
         </tr>
       </table>
     </div>
-  </div>  
+  </div>   -->
 </div>
