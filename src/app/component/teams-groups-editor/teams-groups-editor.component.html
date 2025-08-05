@@ -9,10 +9,9 @@
       title="Teams"
       [items]="localCopyTeams"
       [selectedItem]="selectedTeamId"
-      [highlightedItems]="highlightedTeamIds"
-      [editMode]="teamsEditMode"
-      [relationshipEditMode]="groupsEditMode"
-      [relationshipState]="isTeamInGroupFn"
+      [highlightedItems]="highlightedTeams"
+      [editMode]="editMode === Mode.TEAMS"
+      [relationshipEditMode]="editMode === Mode.GROUPS"
       (itemSelected)="onTeamSelected($event)"
       (addItem)="onAddTeam()"
       (renameItem)="onRenameTeam($event)"
@@ -28,10 +27,9 @@
       title="Groups"
       [items]="localCopyGroupNames"
       [selectedItem]="selectedGroupId"
-      [highlightedItems]="highlightedGroupIds"
-      [editMode]="groupsEditMode"
-      [relationshipEditMode]="teamsEditMode"
-      [relationshipState]="isGroupForTeamFn"
+      [highlightedItems]="highlightedGroups"
+      [editMode]="this.editMode === Mode.GROUPS"
+      [relationshipEditMode]="this.editMode === Mode.TEAMS"
       (itemSelected)="onGroupSelected($event)"
       (addItem)="onAddGroup()"
       (renameItem)="onRenameGroup($event)"
@@ -62,8 +60,7 @@
         <tr><td>Selected Team </td><td> {{ selectedTeamId }} </td></tr>
         <tr><td>Selected Group </td><td> {{ selectedGroupId }} </td><td> {{ localCopyTeamGroups[selectedGroupId || ''] }} </td></tr>
       </table>
-    <p>Teams Edit Mode: {{ teamsEditMode }}</p>
-    <p>Groups Edit Mode: {{ groupsEditMode }}</p>
-    <p>Highlighted Teams: {{ highlightedTeamIds }}</p>
-    <p>Highlighted Groups: {{ highlightedGroupIds }}</p>
+    <p>Edit Mode: {{ editMode }}</p>
+    <p>Highlighted Teams: {{ highlightedTeams }}</p>
+    <p>Highlighted Groups: {{ highlightedGroups }}</p>
   </div>

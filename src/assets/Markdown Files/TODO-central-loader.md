@@ -1,17 +1,22 @@
 ## Doing
 - Teams: Allow editing teams names in browser
-  - Fix rename Team, (in the Groups)
-  - Edit team name needs exit when clicking outside input box
   - Store changed names in dataStore (to be used in other pages)
-  - Click outside lists must clear selections
   - Edit mode should only be available if meta.yaml allows it
   - If Team / Group name is not unique, mark it as invalid
+  - Press ESCAPE to cancel rename edit
 
 ## Next
 ### Teams
 - Teams: Store teams names in localstorage
+- Teams: Reset teams names to default (clear browser localStorage)
 - Teams: Export teams YAML from teams page
+- 
 - Teams: Display some core info about the selected team/group
+  - Number of activities completed
+  - Number of activities started
+  - List activities started, dates per stage
+    - Browser's locale
+  - Last updated
 
 ## ToDo
 - Heatmap: Fix: asterisk marks when modified
@@ -19,6 +24,10 @@
 - Heatmap: Bug: Clicking on grey sector leaves cursor on that sector
 - Heatmap: Run Markdown on yaml text
 - Use DOMPurify to check markdown before innerHTML
+### Settings
+- Make settings page
+  - Date format
+  - Display 
 ### Dark Mode
 - Merge in Dark Mode [PR #381](https://github.com/devsecopsmaturitymodel/DevSecOps-MaturityModel/pull/381)
 ### Matrix

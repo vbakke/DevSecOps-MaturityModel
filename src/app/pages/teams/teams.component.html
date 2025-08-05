@@ -9,18 +9,9 @@
   <teams-groups-editor
     [teams]="teams"
     [teamGroups]="teamGroups"
-    [highlightedTeamIds]="highlightedTeamIds"
-    [highlightedGroupIds]="highlightedGroupIds"
+    [highlightedTeams]="highlightedTeams"
+    [highlightedGroups]="highlightedGroups"
     (changed)="onTeamsChanged($event)"
-
-    (OBSOLETE_teamSelected)="OBSOLETE_onTeamSelected($event)"
-    (OBSOLETE_groupSelected)="OBSOLETE_onGroupSelected($event)"
-    (OBSOLETE_addTeam)="OBSOLETE_onAddTeam()"
-    (OBSOLETE_renameTeam)="OBSOLETE_onRenameTeam($event)"
-    (OBSOLETE_deleteTeam)="OBSOLETE_onDeleteTeam($event)"
-    (OBSOLETE_addGroup)="OBSOLETE_onAddGroup()"
-    (OBSOLETE_renameGroup)="OBSOLETE_onRenameGroup($event)"
-    (OBSOLETE_deleteGroup)="OBSOLETE_onDeleteGroup($event)"
     (click)="$event.stopPropagation()"
   ></teams-groups-editor>
 

@@ -17,8 +17,8 @@ export class TeamsComponent implements OnInit {
 
   selectedTeamId: string | null = null;
   selectedGroupId: string | null = null;
-  highlightedTeamIds: string[] = [];
-  highlightedGroupIds: string[] = [];
+  highlightedTeams: string[] = [];
+  highlightedGroups: string[] = [];
 
   constructor(
         private loader: LoaderService,
@@ -82,62 +82,10 @@ export class TeamsComponent implements OnInit {
     // });
   }
 
-  OBSOLETE_onTeamSelected(teamName: string) {
-    console.warn(`OBSOLETE Team selected: ${teamName}`);
-    this.selectedTeamId = teamName;
-    this.selectedGroupId = null;
-    // this.highlightedGroupIds = this.groups.filter(group => (this.teamGroups[group] || []).includes(teamName));
-    this.highlightedTeamIds = [];
-  }
-  OBSOLETE_onGroupSelected(groupName: string) {
-    // this.selectedGroupId = groupName;
-    // this.selectedTeamId = null;
-    // this.highlightedTeamIds = (this.teamGroups[groupName] || []);
-    // this.highlightedGroupIds = [];
-  }
-  OBSOLETE_onAddTeam() {
-    console.warn(`OBSOLETE Team Added `);
-    // Handle add team logic
-  }
-  OBSOLETE_onRenameTeam(event: {oldName: string, newName: string}) {
-    console.warn(`OBSOLETE Team renames: ${event.oldName} -> ${event.newName}`);
-
-    // Update team name in teams array
-    const index = this.teams.indexOf(event.oldName);
-    if (index !== -1) {
-      this.teams[index] = event.newName;
-      // Update references in teamGroups
-      Object.keys(this.teamGroups).forEach(group => {
-        this.teamGroups[group] = this.teamGroups[group].map(t => t === event.oldName ? event.newName : t);
-      });
-    }
-  }
-  OBSOLETE_onDeleteTeam(teamId: string) {
-    // Handle delete team logic
-  }
-  OBSOLETE_onAddGroup() {
-    // Handle add group logic
-  }
-  OBSOLETE_onRenameGroup(event: {oldName: string, newName: string}) {
-    console.warn(`OBSOLETE Group renames: ${event.oldName} -> ${event.newName}`);
-    // Update group name in groups array
-    // const index = this.groups.indexOf(event.oldName);
-    // if (index !== -1) {
-    //   this.groups[index] = event.newName;
-    //   // Update key in teamGroups
-    //   if (this.teamGroups[event.oldName]) {
-    //     this.teamGroups[event.newName] = this.teamGroups[event.oldName];
-    //     delete this.teamGroups[event.oldName];
-    //   }
-    // }
-  }
-  OBSOLETE_onDeleteGroup(groupId: string) {
-    // Handle delete group logic
-  }
   onEditorBackgroundClick() {
     this.selectedTeamId = null;
     this.selectedGroupId = null;
-    this.highlightedTeamIds = [];
-    this.highlightedGroupIds = [];
+    this.highlightedTeams = [];
+    this.highlightedGroups = [];
   }
 }

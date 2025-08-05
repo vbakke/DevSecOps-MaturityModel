@@ -14,7 +14,6 @@ export class SelectableListComponent {
   @Input() addLabel = 'Add';
   @Input() typeLabel = '';
   @Input() relationshipEditMode = false;
-  @Input() relationshipState: (item: string) => boolean = () => false;
   @Output() itemSelected = new EventEmitter<string>();
   @Output() addItem = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();

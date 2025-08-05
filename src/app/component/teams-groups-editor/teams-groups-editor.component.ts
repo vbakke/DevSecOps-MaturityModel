@@ -1,6 +1,11 @@
 // Main container for teams/groups editing
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { TeamGroups, TeamName, TeamNames } from 'src/app/model/meta';
+import { GroupName, TeamGroups, TeamName, TeamNames } from 'src/app/model/meta';
+import { renameArrayElement } from 'src/app/util/util';
+
+
+enum EditMode { NONE, TEAMS, GROUPS};
+
 
 @Component({
   selector: 'teams-groups-editor',
@@ -8,27 +13,19 @@ import { TeamGroups, TeamName, TeamNames } from 'src/app/model/meta';
   styleUrls: ['./teams-groups-editor.component.css']
 })
 export class TeamsGroupsEditorComponent {
+  Mode = EditMode;
   @Input() teams: TeamNames = [];
   @Input() teamGroups: TeamGroups = {};
-  @Input() highlightedTeamIds: string[] = [];
-  @Input() highlightedGroupIds: string[] = [];
+  @Input() highlightedTeams: string[] = [];
+  @Input() highlightedGroups: string[] = [];
   @Output() changed = new EventEmitter<{teams: TeamNames, teamGroups: TeamGroups}>();
-  @Output() OBSOLETE_teamSelected = new EventEmitter<string>();
-  @Output() OBSOLETE_groupSelected = new EventEmitter<string>();
-  @Output() OBSOLETE_addTeam = new EventEmitter<void>();
-  @Output() OBSOLETE_renameTeam = new EventEmitter<{ oldName: string, newName: string }>();
-  @Output() OBSOLETE_deleteTeam = new EventEmitter<string>();
-  @Output() OBSOLETE_addGroup = new EventEmitter<void>();
-  @Output() OBSOLETE_renameGroup = new EventEmitter<{ oldName: string, newName: string }>();
-  @Output() OBSOLETE_deleteGroup = new EventEmitter<string>();
-  editMode = false;
+  editMode: EditMode = EditMode.NONE;
   selectedTeamId: string | null = null;
   selectedGroupId: string | null = null;
-  teamsEditMode = false;
-  groupsEditMode = false;
+  // Make a local copy of parent
   localCopyTeams: TeamNames = [];
   localCopyTeamGroups: TeamGroups = {};
-  localCopyGroupNames: string[] = [];
+  localCopyGroupNames: GroupName[] = [];
 
 
   
@@ -61,24 +58,12 @@ export class TeamsGroupsEditorComponent {
   }
 
 
-  isTeamInGroupFn = (group: string) => {
-    if (!this.selectedTeamId) return false;
-    return (this.teamGroups[group] || []).includes(this.selectedTeamId);
-  };
-
-  isGroupForTeamFn = (team: string) => {
-    if (!this.selectedGroupId) return false;
-    return (this.teamGroups[this.selectedGroupId] || []).includes(team);
-  };
-
   onTeamsEditModeChange(editing: boolean) {
-    this.teamsEditMode = editing;
-    if (editing) this.groupsEditMode = false;
+    this.editMode = editing ? EditMode.TEAMS : EditMode.NONE;
   }
 
   onGroupsEditModeChange(editing: boolean) {
-    this.groupsEditMode = editing;
-    if (editing) this.teamsEditMode = false;
+    this.editMode = editing ? EditMode.GROUPS : EditMode.NONE;
   }
 
   onTeamGroupToggle(team: string | null, group: string | null) {
@@ -93,15 +78,15 @@ export class TeamsGroupsEditorComponent {
 
   onTeamSelected(teamId: string) {
     this.selectedGroupId = null; 
-    this.highlightedTeamIds = []; 
+    this.highlightedTeams = []; 
     this.selectedTeamId = teamId;
-    this.highlightedGroupIds = this.localCopyGroupNames.filter(group => (this.localCopyTeamGroups[group] || []).includes(teamId));
+    this.highlightedGroups = this.localCopyGroupNames.filter(group => (this.localCopyTeamGroups[group] || []).includes(teamId));
   }
   onGroupSelected(groupId: string) {
     this.selectedTeamId = null;
-    this.highlightedGroupIds = [];
+    this.highlightedGroups = [];
     this.selectedGroupId = groupId;
-    this.highlightedTeamIds = this.localCopyTeamGroups[groupId] || [];
+    this.highlightedTeams = this.localCopyTeamGroups[groupId] || [];
   }
   onAddTeam() { 
     let newName: string = `Team ${this.localCopyTeams.length + 1}`;
@@ -109,9 +94,9 @@ export class TeamsGroupsEditorComponent {
     this.onTeamSelected(newName);
    }
   onRenameTeam(event: { oldName: string, newName: string }) { 
-    this.localCopyTeams = this.localCopyTeams.map(team => team === event.oldName ? event.newName : team);
+    this.localCopyTeams = renameArrayElement(this.localCopyTeams, event.oldName, event.newName);
     for (let group in this.localCopyTeamGroups) {
-      this.localCopyTeamGroups[group].map(team => team == event.oldName ? event.newName : team);
+      this.localCopyTeamGroups[group] = renameArrayElement(this.localCopyTeamGroups[group], event.oldName, event.newName);
     }
   }
   onDeleteTeam(teamId: TeamName) { 
@@ -125,7 +110,7 @@ export class TeamsGroupsEditorComponent {
     this.onGroupSelected(newName);    
    }
   onRenameGroup(event: { oldName: string, newName: string }) { 
-    this.localCopyGroupNames = this.localCopyGroupNames.map(group => group === event.oldName ? event.newName : group);
+    this.localCopyGroupNames = renameArrayElement(this.localCopyGroupNames, event.oldName, event.newName);
     this.localCopyTeamGroups[event.newName] = this.localCopyTeamGroups[event.oldName] || [];
     delete this.localCopyTeamGroups[event.oldName];
   }
@@ -135,25 +120,21 @@ export class TeamsGroupsEditorComponent {
   }
 
   onSave() {
-    this.editMode = false;
-    this.teamsEditMode = false;
-    this.groupsEditMode = false;
+    this.editMode = EditMode.NONE;
     this.saveLocalCopy();
-    this.highlightedTeamIds = [];
-    this.highlightedGroupIds = [];
+    this.highlightedTeams = [];
+    this.highlightedGroups = [];
     this.selectedTeamId = null;
     this.selectedGroupId = null;
     this.changed.emit({teams: this.teams, teamGroups: this.teamGroups});
   }
 
   onCancelEdit() {
-    this.editMode = false;
-    this.teamsEditMode = false;
-    this.groupsEditMode = false;
+    this.editMode = EditMode.NONE;
+    this.makeLocalCopy(); // Make a _new_ local copy of the original values
     this.selectedTeamId = null;
     this.selectedGroupId = null;
-    this.highlightedTeamIds = [];
-    this.highlightedGroupIds = [];
-    this.makeLocalCopy();
+    this.highlightedTeams = [];
+    this.highlightedGroups = [];
   }
 }
