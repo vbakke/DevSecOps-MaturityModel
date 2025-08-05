@@ -1,4 +1,4 @@
-export { perfNow, isEmptyObj, hasData, deepCopy, equalArray };
+export { perfNow, isEmptyObj, hasData, deepCopy, renameArrayElement, equalArray };
 
 function perfNow(): string {
   return (performance.now() / 1000).toFixed(3);
@@ -20,6 +20,10 @@ function hasData(obj: any): boolean {
 
 function deepCopy(obj: any): any {
   return JSON.parse(JSON.stringify(obj));
+}
+
+function renameArrayElement(array: any[], oldName: string, newName: string): any[] {
+  return array.map(item => item === oldName ? newName : item);  
 }
 
 function equalArray(a: any[]|undefined|null, b: any[]|undefined|null): boolean {

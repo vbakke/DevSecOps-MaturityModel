@@ -1,9 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-
-export interface SelectableListItem {
-  id: string;
-  name: string;
-}
+import { Component, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
 
 @Component({
   selector: 'app-selectable-list',
@@ -11,30 +6,74 @@ export interface SelectableListItem {
   styleUrls: ['./selectable-list.component.css']
 })
 export class SelectableListComponent {
-  @Input() items: SelectableListItem[] = [];
-  @Input() selectedItemId: string | null = null;
-  @Input() highlightedItemIds: string[] = [];
+  @Input() title: string = '';
+  @Input() items: string[] = [];
+  @Input() selectedItem: string | null = null;
+  @Input() highlightedItems: string[] = [];
   @Input() editMode = false;
   @Input() addLabel = 'Add';
   @Input() typeLabel = '';
+  @Input() relationshipEditMode = false;
   @Output() itemSelected = new EventEmitter<string>();
   @Output() addItem = new EventEmitter<void>();
-  @Output() renameItem = new EventEmitter<{id: string, name: string}>();
+  @Output() cancel = new EventEmitter<void>();
+  @Output() save = new EventEmitter<void>();
+  @Output() renameItem = new EventEmitter<{oldName: string, newName: string}>();
   @Output() deleteItem = new EventEmitter<string>();
+  @Output() relationshipToggle = new EventEmitter<string>();
+  @Output() editModeChange = new EventEmitter<boolean>();
 
-  editingId: string | null = null;
+  @ViewChild('editInput') editInputRef: ElementRef<HTMLInputElement> | undefined;
+
   editingName: string = '';
+  editingOrgName: string = '';
 
-  startEdit(item: SelectableListItem) {
-    this.editingId = item.id;
-    this.editingName = item.name;
-  }
-
-  saveEdit(item: SelectableListItem) {
-    if (this.editingId && this.editingName.trim() && this.editingName !== item.name) {
-      this.renameItem.emit({ id: this.editingId, name: this.editingName.trim() });
+  
+  onItemClicked(name: string) {
+    console.log(`Item clicked: ${name}`);
+    if (this.relationshipEditMode) {
+      this.relationshipToggle.emit(name);
+      if (this.highlightedItems.includes(name)) {
+        delete this.highlightedItems[this.highlightedItems.indexOf(name)];
+      } else {
+        this.highlightedItems.push(name);
+      }
+    } else {
+      this.itemSelected.emit(name);
     }
-    this.editingId = null;
-    this.editingName = '';
   }
+
+  toggleEditMode() {
+    this.editMode = !this.editMode;
+    if (this.editMode) {
+      if(!this.selectedItem && this.items.length > 0) {
+        this.onItemClicked(this.items[0]);
+      }
+    }
+    this.editModeChange.emit(this.editMode);
+  }
+
+  startEditItem(name: string) {
+    this.editingName = name;
+    this.editingOrgName = name;
+    this.itemSelected.emit(name); // Select the item when editing starts
+    setTimeout(() => {
+      if (this.editInputRef) {
+        this.editInputRef.nativeElement.focus();
+        this.editInputRef.nativeElement.select();
+      }
+    });
+  }
+
+  saveEditedItem(oldName: string) {
+    let newName: string = this.editingName?.trim() || oldName;
+    this.items = this.items.map(item => item === oldName ? this.editingName.trim() : item);
+    if (this.editingName?.trim() && this.editingName !== oldName) {
+      this.renameItem.emit({ oldName, newName });
+    }
+    this.editingName = '';
+    this.editingOrgName = '';
+    this.selectedItem = newName;
+  }
+
 }

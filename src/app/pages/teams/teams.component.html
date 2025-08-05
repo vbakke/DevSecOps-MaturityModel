@@ -2,23 +2,29 @@
   <h2>Old List</h2>
   <div class="team-list">
     <ul>
-      <li *ngFor="let team of teams">{{ team.name }}</li>
+      <li *ngFor="let team of teams">{{ team }}</li>
     </ul>
   </div>
   <h2>New Team list</h2>
-  <app-teams-groups-editor
+  <teams-groups-editor
     [teams]="teams"
-    [groups]="groups"
-    [highlightedTeamIds]="highlightedTeamIds"
-    [highlightedGroupIds]="highlightedGroupIds"
-    (teamSelected)="onTeamSelected($event)"
-    (groupSelected)="onGroupSelected($event)"
-    (addTeam)="onAddTeam()"
-    (renameTeam)="onRenameTeam($event)"
-    (deleteTeam)="onDeleteTeam($event)"
-    (addGroup)="onAddGroup()"
-    (renameGroup)="onRenameGroup($event)"
-    (deleteGroup)="onDeleteGroup($event)"
+    [teamGroups]="teamGroups"
+    [highlightedTeams]="highlightedTeams"
+    [highlightedGroups]="highlightedGroups"
+    (changed)="onTeamsChanged($event)"
     (click)="$event.stopPropagation()"
-  ></app-teams-groups-editor>
-</div> 
+  ></teams-groups-editor>
+
+  <!-- <div>
+    <h3>Page debug</h3>
+    <div>
+      <table>
+        <tr><td>All teams:</td><td>{{ teams }}</td></tr> 
+        <tr>Groups</tr>
+        <tr *ngFor="let group of teamGroups | keyvalue">
+          <td>{{ group.key }} </td><td> {{ group.value }} </td>
+        </tr>
+      </table>
+    </div>
+  </div>   -->
+</div>
