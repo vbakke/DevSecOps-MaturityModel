@@ -8,7 +8,7 @@ import * as XLSX from 'xlsx';
 import { LoaderService } from 'src/app/service/loader/data-loader.service';
 import { DialogInfo, ModalMessageComponent } from 'src/app/component/modal-message/modal-message.component';
 import { DataStore } from 'src/app/model/data-store';
-import { Uuid } from 'src/app/model/meta';
+import { Uuid } from 'src/app/model/types';
 import { perfNow } from 'src/app/util/util';
 
 const GROUP_SEP = '\x1F';

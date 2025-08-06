@@ -1,12 +1,10 @@
-import { appendHashElement } from '../util/ArrayHash';
-import { isEmptyObj } from '../util/util';
 import { ActivityStore } from './activity-store';
-import { IgnoreList } from './ignore-list';
-import { TeamProgress, Progress, TeamNames, ProgressDefinition, MetaFile, MetaStrings } from './meta';
+import { Progress } from './types';
+import { MetaStore, MetaStrings } from './meta-store';
 import { ProgressStore } from './progress-store';
 
 export class DataStore {
-  public meta: MetaFile | null = null;
+  public meta: MetaStore | null = null;
   public activityStore: ActivityStore | null = null;
   public progressStore: ProgressStore | null = null;
 

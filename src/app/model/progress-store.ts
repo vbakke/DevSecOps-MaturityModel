@@ -1,6 +1,14 @@
 import { YamlService } from '../service/yaml-loader/yaml-loader.service';
 import { isEmptyObj } from '../util/util';
-import { TeamProgress, Progress, TeamNames, ProgressDefinition, Uuid, TeamName, ProgressTitle, TeamProgressFile } from './meta';
+import { 
+  Uuid, 
+  TeamName, 
+  TeamProgress, 
+  Progress, 
+  ProgressDefinition, 
+  ProgressTitle, 
+  TeamProgressFile 
+} from './types';
 
 type ActivityMap = Record<Uuid, string>;
 

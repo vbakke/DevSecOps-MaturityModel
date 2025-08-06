@@ -1,7 +1,6 @@
 import { appendHashElement } from '../util/ArrayHash';
-import { isEmptyObj } from '../util/util';
 import { IgnoreList } from './ignore-list';
-import { TeamProgress, Progress } from './meta';
+import { Progress } from './types';
 
 export type Data = Record<string, Category>;
 export type Category = Record<string, Dimension>;

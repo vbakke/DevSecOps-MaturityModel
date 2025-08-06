@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { perfNow } from 'src/app/util/util';
 import { YamlService } from '../yaml-loader/yaml-loader.service';
-import { MetaFile, MetaStrings, Progress, TeamProgressFile, Uuid } from 'src/app/model/meta';
+import { MetaStore } from 'src/app/model/meta-store';
+import { TeamProgressFile, Uuid } from 'src/app/model/types';
 import { Activity, ActivityStore, Data } from 'src/app/model/activity-store';
-import { ProgressStore } from 'src/app/model/progress-store';
 import { DataStore } from 'src/app/model/data-store';
 
 export class DataValidationError extends Error {
@@ -16,10 +16,7 @@ export class DataValidationError extends Error {
 export class LoaderService {
   private META_FILE: string = '/assets/YAML/meta.yaml';
   private debug: boolean = false;
-  // public meta: MetaFile | null = null;
   private dataStore: DataStore | null = null;
-  // private cachedActivityStore: ActivityStore | null = null;
-  // private cachedProgressStore: ProgressStore | null = null;
 
   constructor(private yamlService: YamlService) {}
 
@@ -70,11 +67,11 @@ export class LoaderService {
     }
   }
 
-  private async loadMeta(): Promise<MetaFile> {
+  private async loadMeta(): Promise<MetaStore> {
     if (this.debug) {
       console.log(`${perfNow()}: Load meta: ${this.META_FILE}`);
     }
-    let meta: MetaFile = await this.yamlService.loadYaml(this.META_FILE);
+    let meta: MetaStore = await this.yamlService.loadYaml(this.META_FILE);
 
     if (!meta.activityFiles) {
       throw Error("The meta.yaml has no 'activityFiles' to be loaded");
@@ -101,12 +98,12 @@ export class LoaderService {
     return meta;
   }
   
-  private async loadTeamProgress(meta: MetaFile): Promise<TeamProgressFile> {
+  private async loadTeamProgress(meta: MetaStore): Promise<TeamProgressFile> {
     if (this.debug) console.log(`${perfNow()}s: Loading Team Progress: ${meta.teamProgressFile}`);
     return this.yamlService.loadYamlUnresolvedRefs(meta.teamProgressFile);
   }
 
-  private async loadActivities(meta: MetaFile): Promise<ActivityStore> {
+  private async loadActivities(meta: MetaStore): Promise<ActivityStore> {
     const activityStore = new ActivityStore();
     const errors: string[] = [];
     let usingHistoricYamlFile = false;
@@ -150,7 +147,7 @@ export class LoaderService {
     return this.load();
   }
 
-  private recalculateProgressDefinition(meta: MetaFile) {
+  private recalculateProgressDefinition(meta: MetaStore) {
     let errors: string[] = [];
 
     for (let state of Object.keys(meta.progressDefinition)) {

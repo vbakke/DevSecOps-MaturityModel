@@ -1,6 +1,6 @@
 // Main container for teams/groups editing
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { GroupName, TeamGroups, TeamName, TeamNames } from 'src/app/model/meta';
+import { GroupName, TeamGroups, TeamName, TeamNames } from 'src/app/model/types';
 import { perfNow, renameArrayElement } from 'src/app/util/util';
 
 
