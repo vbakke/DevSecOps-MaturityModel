@@ -33,7 +33,6 @@ export class LoaderService {
       
       // Load meta.yaml first
       this.dataStore.meta = await this.loadMeta();
-      console.warn('TODO: MOVE THIS TO DATASTORE...');
       this.dataStore.progressStore?.init(this.dataStore.meta.progressDefinition);
       
       // Then load activities
@@ -45,7 +44,6 @@ export class LoaderService {
         activityMap[activity.uuid] = activity.name;
       });
       this.dataStore.progressStore?.setActivityMap(activityMap);
-
 
       // Load the progress for each team's activities
       let teamProgress: TeamProgressFile = await this.loadTeamProgress(this.dataStore.meta);
@@ -61,8 +59,6 @@ export class LoaderService {
 
       return this.dataStore;
     } catch (err) {
-      // Clear cache on error
-      // this.dataStore.clearCache();
       throw err;
     }
   }
@@ -71,7 +67,9 @@ export class LoaderService {
     if (this.debug) {
       console.log(`${perfNow()}: Load meta: ${this.META_FILE}`);
     }
-    let meta: MetaStore = await this.yamlService.loadYaml(this.META_FILE);
+    const meta: MetaStore = new MetaStore();
+    meta.init(await this.yamlService.loadYaml(this.META_FILE));
+    meta.loadStoredMeta();
 
     if (!meta.activityFiles) {
       throw Error("The meta.yaml has no 'activityFiles' to be loaded");
@@ -79,7 +77,7 @@ export class LoaderService {
     if (!meta.teamProgressFile) {
       throw Error("The meta.yaml has no 'teamProgressFile' to be loaded");
     }
-    
+
     // Recalculate percentages of progress definition
     this.recalculateProgressDefinition(meta);
 
@@ -95,6 +93,7 @@ export class LoaderService {
     );
 
     if (this.debug) console.log(`${perfNow()} s: meta loaded`);
+    console.log(`${perfNow()} s: Loaded teams: ${meta.teams.join(', ')}`);
     return meta;
   }
   
@@ -137,13 +136,7 @@ export class LoaderService {
     return this.yamlService.loadYamlUnresolvedRefs(filename);
   }
 
-  public clearCache(): void {
-    // this.cachedActivityStore = null;
-    // this.meta = null;
-  }
-
   public forceReload(): Promise<DataStore> {
-    this.clearCache();
     return this.load();
   }
 

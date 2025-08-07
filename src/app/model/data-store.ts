@@ -9,6 +9,7 @@ export class DataStore {
   public progressStore: ProgressStore | null = null;
 
   constructor() {
+    this.meta = new MetaStore();
     this.activityStore = new ActivityStore();
     this.progressStore = new ProgressStore();
   }

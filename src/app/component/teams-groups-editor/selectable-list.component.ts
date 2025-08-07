@@ -1,4 +1,5 @@
 import { Component, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
+import { perfNow } from 'src/app/util/util';
 
 @Component({
   selector: 'app-selectable-list',
@@ -67,13 +68,12 @@ export class SelectableListComponent {
 
   saveEditedItem(oldName: string) {
     let newName: string = this.editingName?.trim() || oldName;
-    this.items = this.items.map(item => item === oldName ? this.editingName.trim() : item);
     if (this.editingName?.trim() && this.editingName !== oldName) {
       this.renameItem.emit({ oldName, newName });
     }
+    console.log(`${perfNow()}: Save Item: Setting new name: ${newName}`);
     this.editingName = '';
     this.editingOrgName = '';
-    this.selectedItem = newName;
   }
 
 }

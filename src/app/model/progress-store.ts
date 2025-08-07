@@ -81,6 +81,23 @@ export class ProgressStore {
     return inDate.getTime() < orgDate.getTime();
   }
 
+  public renameTeam(oldName: TeamName, newName: TeamName): void {
+    if (!this._progress) return;
+
+    console.log(`Renaming team '${oldName}' to '${newName}' in progress store`);
+    for (let activityUuid in this._progress) {
+      if (this._progress[activityUuid][oldName]) {
+        this._progress[activityUuid][newName] = this._progress[activityUuid][oldName];
+        delete this._progress[activityUuid][oldName];
+      }
+      // Update the temporary progress as well
+      if (this._tempProgress?.[activityUuid]?.[oldName]) {
+         this._tempProgress[activityUuid][newName] = this._tempProgress[activityUuid][oldName];
+        delete this._tempProgress[activityUuid][oldName];
+      }
+    }
+  }
+
   public getTeamProgress(activityUuid: Uuid, teamName: TeamName, returnBackupValue: boolean = false): TeamProgress {
     if (returnBackupValue) {
       return this._tempProgress?.[activityUuid]?.[teamName];
@@ -195,6 +212,9 @@ export class ProgressStore {
     return null;
   }
     
+  /**
+   * Custom YAML stringifier for the progress data, to include activity name as a comment
+   */
   private toProgressYamlString(progress: Progress, indent: number = 2): string {
     let str = 'progress:\n';
     let tab = ' '.repeat(indent);

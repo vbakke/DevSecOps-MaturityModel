@@ -1,13 +1,11 @@
 ## Doing
 - Teams: Allow editing teams names in browser
-  - Store changed names in dataStore (to be used in other pages)
   - Edit mode should only be available if meta.yaml allows it
-  - If Team / Group name is not unique, mark it as invalid
+  - Improve alert if edited team name is not unique
   - Press ESCAPE to cancel rename edit
 
 ## Next
 ### Teams
-- Teams: Store teams names in localstorage
 - Teams: Reset teams names to default (clear browser localStorage)
 - Teams: Export teams YAML from teams page
 - 
@@ -75,6 +73,7 @@
 
 
 # Done
+- Teams: Store teams names in localstorage
 - Teams: Move team group 'All' from data-loader-service to Heatmap load
 - Teams: Refactor to adhere to new data structure. 
 - Mapping: Add search filters 

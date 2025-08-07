@@ -4,7 +4,7 @@
 #
 teams: ['Team A', 'Team B', 'Team C', 'Team D']
 teamGroups:
-  AB: ['Team A', 'Team B']
-  BC: ['Team B', 'Team C']
-  AC: ['Team A', 'Team C']
-  'The rest': ['Team B', 'Team C', 'Team D']
+  Customer: ['Team A', 'Team B', 'Team D']
+  Internal: ['Team B', 'Team C']
+  Cloud: ['Team A', 'Team C']
+  On-premise: ['Team B', 'Team D']

@@ -2,7 +2,6 @@ import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router, NavigationExtras } from '@angular/router';
-import { stringify } from 'qs';
 import { LoaderService } from 'src/app/service/loader/data-loader.service';
 import { Activity, ActivityStore, Data } from 'src/app/model/activity-store';
 import { UntilDestroy } from '@ngneat/until-destroy';

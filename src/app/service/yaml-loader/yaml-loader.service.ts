@@ -1,6 +1,10 @@
 import { K, Y } from '@angular/cdk/keycodes';
 import { Injectable } from '@angular/core';
-import { parse  as yamlParse } from 'yamljs';
+import { 
+  parse as yamlParse,
+  stringify as yamlStringify,
+} from 'yaml';
+// import YAML from 'yaml';
 import { perfNow } from 'src/app/util/util';
 
 @Injectable({ providedIn: 'root' })
@@ -12,8 +16,13 @@ export class YamlService {
   }
 
   public parse(yamlStr: string): any {
-    return yamlParse(yamlStr);
+    return yamlParse(yamlStr, {schema: 'yaml-1.1'});
   }
+
+  public stringify(yamlObj: any): string {
+    return yamlStringify(yamlObj);
+  }
+
 
 
   /**
@@ -35,7 +44,8 @@ export class YamlService {
    *  Load a yaml file, and convert it to an object
    */
   public async loadYamlUnresolvedRefs(url: string): Promise<any> {
-    console.log(perfNow() + ': YAML: Fetching ' + url);
+    const timeStart: Date = new Date();
+    console.debug(`${perfNow()}: YAML: Fetching ${url}`);
     const response: Response = await fetch(url);
     
     if (!response.ok) {
@@ -44,10 +54,12 @@ export class YamlService {
       );
     }
     const yamlText: string = await response.text();
-    
-    console.log(perfNow() + ': YAML: Retrieved ' + url);
-    let yaml: any = yamlParse(yamlText);
-    console.log(perfNow() + ': YAML: Parsed ' + url);
+    const timeFetched: Date = new Date();
+    console.debug(`${perfNow()}: YAML: Retrieved ${url}`);
+    let yaml: any = this.parse(yamlText);
+    const timeParsed: Date = new Date();
+    console.debug(`${perfNow()}: YAML: Parsed ${url}`);
+    console.log(`${perfNow()}: YAML: Fetched ${url}: load: ${timeFetched.getTime() - timeStart.getTime()} ms, parse: ${timeParsed.getTime() - timeFetched.getTime()} ms`);
     return yaml;
   }
 
