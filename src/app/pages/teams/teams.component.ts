@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { DialogInfo, ModalMessageComponent } from 'src/app/component/modal-message/modal-message.component';
+import { TeamsGroupsChanged } from 'src/app/component/teams-groups-editor/teams-groups-editor.component';
 import { DataStore } from 'src/app/model/data-store';
-import { TeamGroups, TeamNames } from 'src/app/model/meta';
+import { TeamGroups, TeamNames } from 'src/app/model/types';
 import { LoaderService } from 'src/app/service/loader/data-loader.service';
-import { perfNow } from 'src/app/util/util';
+import { isEmptyObj, perfNow } from 'src/app/util/util';
 
 @Component({
   selector: 'app-teams',
@@ -56,30 +57,15 @@ export class TeamsComponent implements OnInit {
     return 0;
   }
 
-  // onTeamsChanged(event: {newTeams: string[], newGroups: string[], teamsRenamed: {old: string, new: string}[]}) {
-  onTeamsChanged(event: {teams: TeamNames, teamGroups: TeamGroups}) {
-  // onTeamsChanged(event: string) {
-    console.warn(`PAGE: OnSave -- ToDo`);
-    console.warn(`Updated teams: ${event.teams},`);
-    console.warn(`Updated groups: ${Object.keys(event.teamGroups)}`);
-
-    // this.teams = event.teams;
-    // this.groups = event.newGroups;
-    // this.teamGroups = {};
-    // event.newGroups.forEach(group => {
-    //   this.teamGroups[group] = [];
-    // });
-    // event.teamsRenamed.forEach(({old, new: newName}) => {
-    //   if (this.teams.includes(old)) {
-    //     const index = this.teams.indexOf(old);
-    //     if (index !== -1) {
-    //       this.teams[index] = newName;
-    //     }
-    //   }
-    //   Object.keys(this.teamGroups).forEach(group => {
-    //     this.teamGroups[group] = this.teamGroups[group].map(team => team === old ? newName : team);
-    //   });
-    // });
+  onTeamsChanged(event: TeamsGroupsChanged) {
+    this.dataStore?.meta?.updateTeamsAndGroups(event.teams, event.teamGroups);
+    if (!isEmptyObj(event.teamsRenamed)) {
+      for (let oldName in event.teamsRenamed) {
+        this.dataStore?.progressStore?.renameTeam(oldName, event.teamsRenamed[oldName]);
+      }
+      this.dataStore?.progressStore?.saveToLocalStorage();
+    }
+    this.setYamlData(this.dataStore);
   }
 
   onEditorBackgroundClick() {

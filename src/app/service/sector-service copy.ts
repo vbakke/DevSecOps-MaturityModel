@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Activity } from 'src/app/model/activity-store';
-import { Progress, ProgressDefinition, TeamNames, Uuid } from 'src/app/model/meta';
+import { Progress, ProgressDefinition, TeamNames, Uuid } from 'src/app/model/types';
 import { ProgressStore } from 'src/app/model/progress-store';
 
 /**

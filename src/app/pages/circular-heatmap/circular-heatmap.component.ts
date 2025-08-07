@@ -13,7 +13,7 @@ import {
   DialogInfo,
 } from '../../component/modal-message/modal-message.component';
 import { Activity, ActivityStore } from 'src/app/model/activity-store';
-import { Uuid, ProgressDefinition, TeamName, ProgressTitle, TeamGroups } from 'src/app/model/meta';
+import { Uuid, ProgressDefinition, TeamName, ProgressTitle, TeamGroups } from 'src/app/model/types';
 import { SectorService } from '../../service/sector-service';
 import { DataStore } from 'src/app/model/data-store';
 import { Sector } from 'src/app/model/sector';

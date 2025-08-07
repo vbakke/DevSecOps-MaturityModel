@@ -1,6 +1,14 @@
 import { YamlService } from '../service/yaml-loader/yaml-loader.service';
 import { isEmptyObj } from '../util/util';
-import { TeamProgress, Progress, TeamNames, ProgressDefinition, Uuid, TeamName, ProgressTitle, TeamProgressFile } from './meta';
+import { 
+  Uuid, 
+  TeamName, 
+  TeamProgress, 
+  Progress, 
+  ProgressDefinition, 
+  ProgressTitle, 
+  TeamProgressFile 
+} from './types';
 
 type ActivityMap = Record<Uuid, string>;
 
@@ -71,6 +79,23 @@ export class ProgressStore {
     if (!orgDate) return true
     
     return inDate.getTime() < orgDate.getTime();
+  }
+
+  public renameTeam(oldName: TeamName, newName: TeamName): void {
+    if (!this._progress) return;
+
+    console.log(`Renaming team '${oldName}' to '${newName}' in progress store`);
+    for (let activityUuid in this._progress) {
+      if (this._progress[activityUuid][oldName]) {
+        this._progress[activityUuid][newName] = this._progress[activityUuid][oldName];
+        delete this._progress[activityUuid][oldName];
+      }
+      // Update the temporary progress as well
+      if (this._tempProgress?.[activityUuid]?.[oldName]) {
+         this._tempProgress[activityUuid][newName] = this._tempProgress[activityUuid][oldName];
+        delete this._tempProgress[activityUuid][oldName];
+      }
+    }
   }
 
   public getTeamProgress(activityUuid: Uuid, teamName: TeamName, returnBackupValue: boolean = false): TeamProgress {
@@ -187,6 +212,9 @@ export class ProgressStore {
     return null;
   }
     
+  /**
+   * Custom YAML stringifier for the progress data, to include activity name as a comment
+   */
   private toProgressYamlString(progress: Progress, indent: number = 2): string {
     let str = 'progress:\n';
     let tab = ' '.repeat(indent);
