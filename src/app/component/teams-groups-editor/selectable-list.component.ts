@@ -33,15 +33,10 @@ export class SelectableListComponent {
   
   onItemClicked(name: string) {
     console.log(`Item clicked: ${name}`);
-    if (this.relationshipEditMode) {
-      this.relationshipToggle.emit(name);
-      if (this.highlightedItems.includes(name)) {
-        delete this.highlightedItems[this.highlightedItems.indexOf(name)];
-      } else {
-        this.highlightedItems.push(name);
-      }
-    } else {
+    if (!this.relationshipEditMode) {
       this.itemSelected.emit(name);
+    } else {
+      this.relationshipToggle.emit(name);
     }
   }
 
