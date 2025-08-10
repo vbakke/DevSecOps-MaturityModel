@@ -28,7 +28,7 @@
         (click)="onItemClicked(name)">
       <span *ngIf="editMode && editingOrgName === name; then editItem else displayItem"></span>
       <ng-template #editItem>
-        <input #editInput [(ngModel)]="editingName" (keydown.enter)="saveEditedItem(name)" (blur)="saveEditedItem(name)" />
+        <input #editInput [(ngModel)]="editingName" (keydown.escape)="cancelEditItem(name)" (keydown.enter)="saveEditedItem(name)" (blur)="saveEditedItem(name)" />
       </ng-template>
       <ng-template #displayItem>
         <span>{{ name }}</span>

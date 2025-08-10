@@ -66,8 +66,15 @@ export class SelectableListComponent {
     });
   }
 
+  cancelEditItem(oldName: string) {
+    console.log(`${perfNow()}: Cancel editing: ${oldName}`);
+    this.editingName = '';
+    this.editingOrgName = '';    
+  }
+
   saveEditedItem(oldName: string) {
     let newName: string = this.editingName?.trim() || oldName;
+    console.log(`${perfNow()}: Save Item: Setting new name: ${newName}`);
     if (this.editingName?.trim() && this.editingName !== oldName) {
       this.renameItem.emit({ oldName, newName });
     }
