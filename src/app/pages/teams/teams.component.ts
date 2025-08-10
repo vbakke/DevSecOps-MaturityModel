@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { DialogInfo, ModalMessageComponent } from 'src/app/component/modal-message/modal-message.component';
 import { TeamsGroupsChanged } from 'src/app/component/teams-groups-editor/teams-groups-editor.component';
-import { DataStore } from 'src/app/model/data-store';
+import { DataStore, } from 'src/app/model/data-store';
 import { TeamGroups, TeamNames } from 'src/app/model/types';
 import { LoaderService } from 'src/app/service/loader/data-loader.service';
 import { isEmptyObj, perfNow } from 'src/app/util/util';
@@ -13,6 +13,7 @@ import { isEmptyObj, perfNow } from 'src/app/util/util';
 })
 export class TeamsComponent implements OnInit {
   dataStore: DataStore = new DataStore();
+  canEdit: boolean = false;
   teams: TeamNames = [];
   teamGroups: TeamGroups = {};
 
@@ -49,6 +50,10 @@ export class TeamsComponent implements OnInit {
 
   setYamlData(dataStore: DataStore) {
     this.dataStore = dataStore;
+    if (this.dataStore.meta) {
+      this.canEdit = this.dataStore.meta.allowChangeTeamNameInBrowser;
+    }
+
     this.teams = dataStore?.meta?.teams || [];
     this.teamGroups = dataStore?.meta?.teamGroups || {};
   }
@@ -58,6 +63,8 @@ export class TeamsComponent implements OnInit {
   }
 
   onTeamsChanged(event: TeamsGroupsChanged) {
+    console.log(`${perfNow()}: Saving teams: ${JSON.stringify(event.teams)}`);
+    console.log(`${perfNow()}: Saving groups: ${JSON.stringify(event.teamGroups)}`);
     this.dataStore?.meta?.updateTeamsAndGroups(event.teams, event.teamGroups);
     if (!isEmptyObj(event.teamsRenamed)) {
       for (let oldName in event.teamsRenamed) {

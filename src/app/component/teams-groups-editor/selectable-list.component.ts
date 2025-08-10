@@ -11,6 +11,7 @@ export class SelectableListComponent {
   @Input() items: string[] = [];
   @Input() selectedItem: string | null = null;
   @Input() highlightedItems: string[] = [];
+  @Input() canEdit = false;
   @Input() editMode = false;
   @Input() addLabel = 'Add';
   @Input() typeLabel = '';
@@ -78,7 +79,6 @@ export class SelectableListComponent {
     if (this.editingName?.trim() && this.editingName !== oldName) {
       this.renameItem.emit({ oldName, newName });
     }
-    console.log(`${perfNow()}: Save Item: Setting new name: ${newName}`);
     this.editingName = '';
     this.editingOrgName = '';
   }

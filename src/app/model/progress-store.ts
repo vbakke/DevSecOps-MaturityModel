@@ -1,5 +1,5 @@
 import { YamlService } from '../service/yaml-loader/yaml-loader.service';
-import { isEmptyObj } from '../util/util';
+import { isEmptyObj, perfNow } from '../util/util';
 import { 
   Uuid, 
   TeamName, 
@@ -84,7 +84,7 @@ export class ProgressStore {
   public renameTeam(oldName: TeamName, newName: TeamName): void {
     if (!this._progress) return;
 
-    console.log(`Renaming team '${oldName}' to '${newName}' in progress store`);
+    console.log(`${perfNow()} Renaming team '${oldName}' to '${newName}' in progress store`);
     for (let activityUuid in this._progress) {
       if (this._progress[activityUuid][oldName]) {
         this._progress[activityUuid][newName] = this._progress[activityUuid][oldName];

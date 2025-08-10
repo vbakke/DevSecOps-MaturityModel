@@ -23,6 +23,7 @@ export class TeamsGroupsEditorComponent {
   @Input() teamGroups: TeamGroups = {};
   @Input() highlightedTeams: string[] = [];
   @Input() highlightedGroups: string[] = [];
+  @Input() canEdit: boolean = true;
   @Output() changed = new EventEmitter<TeamsGroupsChanged>();
 
   editMode: EditMode = EditMode.NONE;
@@ -39,15 +40,12 @@ export class TeamsGroupsEditorComponent {
   
   ngOnChanges() {
     this.makeLocalCopy();
-    console.log('EDitor: ngOnChanges(): groupNames: ', this.localCopyGroupNames);
     if (this.teams.length > 0) {
       this.onTeamSelected(this.teams[0]);
     }
   }
 
-  ngOnInit() {
-  }
-
+  // Makes a local copy to allow editing without affecting the original data
   makeLocalCopy() {
     this.localCopyTeams = this.teams.slice();
     this.localCopyTeamGroups = this.cloneTeamGroups(this.teamGroups);
@@ -188,7 +186,7 @@ export class TeamsGroupsEditorComponent {
     this.highlightedTeams = [];
     this.highlightedGroups = [];
     
-    // Make a _new_ local copy of the original values
+    // Recreate the local copy from original values
     this.makeLocalCopy(); 
   }
 }

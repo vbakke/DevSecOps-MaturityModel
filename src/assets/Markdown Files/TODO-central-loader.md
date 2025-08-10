@@ -1,8 +1,6 @@
 ## Doing
 - Teams: Allow editing teams names in browser
-  - Edit mode should only be available if meta.yaml allows it
   - Improve alert if edited team name is not unique
-  - Press ESCAPE to cancel rename edit
 
 ## Next
 ### Teams

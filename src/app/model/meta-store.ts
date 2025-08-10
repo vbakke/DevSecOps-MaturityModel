@@ -22,6 +22,7 @@ export class MetaStore {
   teams: TeamNames = [];
   activityFiles: string[] = [];
   teamProgressFile: string = '';
+  allowChangeTeamNameInBrowser: boolean = false;
 
   public init(metaData: any): void {
     if (metaData) {
@@ -33,6 +34,7 @@ export class MetaStore {
       this.teams = metaData.teams || this.teams || [];
       this.activityFiles = metaData.activityFiles || this.activityFiles || [];
       this.teamProgressFile = metaData.teamProgressFile || this.teamProgressFile || '';
+      if (metaData.allowChangeTeamNameInBrowser !== undefined) this.allowChangeTeamNameInBrowser = metaData.allowChangeTeamNameInBrowser;
     }
   }
 
@@ -44,7 +46,6 @@ export class MetaStore {
 
   public saveToLocalStorage() {
     let yamlStr: string = this.yamlService.stringify({teams: this.teams, teamGroups: this.teamGroups});
-    console.log(`${perfNow()}: Saved meta.team: ${yamlStr}`);
     localStorage.setItem(LOCALSTORAGE_KEY, yamlStr);
   }
 
