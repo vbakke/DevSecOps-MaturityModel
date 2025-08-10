@@ -1,18 +1,13 @@
 ## Doing
-- Teams: Allow editing teams names in browser
-  - Improve alert if edited team name is not unique
-
-## Next
-### Teams
-- Teams: Reset teams names to default (clear browser localStorage)
-- Teams: Export teams YAML from teams page
-- 
 - Teams: Display some core info about the selected team/group
   - Number of activities completed
   - Number of activities started
   - List activities started, dates per stage
     - Browser's locale
   - Last updated
+  - Improve alert if edited team name is not unique
+
+## Next
 
 ## ToDo
 - Heatmap: Fix: asterisk marks when modified
@@ -71,6 +66,7 @@
 
 
 # Done
+- Teams: Export teams and groups names as yaml
 - Teams: Store teams names in localstorage
 - Teams: Move team group 'All' from data-loader-service to Heatmap load
 - Teams: Refactor to adhere to new data structure. 
