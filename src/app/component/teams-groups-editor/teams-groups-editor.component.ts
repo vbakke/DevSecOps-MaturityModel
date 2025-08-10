@@ -6,7 +6,17 @@ import { perfNow, renameArrayElement } from 'src/app/util/util';
 
 enum EditMode { NONE, TEAMS, GROUPS};
 
-export class TeamsGroupsChanged {
+export class SelectionChangedEvent {
+  selectedTeam: TeamName | null = null;
+  selectedGroup: GroupName | null = null;
+
+  constructor(selectedTeam: TeamName | null, selectedGroup: GroupName | null) {
+    this.selectedTeam = selectedTeam;
+    this.selectedGroup = selectedGroup;
+  }
+}
+
+export class TeamsGroupsChangedEvent {
   teams: TeamNames = [];
   teamGroups: TeamGroups = {};
   teamsRenamed: Record<TeamName, TeamName> = {};
@@ -21,43 +31,53 @@ export class TeamsGroupsEditorComponent {
   Mode = EditMode;
   @Input() teams: TeamNames = [];
   @Input() teamGroups: TeamGroups = {};
-  @Input() highlightedTeams: string[] = [];
-  @Input() highlightedGroups: string[] = [];
-  @Output() changed = new EventEmitter<TeamsGroupsChanged>();
+  @Input() highlightedTeams: TeamName[] = [];
+  @Input() highlightedGroups: GroupName[] = [];
+  @Input() canEdit: boolean = true;
+  @Output() selectionChanged = new EventEmitter<SelectionChangedEvent>();
+  @Output() namesChanged = new EventEmitter<TeamsGroupsChangedEvent>();
 
   editMode: EditMode = EditMode.NONE;
-  selectedTeamId: string | null = null;
-  selectedGroupId: string | null = null;
+  selectedTeam: string | null = null;
+  selectedGroup: string | null = null;
 
   // Make a local copy of parent
   localCopyTeams: TeamNames = [];
   localCopyTeamsRenamed: Record<TeamName, TeamName> = {};
   localCopyTeamGroups: TeamGroups = {};
-  localCopyGroupNames: GroupName[] = [];
 
 
   
   ngOnChanges() {
     this.makeLocalCopy();
-    console.log('EDitor: ngOnChanges(): groupNames: ', this.localCopyGroupNames);
-    if (this.teams.length > 0) {
+    if (this.teams.length > 0 && !this.selectedTeam && !this.selectedGroup) {
+      console.log(`${perfNow()}: Teams: No team or group selected, selecting first team`);
       this.onTeamSelected(this.teams[0]);
     }
   }
 
-  ngOnInit() {
-  }
-
+  // Makes a local copy to allow editing without affecting the original data
   makeLocalCopy() {
     this.localCopyTeams = this.teams.slice();
     this.localCopyTeamGroups = this.cloneTeamGroups(this.teamGroups);
-    this.localCopyGroupNames = Object.keys(this.teamGroups);
   }
 
   saveLocalCopy() {
     this.teams = this.localCopyTeams.slice();
     this.teamGroups = this.cloneTeamGroups(this.localCopyTeamGroups);
   }
+
+  getGroupNames(): GroupName[] {
+    return Object.keys(this.teamGroups);
+  } 
+
+  getRelatedGroups(team: TeamName): GroupName[] {
+    return Object.keys(this.localCopyTeamGroups).filter(group => this.localCopyTeamGroups[group].includes(team));
+  }
+
+  getRelatedTeams(group: GroupName): TeamNames {
+    return this.localCopyTeamGroups[group] || [];
+  }  
 
   cloneTeamGroups(original: TeamGroups): TeamGroups {
     let clone: TeamGroups = {};
@@ -75,7 +95,7 @@ export class TeamsGroupsEditorComponent {
     this.editMode = editing ? EditMode.GROUPS : EditMode.NONE;
   }
 
-  onTeamGroupToggle(team: string | null, group: string | null) {
+  onTeamGroupToggle(team: TeamName | null, group: GroupName | null) {
     if (!team || !group) return;
     const members = this.localCopyTeamGroups[group] || [];
     if (members.includes(team)) {
@@ -83,25 +103,38 @@ export class TeamsGroupsEditorComponent {
     } else {
       this.localCopyTeamGroups[group] = [...members, team];
     }
+
+    if (this.editMode === EditMode.TEAMS) {
+      this.highlightedGroups =  this.getRelatedGroups(team);
+    } else if (this.editMode === EditMode.GROUPS) {
+      this.highlightedTeams = this.getRelatedTeams(group);
+    } else {
+      console.warn(`${perfNow()}: onTeamGroupToggle called in unexpected edit mode: ${this.editMode}`);
+    }
   }
 
-  onTeamSelected(teamId: string) {
-    console.log(`${perfNow()}: Selecting team: ${teamId}`);
-    this.selectedGroupId = null; 
+  onTeamSelected(team: string) {
+    console.log(`${perfNow()}: Selecting team: ${team}`);
+    this.selectedGroup = null; 
     this.highlightedTeams = []; 
-    this.selectedTeamId = teamId;
-    this.highlightedGroups = this.localCopyGroupNames.filter(group => (this.localCopyTeamGroups[group] || []).includes(teamId));
+    this.selectedTeam = team;
+    this.highlightedGroups = this.getRelatedGroups(team);
+
+    this.selectionChanged.emit(new SelectionChangedEvent(team, null));
   }
 
-  onGroupSelected(groupId: string) {
-    this.selectedTeamId = null;
+  onGroupSelected(group: string) {
+    console.log(`${perfNow()}: Selecting group: ${group}`);
+    this.selectedTeam = null;
     this.highlightedGroups = [];
-    this.selectedGroupId = groupId;
-    this.highlightedTeams = this.localCopyTeamGroups[groupId] || [];
+    this.selectedGroup = group;
+    this.highlightedTeams = this.getRelatedTeams(group);
+
+    this.selectionChanged.emit(new SelectionChangedEvent(null, group));
   }
 
   onAddTeam() { 
-    let newName: string = `Team ${this.localCopyTeams.length + 1}`;
+    let newName: string = this.findNextName(this.localCopyTeams, 'Team');
     this.localCopyTeams.push(newName);
     this.onTeamSelected(newName);
   }
@@ -127,32 +160,29 @@ export class TeamsGroupsEditorComponent {
   
   }
 
-  onDeleteTeam(teamId: TeamName) { 
-    this.localCopyTeams = this.localCopyTeams.filter(team => team !== teamId);
+  onDeleteTeam(team: TeamName) { 
+    this.localCopyTeams = this.localCopyTeams.filter(t => t !== team);
     for (let group in this.localCopyTeamGroups) {
-      this.localCopyTeamGroups[group] = this.localCopyTeamGroups[group].filter(team => team !== teamId);
+      this.localCopyTeamGroups[group] = this.localCopyTeamGroups[group].filter(team => team !== team);
     }
 
     this.onTeamSelected('');
   }
 
   onAddGroup() { 
-    let newName: string = `Group ${this.localCopyGroupNames.length + 1}`;
-    this.localCopyGroupNames.push(newName);
+    let newName: string = this.findNextName(this.keys(this.localCopyTeamGroups), 'Group');
     this.localCopyTeamGroups[newName] = [];
     this.onGroupSelected(newName);    
   }
 
   onRenameGroup(event: { oldName: string, newName: string }) { 
     console.log(`${perfNow()}: Rename team: ${event.oldName} to ${event.newName}`);
-    this.localCopyGroupNames = renameArrayElement(this.localCopyGroupNames, event.oldName, event.newName);
     this.localCopyTeamGroups[event.newName] = this.localCopyTeamGroups[event.oldName] || [];
     delete this.localCopyTeamGroups[event.oldName];
   }
   
-  onDeleteGroup(groupId: string) { 
-    delete this.localCopyTeamGroups[groupId];
-    this.localCopyGroupNames = this.localCopyGroupNames.filter(group => group !== groupId);
+  onDeleteGroup(group: string) { 
+    delete this.localCopyTeamGroups[group];
   }
 
   onSave() {
@@ -167,28 +197,41 @@ export class TeamsGroupsEditorComponent {
     }
 
     this.editMode = EditMode.NONE;
-    this.highlightedTeams = [];
-    this.highlightedGroups = [];
-    this.selectedTeamId = null;
-    this.selectedGroupId = null;
     
     // Copy the local copy to the main data
     this.saveLocalCopy();
 
-    this.changed.emit(
+    this.namesChanged.emit(
       {teams: this.teams, teamGroups: this.teamGroups, teamsRenamed: teamsRenamed}
     );
   }
 
   onCancelEdit() {
     console.log(`${perfNow()}: Cancel editing teams and groups`);
-    this.editMode = EditMode.NONE;
-    this.selectedTeamId = null;
-    this.selectedGroupId = null;
-    this.highlightedTeams = [];
-    this.highlightedGroups = [];
     
-    // Make a _new_ local copy of the original values
+    // Recreate the local copy from original values
     this.makeLocalCopy(); 
+    
+    // Re-select and highlight the original values 
+    if (this.editMode === EditMode.TEAMS) {
+      this.onTeamSelected(this.selectedTeam || '');
+    } else if (this.editMode === EditMode.GROUPS) {
+      this.onGroupSelected(this.selectedGroup || ''); 
+    }
+    this.editMode = EditMode.NONE;
+  }
+
+  findNextName(existingNames: string[], prefix: string): string {
+    let i: number = existingNames.length + 1;
+    let newName: string | null = null;
+    while (newName == null || existingNames.includes(newName)) {
+      newName = `${prefix} ${i}`;
+      i++;
+    }
+    return newName;
+  }
+
+  keys(obj: any): string[] {
+    return Object.keys(obj);
   }
 }

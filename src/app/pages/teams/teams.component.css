@@ -41,3 +41,12 @@ h3 {
   font-size: 16px;
   font-weight: bold;
 }
+
+.button-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+}
+.button-container button {
+    margin: 10px;
+}

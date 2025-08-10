@@ -12,7 +12,7 @@ progressDefinition:
 #   Medium maturity: 40%
 #   High maturity: 100% 
 
-¤-allowChangeTeamNameInBrowser: true  # Yet to be implemented
+allowChangeTeamNameInBrowser: true
 teams: 
   $ref: 'default/teams.yaml#/teams'
 teamGroups:

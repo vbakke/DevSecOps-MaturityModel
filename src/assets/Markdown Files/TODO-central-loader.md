@@ -1,20 +1,13 @@
 ## Doing
-- Teams: Allow editing teams names in browser
-  - Edit mode should only be available if meta.yaml allows it
-  - Improve alert if edited team name is not unique
-  - Press ESCAPE to cancel rename edit
-
-## Next
-### Teams
-- Teams: Reset teams names to default (clear browser localStorage)
-- Teams: Export teams YAML from teams page
-- 
 - Teams: Display some core info about the selected team/group
   - Number of activities completed
   - Number of activities started
   - List activities started, dates per stage
     - Browser's locale
   - Last updated
+  - Improve alert if edited team name is not unique
+
+## Next
 
 ## ToDo
 - Heatmap: Fix: asterisk marks when modified
@@ -73,6 +66,7 @@
 - Meta.yaml: Allow admins to rename the terms 'Team' and 'Team Group' (e.g. 'App' and 'Team')
 
 # Done
+- Teams: Export teams and groups names as yaml
 - Teams: Store teams names in localstorage
 - Teams: Move team group 'All' from data-loader-service to Heatmap load
 - Teams: Refactor to adhere to new data structure. 

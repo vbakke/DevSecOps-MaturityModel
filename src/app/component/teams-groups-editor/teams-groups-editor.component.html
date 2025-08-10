@@ -8,8 +8,9 @@
     <app-selectable-list
       title="Teams"
       [items]="localCopyTeams"
-      [selectedItem]="selectedTeamId"
+      [selectedItem]="selectedTeam"
       [highlightedItems]="highlightedTeams"
+      [canEdit]="canEdit"
       [editMode]="editMode === Mode.TEAMS"
       [relationshipEditMode]="editMode === Mode.GROUPS"
       (itemSelected)="onTeamSelected($event)"
@@ -17,7 +18,7 @@
       (renameItem)="onRenameTeam($event)"
       (deleteItem)="onDeleteTeam($event)"
       (editModeChange)="onTeamsEditModeChange($event)"
-      (relationshipToggle)="onTeamGroupToggle($event, selectedGroupId)"
+      (relationshipToggle)="onTeamGroupToggle($event, selectedGroup)"
       (save)="onSave()"
       (cancel)="onCancelEdit()"
     ></app-selectable-list>
@@ -25,9 +26,10 @@
   <div class="editor-list-panel">
     <app-selectable-list
       title="Groups"
-      [items]="localCopyGroupNames"
-      [selectedItem]="selectedGroupId"
+      [items]="keys(localCopyTeamGroups)"
+      [selectedItem]="selectedGroup"
       [highlightedItems]="highlightedGroups"
+      [canEdit]="canEdit"
       [editMode]="this.editMode === Mode.GROUPS"
       [relationshipEditMode]="this.editMode === Mode.TEAMS"
       (itemSelected)="onGroupSelected($event)"
@@ -35,32 +37,9 @@
       (renameItem)="onRenameGroup($event)"
       (deleteItem)="onDeleteGroup($event)"
       (editModeChange)="onGroupsEditModeChange($event)"
-      (relationshipToggle)="onTeamGroupToggle(selectedTeamId, $event)"
+      (relationshipToggle)="onTeamGroupToggle(selectedTeam, $event)"
       (save)="onSave()"
       (cancel)="onCancelEdit()"
     ></app-selectable-list>
   </div>
 </div>
-<!-- <div class="editor-footer">
-  <button mat-raised-button color="primary" (click)="editMode = !editMode">
-    {{ editMode ? 'Exit Edit Mode' : 'Enter Edit Mode' }}
-  </button>
-</div> -->
-
-<!-- <div class="editor-debug">
-  <h3>Editor Debug</h3>
-  <div>
-      <table>
-        <tr><td></td><td>Local</td><td>Original</td></tr> 
-        <tr><td>All teams:</td><td>{{ localCopyTeams }}</td><td>{{ teams }}</td></tr> 
-        <tr>Groups</tr>
-        <tr *ngFor="let groupName of localCopyGroupNames">
-          <td>{{ groupName }} </td><td> {{ localCopyTeamGroups[groupName] }} </td><td> {{ teamGroups[groupName] }} </td>
-        </tr>
-        <tr><td>Selected Team </td><td> {{ selectedTeamId }} </td></tr>
-        <tr><td>Selected Group </td><td> {{ selectedGroupId }} </td><td> {{ localCopyTeamGroups[selectedGroupId || ''] }} </td></tr>
-      </table>
-    <p>Edit Mode: {{ editMode }}</p>
-    <p>Highlighted Teams: {{ highlightedTeams }}</p>
-    <p>Highlighted Groups: {{ highlightedGroups }}</p>
-  </div> -->

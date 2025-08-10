@@ -2,7 +2,7 @@
 <div class="selectable-list">
   <div class="selectable-list-header">
     <span>{{ title }}</span>
-    <button mat-icon-button (click)="toggleEditMode()" title="Edit {{ title }}" color="red" *ngIf="!editMode && !relationshipEditMode">
+    <button mat-icon-button *ngIf="canEdit && !relationshipEditMode" (click)="toggleEditMode()" title="Edit {{ title }}" color="red">
       <mat-icon>edit</mat-icon>
     </button>
     <span *ngIf="editMode" >
@@ -28,7 +28,7 @@
         (click)="onItemClicked(name)">
       <span *ngIf="editMode && editingOrgName === name; then editItem else displayItem"></span>
       <ng-template #editItem>
-        <input #editInput [(ngModel)]="editingName" (keydown.enter)="saveEditedItem(name)" (blur)="saveEditedItem(name)" />
+        <input #editInput [(ngModel)]="editingName" (keydown.escape)="cancelEditItem(name)" (keydown.enter)="saveEditedItem(name)" (blur)="saveEditedItem(name)" />
       </ng-template>
       <ng-template #displayItem>
         <span>{{ name }}</span>

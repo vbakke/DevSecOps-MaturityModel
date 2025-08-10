@@ -11,6 +11,7 @@ export class SelectableListComponent {
   @Input() items: string[] = [];
   @Input() selectedItem: string | null = null;
   @Input() highlightedItems: string[] = [];
+  @Input() canEdit = false;
   @Input() editMode = false;
   @Input() addLabel = 'Add';
   @Input() typeLabel = '';
@@ -32,15 +33,10 @@ export class SelectableListComponent {
   
   onItemClicked(name: string) {
     console.log(`Item clicked: ${name}`);
-    if (this.relationshipEditMode) {
-      this.relationshipToggle.emit(name);
-      if (this.highlightedItems.includes(name)) {
-        delete this.highlightedItems[this.highlightedItems.indexOf(name)];
-      } else {
-        this.highlightedItems.push(name);
-      }
-    } else {
+    if (!this.relationshipEditMode) {
       this.itemSelected.emit(name);
+    } else {
+      this.relationshipToggle.emit(name);
     }
   }
 
@@ -66,12 +62,18 @@ export class SelectableListComponent {
     });
   }
 
+  cancelEditItem(oldName: string) {
+    console.log(`${perfNow()}: Cancel editing: ${oldName}`);
+    this.editingName = '';
+    this.editingOrgName = '';    
+  }
+
   saveEditedItem(oldName: string) {
     let newName: string = this.editingName?.trim() || oldName;
+    console.log(`${perfNow()}: Save Item: Setting new name: ${newName}`);
     if (this.editingName?.trim() && this.editingName !== oldName) {
       this.renameItem.emit({ oldName, newName });
     }
-    console.log(`${perfNow()}: Save Item: Setting new name: ${newName}`);
     this.editingName = '';
     this.editingOrgName = '';
   }
