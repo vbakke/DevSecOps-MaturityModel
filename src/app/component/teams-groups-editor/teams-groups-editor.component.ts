@@ -6,7 +6,17 @@ import { perfNow, renameArrayElement } from 'src/app/util/util';
 
 enum EditMode { NONE, TEAMS, GROUPS};
 
-export class TeamsGroupsChanged {
+export class SelectionChangedEvent {
+  selectedTeam: TeamName | null = null;
+  selectedGroup: GroupName | null = null;
+
+  constructor(selectedTeam: TeamName | null, selectedGroup: GroupName | null) {
+    this.selectedTeam = selectedTeam;
+    this.selectedGroup = selectedGroup;
+  }
+}
+
+export class TeamsGroupsChangedEvent {
   teams: TeamNames = [];
   teamGroups: TeamGroups = {};
   teamsRenamed: Record<TeamName, TeamName> = {};
@@ -24,7 +34,8 @@ export class TeamsGroupsEditorComponent {
   @Input() highlightedTeams: TeamName[] = [];
   @Input() highlightedGroups: GroupName[] = [];
   @Input() canEdit: boolean = true;
-  @Output() changed = new EventEmitter<TeamsGroupsChanged>();
+  @Output() selectionChanged = new EventEmitter<SelectionChangedEvent>();
+  @Output() namesChanged = new EventEmitter<TeamsGroupsChangedEvent>();
 
   editMode: EditMode = EditMode.NONE;
   selectedTeam: string | null = null;

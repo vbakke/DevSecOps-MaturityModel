@@ -18,6 +18,7 @@ import { SectorService } from '../../service/sector-service';
 import { DataStore } from 'src/app/model/data-store';
 import { Sector } from 'src/app/model/sector';
 import { perfNow } from 'src/app/util/util';
+import { downloadYamlFile } from 'src/app/util/download';
 
 @Component({
   selector: 'app-circular-heatmap',
@@ -588,14 +589,16 @@ export class CircularHeatmapComponent implements OnInit {
       this.displayMessage(new DialogInfo('No team progress data available', 'Export Error'));
       return;
     }
-    
-    let file = new Blob([yamlStr], { type: 'application/yaml; charset=utf-8' });
-    var link = document.createElement('a');
-    link.href = window.URL.createObjectURL(file);
-    link.download = this.dataStore?.meta?.teamProgressFile?.split('/')?.pop() || 'team-progress.yaml';
 
-    link.click();
-    link.remove();
+    downloadYamlFile(yamlStr, this.dataStore?.meta?.teamProgressFile || 'team-progress.yaml');
+    
+    // let file = new Blob([yamlStr], { type: 'application/yaml; charset=utf-8' });
+    // var link = document.createElement('a');
+    // link.href = window.URL.createObjectURL(file);
+    // link.download = this.dataStore?.meta?.teamProgressFile?.split('/')?.pop() || 'team-progress.yaml';
+
+    // link.click();
+    // link.remove();
   }
 
   recolorSector(index: number) {

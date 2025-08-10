@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { DialogInfo, ModalMessageComponent } from 'src/app/component/modal-message/modal-message.component';
-import { TeamsGroupsChanged } from 'src/app/component/teams-groups-editor/teams-groups-editor.component';
+import { SelectionChangedEvent, TeamsGroupsChangedEvent } from 'src/app/component/teams-groups-editor/teams-groups-editor.component';
 import { DataStore, } from 'src/app/model/data-store';
 import { TeamGroups, TeamNames } from 'src/app/model/types';
 import { LoaderService } from 'src/app/service/loader/data-loader.service';
+import { downloadYamlFile } from 'src/app/util/download';
 import { isEmptyObj, perfNow } from 'src/app/util/util';
 
 @Component({
@@ -17,8 +18,8 @@ export class TeamsComponent implements OnInit {
   teams: TeamNames = [];
   teamGroups: TeamGroups = {};
 
-  selectedTeam: string | null = null;
-  selectedGroup: string | null = null;
+  infoTitle: string = '';
+  infoTeams: TeamNames = [];
 
   constructor(
         private loader: LoaderService,
@@ -56,11 +57,18 @@ export class TeamsComponent implements OnInit {
     this.teamGroups = dataStore?.meta?.teamGroups || {};
   }
 
-  unsorted() {
-    return 0;
+  onSelectionChanged(event: SelectionChangedEvent) {
+    console.log(`${perfNow()}: Selection changed: ${JSON.stringify(event)}`);
+    if (event.selectedTeam) {
+      this.infoTitle = event.selectedTeam;
+      this.infoTeams = [ event.selectedTeam ];
+    } else if (event.selectedGroup) {
+      this.infoTitle = event.selectedGroup;
+      this.infoTeams = this.teamGroups[event.selectedGroup] || [];
+    }
   }
 
-  onTeamsChanged(event: TeamsGroupsChanged) {
+  onTeamsChanged(event: TeamsGroupsChangedEvent) {
     console.log(`${perfNow()}: Saving teams: ${JSON.stringify(event.teams)}`);
     console.log(`${perfNow()}: Saving groups: ${JSON.stringify(event.teamGroups)}`);
     this.dataStore?.meta?.updateTeamsAndGroups(event.teams, event.teamGroups);
@@ -73,8 +81,14 @@ export class TeamsComponent implements OnInit {
     this.setYamlData(this.dataStore);
   }
 
-  onEditorBackgroundClick() {
-    this.selectedTeam = null;
-    this.selectedGroup = null;
+  onResetTeamGroups() {
+    console.log(`${perfNow()}: Remove teams and groups from localStorage`);
+    localStorage.removeItem('meta');
   }
+
+  onExportTeamGroups() {
+    console.log(`${perfNow()}: Exporting teams and groups`);
+    const yamlStr: string = localStorage.getItem('meta') || '';
+    downloadYamlFile(yamlStr, 'teams.yaml');
+  } 
 }

@@ -1,4 +1,4 @@
-<div id="team-section" (click)="onEditorBackgroundClick()">
+<div class="team-section">
   <!-- <h2>Old List</h2>
   <div class="team-list">
     <ul>
@@ -10,23 +10,17 @@
     [teams]="teams"
     [teamGroups]="teamGroups"
     [canEdit]="canEdit"
-    (changed)="onTeamsChanged($event)"
+    (selectionChanged)="onSelectionChanged($event)"
+    (namesChanged)="onTeamsChanged($event)"
     (click)="$event.stopPropagation()"
   ></teams-groups-editor>
-  <br/>
-  <div>Latest status:<br/><em>Changed names are now visible in the rest of the application, and stored in browser for next time</em></div>
-  <br/>
-  <div>To come:<br/><em>Key info about the selected team</em></div>
-  <!-- <div>
-    <h3>Page debug</h3>
-    <div>
-      <table>
-        <tr><td>All teams:</td><td>{{ teams }}</td></tr> 
-        <tr>Groups</tr>
-        <tr *ngFor="let group of teamGroups | keyvalue">
-          <td>{{ group.key }} </td><td> {{ group.value }} </td>
-        </tr>
-      </table>
-    </div>
-  </div>   -->
+  <div class="button-container">
+    <button mat-raised-button (click)="onExportTeamGroups()">Download names</button>
+    <button mat-raised-button (click)="onResetTeamGroups()">Reset names</button>
+</div>
+
+  <div class="team-info">
+    <h3>{{infoTitle}}</h3>
+    <p>Teams: {{ infoTeams }}</p>
+  </div>
 </div>
