@@ -17,10 +17,8 @@ export class TeamsComponent implements OnInit {
   teams: TeamNames = [];
   teamGroups: TeamGroups = {};
 
-  selectedTeamId: string | null = null;
-  selectedGroupId: string | null = null;
-  highlightedTeams: string[] = [];
-  highlightedGroups: string[] = [];
+  selectedTeam: string | null = null;
+  selectedGroup: string | null = null;
 
   constructor(
         private loader: LoaderService,
@@ -76,9 +74,7 @@ export class TeamsComponent implements OnInit {
   }
 
   onEditorBackgroundClick() {
-    this.selectedTeamId = null;
-    this.selectedGroupId = null;
-    this.highlightedTeams = [];
-    this.highlightedGroups = [];
+    this.selectedTeam = null;
+    this.selectedGroup = null;
   }
 }

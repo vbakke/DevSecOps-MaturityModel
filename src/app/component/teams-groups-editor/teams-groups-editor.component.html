@@ -8,7 +8,7 @@
     <app-selectable-list
       title="Teams"
       [items]="localCopyTeams"
-      [selectedItem]="selectedTeamId"
+      [selectedItem]="selectedTeam"
       [highlightedItems]="highlightedTeams"
       [canEdit]="canEdit"
       [editMode]="editMode === Mode.TEAMS"
@@ -18,7 +18,7 @@
       (renameItem)="onRenameTeam($event)"
       (deleteItem)="onDeleteTeam($event)"
       (editModeChange)="onTeamsEditModeChange($event)"
-      (relationshipToggle)="onTeamGroupToggle($event, selectedGroupId)"
+      (relationshipToggle)="onTeamGroupToggle($event, selectedGroup)"
       (save)="onSave()"
       (cancel)="onCancelEdit()"
     ></app-selectable-list>
@@ -27,7 +27,7 @@
     <app-selectable-list
       title="Groups"
       [items]="localCopyGroupNames"
-      [selectedItem]="selectedGroupId"
+      [selectedItem]="selectedGroup"
       [highlightedItems]="highlightedGroups"
       [canEdit]="canEdit"
       [editMode]="this.editMode === Mode.GROUPS"
@@ -37,7 +37,7 @@
       (renameItem)="onRenameGroup($event)"
       (deleteItem)="onDeleteGroup($event)"
       (editModeChange)="onGroupsEditModeChange($event)"
-      (relationshipToggle)="onTeamGroupToggle(selectedTeamId, $event)"
+      (relationshipToggle)="onTeamGroupToggle(selectedTeam, $event)"
       (save)="onSave()"
       (cancel)="onCancelEdit()"
     ></app-selectable-list>
@@ -59,8 +59,8 @@
         <tr *ngFor="let groupName of localCopyGroupNames">
           <td>{{ groupName }} </td><td> {{ localCopyTeamGroups[groupName] }} </td><td> {{ teamGroups[groupName] }} </td>
         </tr>
-        <tr><td>Selected Team </td><td> {{ selectedTeamId }} </td></tr>
-        <tr><td>Selected Group </td><td> {{ selectedGroupId }} </td><td> {{ localCopyTeamGroups[selectedGroupId || ''] }} </td></tr>
+        <tr><td>Selected Team </td><td> {{ selectedTeam }} </td></tr>
+        <tr><td>Selected Group </td><td> {{ selectedGroup }} </td><td> {{ localCopyTeamGroups[selectedGroup || ''] }} </td></tr>
       </table>
     <p>Edit Mode: {{ editMode }}</p>
     <p>Highlighted Teams: {{ highlightedTeams }}</p>

@@ -27,8 +27,8 @@ export class TeamsGroupsEditorComponent {
   @Output() changed = new EventEmitter<TeamsGroupsChanged>();
 
   editMode: EditMode = EditMode.NONE;
-  selectedTeamId: string | null = null;
-  selectedGroupId: string | null = null;
+  selectedTeam: string | null = null;
+  selectedGroup: string | null = null;
 
   // Make a local copy of parent
   localCopyTeams: TeamNames = [];
@@ -83,19 +83,20 @@ export class TeamsGroupsEditorComponent {
     }
   }
 
-  onTeamSelected(teamId: string) {
-    console.log(`${perfNow()}: Selecting team: ${teamId}`);
-    this.selectedGroupId = null; 
+  onTeamSelected(team: string) {
+    console.log(`${perfNow()}: Selecting team: ${team}`);
+    this.selectedGroup = null; 
     this.highlightedTeams = []; 
-    this.selectedTeamId = teamId;
-    this.highlightedGroups = this.localCopyGroupNames.filter(group => (this.localCopyTeamGroups[group] || []).includes(teamId));
+    this.selectedTeam = team;
+    this.highlightedGroups = this.localCopyGroupNames.filter(group => (this.localCopyTeamGroups[group] || []).includes(team));
   }
 
-  onGroupSelected(groupId: string) {
-    this.selectedTeamId = null;
+  onGroupSelected(group: string) {
+    console.log(`${perfNow()}: Selecting group: ${group}`);
+    this.selectedTeam = null;
     this.highlightedGroups = [];
-    this.selectedGroupId = groupId;
-    this.highlightedTeams = this.localCopyTeamGroups[groupId] || [];
+    this.selectedGroup = group;
+    this.highlightedTeams = this.localCopyTeamGroups[group] || [];
   }
 
   onAddTeam() { 
@@ -125,10 +126,10 @@ export class TeamsGroupsEditorComponent {
   
   }
 
-  onDeleteTeam(teamId: TeamName) { 
-    this.localCopyTeams = this.localCopyTeams.filter(team => team !== teamId);
+  onDeleteTeam(team: TeamName) { 
+    this.localCopyTeams = this.localCopyTeams.filter(team => team !== team);
     for (let group in this.localCopyTeamGroups) {
-      this.localCopyTeamGroups[group] = this.localCopyTeamGroups[group].filter(team => team !== teamId);
+      this.localCopyTeamGroups[group] = this.localCopyTeamGroups[group].filter(team => team !== team);
     }
 
     this.onTeamSelected('');
@@ -148,9 +149,9 @@ export class TeamsGroupsEditorComponent {
     delete this.localCopyTeamGroups[event.oldName];
   }
   
-  onDeleteGroup(groupId: string) { 
-    delete this.localCopyTeamGroups[groupId];
-    this.localCopyGroupNames = this.localCopyGroupNames.filter(group => group !== groupId);
+  onDeleteGroup(group: string) { 
+    delete this.localCopyTeamGroups[group];
+    this.localCopyGroupNames = this.localCopyGroupNames.filter(group => group !== group);
   }
 
   onSave() {
@@ -167,8 +168,8 @@ export class TeamsGroupsEditorComponent {
     this.editMode = EditMode.NONE;
     this.highlightedTeams = [];
     this.highlightedGroups = [];
-    this.selectedTeamId = null;
-    this.selectedGroupId = null;
+    this.selectedTeam = null;
+    this.selectedGroup = null;
     
     // Copy the local copy to the main data
     this.saveLocalCopy();
@@ -181,8 +182,8 @@ export class TeamsGroupsEditorComponent {
   onCancelEdit() {
     console.log(`${perfNow()}: Cancel editing teams and groups`);
     this.editMode = EditMode.NONE;
-    this.selectedTeamId = null;
-    this.selectedGroupId = null;
+    this.selectedTeam = null;
+    this.selectedGroup = null;
     this.highlightedTeams = [];
     this.highlightedGroups = [];
     
