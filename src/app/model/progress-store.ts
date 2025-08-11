@@ -202,6 +202,7 @@ export class ProgressStore {
   }
 
   public deleteBrowserStoredTeamProgress(): void {
+    console.log('Deleting team progress from browser storage');
     localStorage.removeItem(LOCALSTORAGE_KEY);
   }
 

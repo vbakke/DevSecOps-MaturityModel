@@ -14,6 +14,8 @@ const LOCALSTORAGE_KEY: string = 'meta';
 export class MetaStore {
   private yamlService: YamlService = new YamlService();
 
+  public hasLocalStorage: boolean = false;
+  
   checkForDsommUpdates: boolean = false;
   lang: string = 'en';
   strings: Record<string, MetaStrings> = {};
@@ -44,17 +46,28 @@ export class MetaStore {
     this.saveToLocalStorage();
   }
 
+  public asStorableYamlString(): string {
+    return this.yamlService.stringify({teams: this.teams, teamGroups: this.teamGroups});
+  }
+
   public saveToLocalStorage() {
-    let yamlStr: string = this.yamlService.stringify({teams: this.teams, teamGroups: this.teamGroups});
+    let yamlStr: string = this.asStorableYamlString();
     localStorage.setItem(LOCALSTORAGE_KEY, yamlStr);
+    this.hasLocalStorage = true;
+  }
+
+  public deleteLocalStorage() {
+    localStorage.removeItem(LOCALSTORAGE_KEY);
+    this.hasLocalStorage = false;
   }
 
   public loadStoredMeta(): void {
     let storedMeta: string | null = localStorage.getItem(LOCALSTORAGE_KEY);
     if (storedMeta) {
       try {
-        let metaData = this.yamlService.parse(storedMeta);
+        let metaData = this.yamlService.parse(storedMeta);        
         this.init(metaData);
+        this.hasLocalStorage = true;
         console.log('Loaded stored meta from localStorage');
       } catch (error) {
         console.error('Failed to load stored meta from localStorage:', error);

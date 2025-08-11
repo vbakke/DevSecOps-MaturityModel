@@ -5,7 +5,6 @@
   - List activities started, dates per stage
     - Browser's locale
   - Last updated
-  - Improve alert if edited team name is not unique
 
 ## Next
 

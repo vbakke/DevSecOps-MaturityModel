@@ -14,7 +14,7 @@
     (namesChanged)="onTeamsChanged($event)"
     (click)="$event.stopPropagation()"
   ></teams-groups-editor>
-  <div class="button-container">
+  <div class="button-container" *ngIf="dataStore?.meta?.hasLocalStorage">
     <button mat-raised-button (click)="onExportTeamGroups()">Download names</button>
     <button mat-raised-button (click)="onResetTeamGroups()">Reset names</button>
 </div>
