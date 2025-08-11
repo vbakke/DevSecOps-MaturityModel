@@ -179,6 +179,7 @@ export class TeamsGroupsEditorComponent {
     console.log(`${perfNow()}: Rename team: ${event.oldName} to ${event.newName}`);
     this.localCopyTeamGroups[event.newName] = this.localCopyTeamGroups[event.oldName] || [];
     delete this.localCopyTeamGroups[event.oldName];
+    this.onGroupSelected(event.newName);
   }
   
   onDeleteGroup(group: string) { 
