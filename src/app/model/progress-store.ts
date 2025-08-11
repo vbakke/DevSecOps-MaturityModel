@@ -160,7 +160,7 @@ export class ProgressStore {
       throw Error('Progress states are not initialized');
     }
     console.log(`Setting progress state for activity ${activityUuid} and team ${teamName} to: ${newProgress}`);
-    this.dump(activityUuid, teamName);
+    // this.dump(activityUuid, teamName);
     
     if (!this._progress[activityUuid]) {
       this._progress[activityUuid] = {};
@@ -179,12 +179,12 @@ export class ProgressStore {
     } else if (newIndex > orgIndex) {
       this.setTeamActivityProgress(activityUuid, teamName, orgIndex + 1, newIndex);
     }
-    this.dump(activityUuid, teamName);
+    // this.dump(activityUuid, teamName);
     this.saveToLocalStorage();
   }
 
   private dump(activityUuid: Uuid, teamName: TeamName) {
-    console.log(`${activityUuid}: ${teamName}`);
+    console.log(`Dump: ${activityUuid}: ${teamName}`);
     if (this._progressTitles == null) return;
     for (let i = 0; i < this._progressTitles.length; i++) {
       let progress = this._progressTitles[i];
