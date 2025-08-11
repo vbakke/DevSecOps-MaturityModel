@@ -1,11 +1,4 @@
 <div class="team-section">
-  <!-- <h2>Old List</h2>
-  <div class="team-list">
-    <ul>
-      <li *ngFor="let team of teams">{{ team }}</li>
-    </ul>
-  </div> -->
-  <h2>New Team list</h2>
   <teams-groups-editor
     [teams]="teams"
     [teamGroups]="teamGroups"
@@ -20,7 +13,12 @@
 </div>
 
   <div class="team-info">
-    <h3>{{infoTitle}}</h3>
-    <p>Teams: {{ infoTeams }}</p>
+    <h2>{{infoTitle}}</h2>
+    <div class="info-content">
+      <p>Teams: {{ info[infoTitle]?.teams  }}</p>
+      <p>Last updated: {{ info[infoTitle]?.lastUpdated }}</p>
+      <p>Completed: {{ info[infoTitle]?.activitiesCompleted?.length }}</p>
+
+
   </div>
 </div>

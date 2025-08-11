@@ -138,6 +138,18 @@ export class ProgressStore {
     return this._progressTitles[0];
   }
 
+  public getActivitiesCompletedForTeam(teamName: TeamName): Uuid[] {
+    let completedName: ProgressTitle = this._progressTitlesDescOrder?.[0] || '';
+
+    let activitiesCompleted: Uuid[] = [];
+    for (let activityUuid in this._progress) {
+      if (this._progress?.[activityUuid]?.[teamName]?.[completedName]) {
+          activitiesCompleted.push(activityUuid);
+      }
+    }
+    return activitiesCompleted;
+  }
+
   // Calculate the progress value for a team progress state
   private getProgressValue(teamProgress: TeamProgress): number {
       if (!this._progressTitlesDescOrder) return 0;

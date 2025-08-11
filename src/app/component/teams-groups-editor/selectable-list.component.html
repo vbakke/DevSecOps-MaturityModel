@@ -1,7 +1,7 @@
 <!-- Generic selectable list for teams or groups -->
 <div class="selectable-list">
   <div class="selectable-list-header">
-    <span>{{ title }}</span>
+    <h2>{{ title }}</h2>
     <button mat-icon-button *ngIf="canEdit && !relationshipEditMode" (click)="toggleEditMode()" title="Edit {{ title }}" color="red">
       <mat-icon>edit</mat-icon>
     </button>

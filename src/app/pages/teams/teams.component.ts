@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { DialogInfo, ModalMessageComponent } from 'src/app/component/modal-message/modal-message.component';
 import { SelectionChangedEvent, TeamsGroupsChangedEvent } from 'src/app/component/teams-groups-editor/teams-groups-editor.component';
 import { DataStore, } from 'src/app/model/data-store';
-import { TeamGroups, TeamNames } from 'src/app/model/types';
+import { TeamGroups, TeamNames, Uuid } from 'src/app/model/types';
 import { LoaderService } from 'src/app/service/loader/data-loader.service';
 import { downloadYamlFile } from 'src/app/util/download';
 import { isEmptyObj, perfNow } from 'src/app/util/util';
@@ -20,6 +20,7 @@ export class TeamsComponent implements OnInit {
 
   infoTitle: string = '';
   infoTeams: TeamNames = [];
+  info: Record<string, TeamSummary> = {};
 
   constructor(
         private loader: LoaderService,
@@ -65,6 +66,10 @@ export class TeamsComponent implements OnInit {
     } else if (event.selectedGroup) {
       this.infoTitle = event.selectedGroup;
       this.infoTeams = this.teamGroups[event.selectedGroup] || [];
+    }
+
+    if (!this.info[this.infoTitle]) {
+      this.info[this.infoTitle] = this.makeTeamSummary(this.infoTitle, this.infoTeams);
     }
   }
 
@@ -120,4 +125,23 @@ export class TeamsComponent implements OnInit {
   }
 
 
+  makeTeamSummary(name: string, teams: TeamNames): TeamSummary {
+    let activitiesCompleted: Uuid[] = this.dataStore?.progressStore?.getActivitiesCompletedForTeam(name) || [];
+    // let activitiesInProgress: Uuid[] = this.dataStore?.progressStore?.getActivitiesInProgressForTeam(team) || [];
+    let activitiesInProgress: Uuid[] = this.dataStore?.progressStore?.getActivitiesCompletedForTeam(name) || [];
+
+    return {
+      teams: teams,
+      lastUpdated: new Date(),
+      activitiesCompleted,
+      activitiesInProgress,
+    };
+  }
+}
+
+export interface TeamSummary {
+  teams: TeamNames;
+  lastUpdated: Date;
+  activitiesCompleted: Uuid[];
+  activitiesInProgress: Uuid[];
 }
