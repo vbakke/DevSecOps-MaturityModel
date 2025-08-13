@@ -2,9 +2,11 @@ import { enableProdMode } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
 import { AppModule } from './app/app.module';
-import { environment, version } from './environments/environment';
+import { environment } from './environments/environment';
 import { faro, getWebInstrumentations, initializeFaro, LogLevel } from '@grafana/faro-web-sdk';
 import { TracingInstrumentation } from '@grafana/faro-web-tracing';
+
+export const version: string = '1.3.2';
 
 const localDevelopment:boolean = (window.location.hostname == 'localhost');
 if (environment.production) {

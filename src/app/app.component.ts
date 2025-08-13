@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { doc } from 'prettier';
-import { environment, version } from 'src/environments/environment';
+import { environment } from 'src/environments/environment';
+import { version } from 'src/main';
 
 @Component({
   selector: 'app-root',
