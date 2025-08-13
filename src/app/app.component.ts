@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { doc } from 'prettier';
-import { environment } from 'src/environments/environment';
+import { environment, version } from 'src/environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -9,7 +9,7 @@ import { environment } from 'src/environments/environment';
 })
 export class AppComponent implements OnInit {
   title = 'DSOMM';
-  version: string = environment?.version || '';
+  version: string = version || '';
   menuIsOpen: boolean = true;
 
   __experimental__updated: Date = new Date();

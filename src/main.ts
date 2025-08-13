@@ -2,7 +2,7 @@ import { enableProdMode } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
 import { AppModule } from './app/app.module';
-import { environment } from './environments/environment';
+import { environment, version } from './environments/environment';
 import { faro, getWebInstrumentations, initializeFaro, LogLevel } from '@grafana/faro-web-sdk';
 import { TracingInstrumentation } from '@grafana/faro-web-tracing';
 
@@ -16,7 +16,7 @@ if (environment?.experimental && !localDevelopment) {
     url: '/faro-logs', // Use the Cloudflare proxy endpoint
     app: {
       name: 'dsomm',
-      version: environment.version || 'unknown',
+      version: version || 'unknown',
       environment: localDevelopment ? 'development' : 'experimental',
     },
     sessionTracking: {

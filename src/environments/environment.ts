@@ -2,6 +2,8 @@
 // `ng build` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
+export const version: string = '1.3.2';
+
 export const environment = {
   production: false,
   experimental: true,
