@@ -12,6 +12,12 @@ import {
 
 type ActivityMap = Record<Uuid, string>;
 
+
+export interface TeamActivityProgress {
+  team: TeamName;
+  activityUuid: Uuid;
+  progress: TeamProgress;
+}
 const LOCALSTORAGE_KEY: string = 'progress';
 
 export class ProgressStore {
@@ -138,6 +144,43 @@ export class ProgressStore {
     return this._progressTitles[0];
   }
 
+  public getActivitiesCompletedForTeam(teamName: TeamName): TeamActivityProgress[] {
+    let completedName: ProgressTitle = this._progressTitlesDescOrder?.[0] || '';
+
+    let activitiesCompleted: TeamActivityProgress[] = [];
+    for (let activityUuid in this._progress) {
+      if (this._progress?.[activityUuid]?.[teamName]?.[completedName]) {
+          let teamActivityProgress: TeamActivityProgress = {
+            team: teamName,
+            activityUuid: activityUuid,
+            progress: this._progress[activityUuid][teamName]
+          }
+          activitiesCompleted.push(teamActivityProgress);
+      }
+    }
+    return activitiesCompleted;
+  }
+
+  public getActivitiesInProgressForTeam(teamName: TeamName): TeamActivityProgress[] {
+    let initiatedName: ProgressTitle = this._progressTitles?.[1] || '';
+    let completedName: ProgressTitle = this._progressTitlesDescOrder?.[0] || '';
+
+    let activitiesCompleted: TeamActivityProgress[] = [];
+    for (let activityUuid in this._progress) {
+      if (this._progress?.[activityUuid]?.[teamName]?.[initiatedName] &&
+          !this._progress?.[activityUuid]?.[teamName]?.[completedName])
+      {
+          let teamActivityProgress: TeamActivityProgress = {
+            team: teamName,
+            activityUuid: activityUuid,
+            progress: this._progress[activityUuid][teamName]
+          }
+          activitiesCompleted.push(teamActivityProgress);
+      }
+    }
+    return activitiesCompleted;
+  }
+
   // Calculate the progress value for a team progress state
   private getProgressValue(teamProgress: TeamProgress): number {
       if (!this._progressTitlesDescOrder) return 0;
@@ -160,7 +203,7 @@ export class ProgressStore {
       throw Error('Progress states are not initialized');
     }
     console.log(`Setting progress state for activity ${activityUuid} and team ${teamName} to: ${newProgress}`);
-    this.dump(activityUuid, teamName);
+    // this.dump(activityUuid, teamName);
     
     if (!this._progress[activityUuid]) {
       this._progress[activityUuid] = {};
@@ -179,12 +222,12 @@ export class ProgressStore {
     } else if (newIndex > orgIndex) {
       this.setTeamActivityProgress(activityUuid, teamName, orgIndex + 1, newIndex);
     }
-    this.dump(activityUuid, teamName);
+    // this.dump(activityUuid, teamName);
     this.saveToLocalStorage();
   }
 
   private dump(activityUuid: Uuid, teamName: TeamName) {
-    console.log(`${activityUuid}: ${teamName}`);
+    console.log(`Dump: ${activityUuid}: ${teamName}`);
     if (this._progressTitles == null) return;
     for (let i = 0; i < this._progressTitles.length; i++) {
       let progress = this._progressTitles[i];
@@ -202,6 +245,7 @@ export class ProgressStore {
   }
 
   public deleteBrowserStoredTeamProgress(): void {
+    console.log('Deleting team progress from browser storage');
     localStorage.removeItem(LOCALSTORAGE_KEY);
   }
 

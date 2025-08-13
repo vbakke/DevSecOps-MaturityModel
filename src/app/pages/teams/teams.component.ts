@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { DialogInfo, ModalMessageComponent } from 'src/app/component/modal-message/modal-message.component';
 import { SelectionChangedEvent, TeamsGroupsChangedEvent } from 'src/app/component/teams-groups-editor/teams-groups-editor.component';
+import { Activity } from 'src/app/model/activity-store';
 import { DataStore, } from 'src/app/model/data-store';
-import { TeamGroups, TeamNames } from 'src/app/model/types';
+import { TeamActivityProgress as progressStoreMapping } from 'src/app/model/progress-store';
+import { TeamGroups, TeamName, TeamNames, TeamProgress, Uuid } from 'src/app/model/types';
 import { LoaderService } from 'src/app/service/loader/data-loader.service';
 import { downloadYamlFile } from 'src/app/util/download';
-import { isEmptyObj, perfNow } from 'src/app/util/util';
+import { isEmptyObj, perfNow, dateStr } from 'src/app/util/util';
 
 @Component({
   selector: 'app-teams',
@@ -13,6 +15,7 @@ import { isEmptyObj, perfNow } from 'src/app/util/util';
   styleUrls: ['./teams.component.css'],
 })
 export class TeamsComponent implements OnInit {
+  dateStr = dateStr;
   dataStore: DataStore = new DataStore();
   canEdit: boolean = false;
   teams: TeamNames = [];
@@ -20,6 +23,7 @@ export class TeamsComponent implements OnInit {
 
   infoTitle: string = '';
   infoTeams: TeamNames = [];
+  info: Record<string, TeamSummary> = {};
 
   constructor(
         private loader: LoaderService,
@@ -66,6 +70,10 @@ export class TeamsComponent implements OnInit {
       this.infoTitle = event.selectedGroup;
       this.infoTeams = this.teamGroups[event.selectedGroup] || [];
     }
+
+    if (!this.info[this.infoTitle]) {
+      this.info[this.infoTitle] = this.makeTeamSummary(this.infoTitle, this.infoTeams);
+    }
   }
 
   onTeamsChanged(event: TeamsGroupsChangedEvent) {
@@ -81,14 +89,75 @@ export class TeamsComponent implements OnInit {
     this.setYamlData(this.dataStore);
   }
 
-  onResetTeamGroups() {
-    console.log(`${perfNow()}: Remove teams and groups from localStorage`);
-    localStorage.removeItem('meta');
-  }
 
   onExportTeamGroups() {
     console.log(`${perfNow()}: Exporting teams and groups`);
-    const yamlStr: string = localStorage.getItem('meta') || '';
+    const yamlStr: string | undefined = this?.dataStore?.meta?.asStorableYamlString();
+
+    if (!yamlStr) {
+      this.displayMessage(new DialogInfo('No team and groups names stored locally in the browser', 'Export Error'));
+      return;
+    }
+
     downloadYamlFile(yamlStr, 'teams.yaml');
   } 
+
+  async onResetTeamGroups() {
+    let buttonClicked: string = await this.displayDeleteBrowserTeamsDialog();
+    
+    if (buttonClicked === 'Delete') {
+      this.dataStore?.meta?.deleteLocalStorage();
+      location.reload(); // Make sure all load routines are initialized
+    }
+  }
+
+  displayDeleteBrowserTeamsDialog(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      let title: string = 'Delete local browser data';
+      let message: string =
+        'Do you want to reset all team and group names?' +
+        '\n\nThis will revert the names to the names stored in the yaml file on the server.';
+      let buttons: string[] = ['Cancel', 'Delete'];
+      this.modal
+        .openDialog({ title, message, buttons, template: '' })
+        .afterClosed()
+        .subscribe(data => {
+          resolve(data);
+        });      
+      }); 
+  }
+
+
+  makeTeamSummary(name: string, teams: TeamNames): TeamSummary {
+    let activitiesCompleted: progressStoreMapping[] = this.dataStore?.progressStore?.getActivitiesCompletedForTeam(name) || [];
+    let activitiesInProgress: progressStoreMapping[] = this.dataStore?.progressStore?.getActivitiesInProgressForTeam(name) || [];
+
+    let summary: TeamSummary = {teams, lastUpdated: new Date(), activitiesCompleted: [], activitiesInProgress: []};
+    var _self = this;
+    summary.activitiesCompleted = activitiesCompleted.map(activityProgress => _self.mapIncludeActivity(activityProgress));
+    summary.activitiesInProgress = activitiesInProgress.map(activityProgress => _self.mapIncludeActivity(activityProgress));
+    return summary;
+  }
+
+  mapIncludeActivity(input: progressStoreMapping): TeamActivityProgress {
+    return {
+      team: input.team,
+      activity: this.dataStore?.activityStore?.getActivityByUuid(input.activityUuid) || {} as Activity,
+      progress: input.progress,
+    };
+  }
+}
+
+export interface TeamSummary {
+  teams: TeamNames;
+  lastUpdated: Date;
+  activitiesCompleted: TeamActivityProgress[];
+  activitiesInProgress: TeamActivityProgress[];
+}
+
+
+export interface TeamActivityProgress {
+  team: TeamName;
+  activity: Activity;
+  progress: TeamProgress;
 }
