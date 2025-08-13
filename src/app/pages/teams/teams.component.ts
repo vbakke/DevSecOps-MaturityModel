@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { DialogInfo, ModalMessageComponent } from 'src/app/component/modal-message/modal-message.component';
 import { SelectionChangedEvent, TeamsGroupsChangedEvent } from 'src/app/component/teams-groups-editor/teams-groups-editor.component';
+import { Activity } from 'src/app/model/activity-store';
 import { DataStore, } from 'src/app/model/data-store';
-import { TeamGroups, TeamNames, Uuid } from 'src/app/model/types';
+import { TeamActivityProgress as progressStoreMapping } from 'src/app/model/progress-store';
+import { TeamGroups, TeamName, TeamNames, TeamProgress, Uuid } from 'src/app/model/types';
 import { LoaderService } from 'src/app/service/loader/data-loader.service';
 import { downloadYamlFile } from 'src/app/util/download';
-import { isEmptyObj, perfNow } from 'src/app/util/util';
+import { isEmptyObj, perfNow, dateStr } from 'src/app/util/util';
 
 @Component({
   selector: 'app-teams',
@@ -13,6 +15,7 @@ import { isEmptyObj, perfNow } from 'src/app/util/util';
   styleUrls: ['./teams.component.css'],
 })
 export class TeamsComponent implements OnInit {
+  dateStr = dateStr;
   dataStore: DataStore = new DataStore();
   canEdit: boolean = false;
   teams: TeamNames = [];
@@ -126,15 +129,21 @@ export class TeamsComponent implements OnInit {
 
 
   makeTeamSummary(name: string, teams: TeamNames): TeamSummary {
-    let activitiesCompleted: Uuid[] = this.dataStore?.progressStore?.getActivitiesCompletedForTeam(name) || [];
-    // let activitiesInProgress: Uuid[] = this.dataStore?.progressStore?.getActivitiesInProgressForTeam(team) || [];
-    let activitiesInProgress: Uuid[] = this.dataStore?.progressStore?.getActivitiesCompletedForTeam(name) || [];
+    let activitiesCompleted: progressStoreMapping[] = this.dataStore?.progressStore?.getActivitiesCompletedForTeam(name) || [];
+    let activitiesInProgress: progressStoreMapping[] = this.dataStore?.progressStore?.getActivitiesInProgressForTeam(name) || [];
 
+    let summary: TeamSummary = {teams, lastUpdated: new Date(), activitiesCompleted: [], activitiesInProgress: []};
+    var _self = this;
+    summary.activitiesCompleted = activitiesCompleted.map(activityProgress => _self.mapIncludeActivity(activityProgress));
+    summary.activitiesInProgress = activitiesInProgress.map(activityProgress => _self.mapIncludeActivity(activityProgress));
+    return summary;
+  }
+
+  mapIncludeActivity(input: progressStoreMapping): TeamActivityProgress {
     return {
-      teams: teams,
-      lastUpdated: new Date(),
-      activitiesCompleted,
-      activitiesInProgress,
+      team: input.team,
+      activity: this.dataStore?.activityStore?.getActivityByUuid(input.activityUuid) || {} as Activity,
+      progress: input.progress,
     };
   }
 }
@@ -142,6 +151,13 @@ export class TeamsComponent implements OnInit {
 export interface TeamSummary {
   teams: TeamNames;
   lastUpdated: Date;
-  activitiesCompleted: Uuid[];
-  activitiesInProgress: Uuid[];
+  activitiesCompleted: TeamActivityProgress[];
+  activitiesInProgress: TeamActivityProgress[];
+}
+
+
+export interface TeamActivityProgress {
+  team: TeamName;
+  activity: Activity;
+  progress: TeamProgress;
 }

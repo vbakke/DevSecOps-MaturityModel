@@ -12,6 +12,12 @@ import {
 
 type ActivityMap = Record<Uuid, string>;
 
+
+export interface TeamActivityProgress {
+  team: TeamName;
+  activityUuid: Uuid;
+  progress: TeamProgress;
+}
 const LOCALSTORAGE_KEY: string = 'progress';
 
 export class ProgressStore {
@@ -138,13 +144,38 @@ export class ProgressStore {
     return this._progressTitles[0];
   }
 
-  public getActivitiesCompletedForTeam(teamName: TeamName): Uuid[] {
+  public getActivitiesCompletedForTeam(teamName: TeamName): TeamActivityProgress[] {
     let completedName: ProgressTitle = this._progressTitlesDescOrder?.[0] || '';
 
-    let activitiesCompleted: Uuid[] = [];
+    let activitiesCompleted: TeamActivityProgress[] = [];
     for (let activityUuid in this._progress) {
       if (this._progress?.[activityUuid]?.[teamName]?.[completedName]) {
-          activitiesCompleted.push(activityUuid);
+          let teamActivityProgress: TeamActivityProgress = {
+            team: teamName,
+            activityUuid: activityUuid,
+            progress: this._progress[activityUuid][teamName]
+          }
+          activitiesCompleted.push(teamActivityProgress);
+      }
+    }
+    return activitiesCompleted;
+  }
+
+  public getActivitiesInProgressForTeam(teamName: TeamName): TeamActivityProgress[] {
+    let initiatedName: ProgressTitle = this._progressTitles?.[1] || '';
+    let completedName: ProgressTitle = this._progressTitlesDescOrder?.[0] || '';
+
+    let activitiesCompleted: TeamActivityProgress[] = [];
+    for (let activityUuid in this._progress) {
+      if (this._progress?.[activityUuid]?.[teamName]?.[initiatedName] &&
+          !this._progress?.[activityUuid]?.[teamName]?.[completedName])
+      {
+          let teamActivityProgress: TeamActivityProgress = {
+            team: teamName,
+            activityUuid: activityUuid,
+            progress: this._progress[activityUuid][teamName]
+          }
+          activitiesCompleted.push(teamActivityProgress);
       }
     }
     return activitiesCompleted;

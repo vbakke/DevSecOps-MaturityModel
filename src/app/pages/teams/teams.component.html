@@ -14,10 +14,26 @@
 
   <div class="team-info">
     <h2>{{infoTitle}}</h2>
+    <div style="text-align: center"><strong><em>Work in progress... basic KPIs for teams and groups...</em></strong></div>
     <div class="info-content">
       <p>Teams: {{ info[infoTitle]?.teams  }}</p>
-      <p>Last updated: {{ info[infoTitle]?.lastUpdated }}</p>
-      <p>Completed: {{ info[infoTitle]?.activitiesCompleted?.length }}</p>
+      <p>Last updated: {{ dateStr(info[infoTitle]?.lastUpdated) }}</p>
+      <p><span class="bi-title">Completed: </span><span class="biNumber">{{ info[infoTitle]?.activitiesCompleted?.length }}</span></p>
+      <p><span class="bi-title">In progress: </span><span class="biNumber">{{ info[infoTitle]?.activitiesInProgress?.length }}</span></p>
+      <table border="1" style="border-collapse: collapse;" class="activity-table">
+        <tr>
+          <th>Team</th>
+          <th>Activity</th>
+          <th>Planned</th>
+          <th>Started</th>
+        </tr>
+        <tr *ngFor="let summary of info[infoTitle]?.activitiesInProgress">
+          <td>{{ summary.team }}</td>
+          <td>{{ summary.activity.name }}</td>
+          <td>{{ dateStr(summary.progress['Planned']) }}</td>
+          <td>{{ dateStr(summary.progress['Started']) }}</td>
+        </tr>
+      </table>
 
 
   </div>
