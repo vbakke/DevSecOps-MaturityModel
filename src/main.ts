@@ -16,7 +16,7 @@ if (environment?.experimental && !localDevelopment) {
     url: '/faro-logs', // Use the Cloudflare proxy endpoint
     app: {
       name: 'dsomm',
-      version: '1.3.1',
+      version: environment.version || 'unknown',
       environment: localDevelopment ? 'development' : 'experimental',
     },
     sessionTracking: {

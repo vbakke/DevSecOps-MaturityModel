@@ -9,6 +9,7 @@ import { environment } from 'src/environments/environment';
 })
 export class AppComponent implements OnInit {
   title = 'DSOMM';
+  version: string = environment?.version || '';
   menuIsOpen: boolean = true;
 
   __experimental__updated: Date = new Date();
