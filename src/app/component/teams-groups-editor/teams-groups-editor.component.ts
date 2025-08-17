@@ -50,9 +50,11 @@ export class TeamsGroupsEditorComponent {
   
   ngOnChanges() {
     this.makeLocalCopy();
-    if (this.teams.length > 0 && !this.selectedTeam && !this.selectedGroup) {
-      console.log(`${perfNow()}: Teams: No team or group selected, selecting first team`);
-      this.onTeamSelected(this.teams[0]);
+    
+    let groups: GroupName[] = this.getGroupNames();
+    if (groups.length > 0 && !this.selectedTeam && !this.selectedGroup) {
+      console.log(`${perfNow()}: Teams: No team or group selected, selecting first group`);
+      this.onGroupSelected(groups[0]);
     }
   }
 

@@ -62,6 +62,7 @@
 - Matrix: Brushup layout of details page
 - Matrix: Remember filters, when moving back from details
 - Matrix: Dependency graph: Make it clickable
+- Matrix: Go through tags: remove, add and rename
 - Misc: What is the activities.yaml comment field for? Should it be displayed to the user?
 - Teams: View active initiatives for a team (>0% and <100%)
 - Teams: View timeline for a team
