@@ -33,6 +33,11 @@ export function equalArray(a: any[]|undefined|null, b: any[]|undefined|null): bo
   return a.every((v, i) => v === b[i]);
 }
 
+export function uniqueCount(array: any[]): number {
+  const set: Set<any> = new Set(array);
+  return set.size;
+}
+
 export function dateStr(date: Date | null | undefined): string {
   if (!date) return '';
   return date.toLocaleDateString(navigator.language, {

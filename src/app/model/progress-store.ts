@@ -144,38 +144,58 @@ export class ProgressStore {
     return this._progressTitles[0];
   }
 
-  public getActivitiesCompletedForTeam(teamName: TeamName): TeamActivityProgress[] {
+  public getActivitiesCompletedForTeams(teamNames: TeamName[]): TeamActivityProgress[] {
     let completedName: ProgressTitle = this._progressTitlesDescOrder?.[0] || '';
 
     let activitiesCompleted: TeamActivityProgress[] = [];
+    let teamCount = teamNames.length;
     for (let activityUuid in this._progress) {
-      if (this._progress?.[activityUuid]?.[teamName]?.[completedName]) {
-          let teamActivityProgress: TeamActivityProgress = {
-            team: teamName,
-            activityUuid: activityUuid,
-            progress: this._progress[activityUuid][teamName]
+      let count = 0;
+      for (let teamName of teamNames) {
+        if (this._progress?.[activityUuid]?.[teamName]?.[completedName]) {
+          count++;
+        }
+        if (count === teamCount) {
+            let teamActivityProgress: TeamActivityProgress = {
+              team: '',
+              activityUuid: activityUuid,
+              progress: this._progress[activityUuid][teamName]
+            }
+            activitiesCompleted.push(teamActivityProgress);
           }
-          activitiesCompleted.push(teamActivityProgress);
       }
     }
     return activitiesCompleted;
   }
 
-  public getActivitiesInProgressForTeam(teamName: TeamName): TeamActivityProgress[] {
+  public getInProgressTitles(): ProgressTitle[] {
+    if (!this._progressTitles) return [];
+    return this._progressTitles.slice(1, -1);
+  }
+
+  public getCompleetedProgressTitle(): ProgressTitle {
+    if (!this._progressTitles) return '';
+    return this._progressTitles.slice(-1)[0];
+  }
+
+  public getActivitiesInProgressForTeams(teamNames: TeamName[]): TeamActivityProgress[] {
     let initiatedName: ProgressTitle = this._progressTitles?.[1] || '';
     let completedName: ProgressTitle = this._progressTitlesDescOrder?.[0] || '';
 
     let activitiesCompleted: TeamActivityProgress[] = [];
     for (let activityUuid in this._progress) {
-      if (this._progress?.[activityUuid]?.[teamName]?.[initiatedName] &&
-          !this._progress?.[activityUuid]?.[teamName]?.[completedName])
-      {
-          let teamActivityProgress: TeamActivityProgress = {
-            team: teamName,
-            activityUuid: activityUuid,
-            progress: this._progress[activityUuid][teamName]
-          }
-          activitiesCompleted.push(teamActivityProgress);
+      for (let teamName of teamNames) {
+        // Only include started, but not completed activities
+        if (this._progress?.[activityUuid]?.[teamName]?.[initiatedName] &&
+            !this._progress?.[activityUuid]?.[teamName]?.[completedName])
+        {
+            let teamActivityProgress: TeamActivityProgress = {
+              team: teamName,
+              activityUuid: activityUuid,
+              progress: this._progress[activityUuid][teamName]
+            }
+            activitiesCompleted.push(teamActivityProgress);
+        }
       }
     }
     return activitiesCompleted;
@@ -212,7 +232,6 @@ export class ProgressStore {
       this._progress[activityUuid][teamName] = {};
     }
 
-    // let teamProgress: TeamProgress = this._progress[activityUuid][teamName];
     let orgProgress: ProgressTitle = this.getTeamProgressTitle(activityUuid, teamName);
     let orgIndex: number = this._progressTitles.indexOf(orgProgress);
     let newIndex: number = this._progressTitles.indexOf(newProgress);

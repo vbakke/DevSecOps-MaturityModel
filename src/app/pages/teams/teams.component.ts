@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { MatSort } from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
 import { DialogInfo, ModalMessageComponent } from 'src/app/component/modal-message/modal-message.component';
 import { SelectionChangedEvent, TeamsGroupsChangedEvent } from 'src/app/component/teams-groups-editor/teams-groups-editor.component';
 import { Activity } from 'src/app/model/activity-store';
@@ -7,7 +9,7 @@ import { TeamActivityProgress as progressStoreMapping } from 'src/app/model/prog
 import { TeamGroups, TeamName, TeamNames, TeamProgress, Uuid } from 'src/app/model/types';
 import { LoaderService } from 'src/app/service/loader/data-loader.service';
 import { downloadYamlFile } from 'src/app/util/download';
-import { isEmptyObj, perfNow, dateStr } from 'src/app/util/util';
+import { isEmptyObj, perfNow, dateStr, uniqueCount } from 'src/app/util/util';
 
 @Component({
   selector: 'app-teams',
@@ -24,6 +26,11 @@ export class TeamsComponent implements OnInit {
   infoTitle: string = '';
   infoTeams: TeamNames = [];
   info: Record<string, TeamSummary> = {};
+
+  dataSource: MatTableDataSource<TeamActivityProgress> = new MatTableDataSource<TeamActivityProgress>([]);
+  allColumnNames: string[] = [];
+  progressColumnNames: string[] = [];
+  @ViewChild(MatSort, { static: false }) sort!: MatSort;
 
   constructor(
         private loader: LoaderService,
@@ -47,6 +54,28 @@ export class TeamsComponent implements OnInit {
   }
 
   
+    ngAfterViewInit() {
+    if (this.sort) {
+      this.dataSource.sort = this.sort;
+      this.dataSource.sortingDataAccessor = (item: TeamActivityProgress, property: string) => {
+          if (property === 'Team') {
+            return item.team;
+          }
+          if (property === 'Activity') {
+            return item.activity?.name || '';
+          }
+          // For progress columns, sort by date string or timestamp
+          if (this.progressColumnNames.includes(property)) {
+            // If your progress is a date string, you may want to convert to Date for proper sorting
+            const value = item.progress?.[property];
+            return value ? new Date(value).getTime() : 0;
+          }
+          return ''; 
+     };
+    }
+  }
+  
+  
   displayMessage(dialogInfo: DialogInfo) {
     this.modal.openDialog(dialogInfo);
   }
@@ -59,6 +88,9 @@ export class TeamsComponent implements OnInit {
 
     this.teams = dataStore?.meta?.teams || [];
     this.teamGroups = dataStore?.meta?.teamGroups || {};
+
+    this.progressColumnNames = this.dataStore?.progressStore?.getInProgressTitles() || [];
+    this.allColumnNames = ['Team', 'Activity', ...this.progressColumnNames];
   }
 
   onSelectionChanged(event: SelectionChangedEvent) {
@@ -74,6 +106,7 @@ export class TeamsComponent implements OnInit {
     if (!this.info[this.infoTitle]) {
       this.info[this.infoTitle] = this.makeTeamSummary(this.infoTitle, this.infoTeams);
     }
+    this.dataSource.data = this?.info[this.infoTitle]?.activitiesInProgress || [];
   }
 
   onTeamsChanged(event: TeamsGroupsChangedEvent) {
@@ -129,13 +162,20 @@ export class TeamsComponent implements OnInit {
 
 
   makeTeamSummary(name: string, teams: TeamNames): TeamSummary {
-    let activitiesCompleted: progressStoreMapping[] = this.dataStore?.progressStore?.getActivitiesCompletedForTeam(name) || [];
-    let activitiesInProgress: progressStoreMapping[] = this.dataStore?.progressStore?.getActivitiesInProgressForTeam(name) || [];
+    let activitiesCompleted: progressStoreMapping[] = this.dataStore?.progressStore?.getActivitiesCompletedForTeams(teams) || [];
+    let activitiesInProgress: progressStoreMapping[] = this.dataStore?.progressStore?.getActivitiesInProgressForTeams(teams) || [];
 
-    let summary: TeamSummary = {teams, lastUpdated: new Date(), activitiesCompleted: [], activitiesInProgress: []};
+    let summary: TeamSummary = {
+      teams,
+      lastUpdated: new Date(),
+      activitiesCompleted: [], activitiesInProgress: [],
+      uniqueActivitiesCompletedCount: 0, uniqueActivitiesInProgressCount: 0,
+    };
     var _self = this;
     summary.activitiesCompleted = activitiesCompleted.map(activityProgress => _self.mapIncludeActivity(activityProgress));
     summary.activitiesInProgress = activitiesInProgress.map(activityProgress => _self.mapIncludeActivity(activityProgress));
+    summary.uniqueActivitiesCompletedCount = uniqueCount(summary.activitiesCompleted.map(item => item.activity.uuid));
+    summary.uniqueActivitiesInProgressCount = uniqueCount(summary.activitiesInProgress.map(item => item.activity.uuid));
     return summary;
   }
 
@@ -153,6 +193,8 @@ export interface TeamSummary {
   lastUpdated: Date;
   activitiesCompleted: TeamActivityProgress[];
   activitiesInProgress: TeamActivityProgress[];
+  uniqueActivitiesCompletedCount: number;
+  uniqueActivitiesInProgressCount: number;
 }
 
 

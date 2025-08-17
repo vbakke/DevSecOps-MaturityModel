@@ -2,7 +2,7 @@
 <div class="selectable-list">
   <div class="selectable-list-header">
     <h2>{{ title }}</h2>
-    <button mat-icon-button *ngIf="canEdit && !relationshipEditMode" (click)="toggleEditMode()" title="Edit {{ title }}" color="red">
+    <button mat-icon-button *ngIf="canEdit && !editMode && !relationshipEditMode" (click)="toggleEditMode()" title="Edit {{ title }}" color="red">
       <mat-icon>edit</mat-icon>
     </button>
     <span *ngIf="editMode" >
