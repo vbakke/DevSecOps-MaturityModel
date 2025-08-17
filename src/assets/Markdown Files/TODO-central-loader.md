@@ -1,10 +1,7 @@
 ## Doing
-- Teams: Display some core info about the selected team/group
-  - Number of activities completed
-  - Number of activities started
-  - List activities started, dates per stage
-    - Browser's locale
-  - Last updated
+- Teams: Bug: On delete team, groups no longer highlights
+- Teams: Bug: On delete team, auto-select next in list (or previous, if at bottom)
+- Teams: Bug: On rename team, in-progress activities must be updated
 
 ## Next
 
@@ -16,13 +13,16 @@
 - Use DOMPurify to check markdown before innerHTML
 ### Settings
 - Make settings page
-  - Date format
-  - Display 
+  - Date format (don't rely just on browser language)
+  - Display mode dark/light
+  - Alter Progress Stages
 ### Dark Mode
 - Merge in Dark Mode [PR #381](https://github.com/devsecopsmaturitymodel/DevSecOps-MaturityModel/pull/381)
 ### Matrix
 - Matrix: Fix markdown rendering
 - Matrix: Add a Close/Back button
+### Teama
+- Teams: Allow user to re-order teams and groups
 ### Heatmap:
 - Heatmap: Bug: Selecting a team group does not always get deselected when flipping teams
 - Heatmap: meta-yaml: If progress definition is missing, default to 0% + 100% 
@@ -52,6 +52,8 @@
 - DSOMM: Read latest "generated.yaml" from DSOMM-data's github repo, to check for any new releases
 
 # Later
+- App: Search activities, across title description etc
+- Export to Excel. Move from Mapping, to just progress data
 - Filter: Bug: SPACE key does not trigger
 - Heatmap, Card: Add Complete-symbol per activity
 - Heatmap: Update url on open details + read querystring on open
@@ -65,6 +67,7 @@
 - Meta.yaml: Allow admins to rename the terms 'Team' and 'Team Group' (e.g. 'App' and 'Team')
 
 # Done
+- Teams: Display some core info about the selected team/group
 - Teams: Export teams and groups names as yaml
 - Teams: Store teams names in localstorage
 - Teams: Move team group 'All' from data-loader-service to Heatmap load
