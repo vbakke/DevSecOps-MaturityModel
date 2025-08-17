@@ -23,6 +23,7 @@
 - Matrix: Add a Close/Back button
 ### Teama
 - Teams: Allow user to re-order teams and groups
+- Teams: Allow editing dates for progress stages
 ### Heatmap:
 - Heatmap: Bug: Selecting a team group does not always get deselected when flipping teams
 - Heatmap: meta-yaml: If progress definition is missing, default to 0% + 100% 
@@ -64,7 +65,7 @@
 - Misc: What is the activities.yaml comment field for? Should it be displayed to the user?
 - Teams: View active initiatives for a team (>0% and <100%)
 - Teams: View timeline for a team
-- Meta.yaml: Allow admins to rename the terms 'Team' and 'Team Group' (e.g. 'App' and 'Team')
+- Meta.yaml: Allow admins to customize the terms 'Team' and 'Group' (e.g. to 'App' and 'Portfolio')
 
 # Done
 - Teams: Display some core info about the selected team/group
