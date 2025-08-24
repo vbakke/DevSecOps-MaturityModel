@@ -6,7 +6,7 @@ import { environment } from './environments/environment';
 import { faro, getWebInstrumentations, initializeFaro, LogLevel } from '@grafana/faro-web-sdk';
 import { TracingInstrumentation } from '@grafana/faro-web-tracing';
 
-export const version: string = '1.3.3';
+export const version: string = '1.3.4';
 
 const localDevelopment:boolean = (window.location.hostname == 'localhost');
 if (environment.production) {
