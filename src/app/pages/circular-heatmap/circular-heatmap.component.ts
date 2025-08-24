@@ -174,7 +174,6 @@ export class CircularHeatmapComponent implements OnInit {
     // Update team group filter, if one matches selection
     Object.keys(this.teamGroups || {}).forEach(group => {
       let match: boolean = equalArray(selectedTeams, this.teamGroups[group]);
-      console.log(`${perfNow()}: Heat: Team group '${group}', selected: ${selectedTeams}: match: ${match}`);
       this.filtersTeamGroups[group] = match;
     });
     this.filtersTeamGroups = this.filtersTeamGroups;
