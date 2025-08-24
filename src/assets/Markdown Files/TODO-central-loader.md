@@ -4,7 +4,6 @@
 - Teams: Bug: On rename team, in-progress activities must be updated
 
 ## Next
-- Use DOMPurify to check markdown in MarkdownText before innerHTML
 
 ## ToDo
 - Heatmap: Fix: asterisk marks when modified
@@ -67,6 +66,7 @@
 - Meta.yaml: Allow admins to customize the terms 'Team' and 'Group' (e.g. to 'App' and 'Portfolio')
 
 # Done
+- Using Angular's built-in DomSanitizer to check [innerHTML]
 - Heatmap: Run Markdown on yaml text
 - Matrix: Fix markdown rendering
 - Teams: Display some core info about the selected team/group

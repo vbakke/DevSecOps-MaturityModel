@@ -61,7 +61,6 @@ export class ActivityDescriptionComponent implements OnInit {
 
   // Expand all function
   openAll(): void {
-    console.log("Expanding all accordions");
     this.accordion.forEach(element => {
       element.openAll();
     });
