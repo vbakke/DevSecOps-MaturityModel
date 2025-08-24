@@ -2,7 +2,6 @@ import { Component, ViewChildren, QueryList, OnInit } from '@angular/core';
 import { MatAccordion } from '@angular/material/expansion';
 import { ActivatedRoute } from '@angular/router';
 import { LoaderService } from '../../service/loader/data-loader.service';
-import * as md from 'markdown-it';
 import { Activity, ActivityStore } from '../../model/activity-store';
 import { DataStore } from 'src/app/model/data-store';
 
@@ -12,7 +11,6 @@ import { DataStore } from 'src/app/model/data-store';
   styleUrls: ['./activity-description.component.css'],
 })
 export class ActivityDescriptionComponent implements OnInit {
-  markdown: md = md();
   currentActivity: Partial<Activity> = {};
 
   TimeLabel: string = '';
@@ -54,7 +52,7 @@ export class ActivityDescriptionComponent implements OnInit {
         this.ResourceLabel = dataStore.getMetaString('labels', activity.difficultyOfImplementation.resources);
         this.UsefulnessLabel = dataStore.getMetaString('labels', activity.usefulness);
 
-        this.openall();
+        setTimeout(() => { this.openAll() }, 1);
       })
       .catch(err => {
         console.error('Error loading activity data:', err);
@@ -62,14 +60,15 @@ export class ActivityDescriptionComponent implements OnInit {
   }
 
   // Expand all function
-  openall(): void {
+  openAll(): void {
+    console.log("Expanding all accordions");
     this.accordion.forEach(element => {
       element.openAll();
     });
   }
 
   // Close all function
-  closeall(): void {
+  closeAll(): void {
     this.accordion.forEach(element => {
       element.closeAll();
     });

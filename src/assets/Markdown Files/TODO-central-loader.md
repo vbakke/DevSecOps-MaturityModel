@@ -4,13 +4,12 @@
 - Teams: Bug: On rename team, in-progress activities must be updated
 
 ## Next
+- Use DOMPurify to check markdown in MarkdownText before innerHTML
 
 ## ToDo
 - Heatmap: Fix: asterisk marks when modified
   - ViewController needs to know about changes vs temp storage
 - Heatmap: Bug: Clicking on grey sector leaves cursor on that sector
-- Heatmap: Run Markdown on yaml text
-- Use DOMPurify to check markdown before innerHTML
 ### Settings
 - Make settings page
   - Date format (don't rely just on browser language)
@@ -19,7 +18,6 @@
 ### Dark Mode
 - Merge in Dark Mode [PR #381](https://github.com/devsecopsmaturitymodel/DevSecOps-MaturityModel/pull/381)
 ### Matrix
-- Matrix: Fix markdown rendering
 - Matrix: Add a Close/Back button
 ### Teama
 - Teams: Allow user to re-order teams and groups
@@ -69,6 +67,8 @@
 - Meta.yaml: Allow admins to customize the terms 'Team' and 'Group' (e.g. to 'App' and 'Portfolio')
 
 # Done
+- Heatmap: Run Markdown on yaml text
+- Matrix: Fix markdown rendering
 - Teams: Display some core info about the selected team/group
 - Teams: Export teams and groups names as yaml
 - Teams: Store teams names in localstorage
