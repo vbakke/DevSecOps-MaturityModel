@@ -81,6 +81,26 @@ export class TeamsGroupsEditorComponent {
     return this.localCopyTeamGroups[group] || [];
   }  
 
+  getOriginalTeamName(localName: TeamName): TeamName {
+      if (this.teams.includes(localName)) {
+        return localName;
+      } else {
+        let index: number = this.localCopyTeams.indexOf(localName);
+        return this.teams?.[index] || '';
+      }    
+  }
+
+  getOriginalGroupName(localName: GroupName): GroupName {
+      if (this.teamGroups.hasOwnProperty(localName)) {
+        return localName;
+      } else {
+        // FIXME: This logic is flawed if groups have been renamed
+        // let index: number = Object.keys(this.localCopyTeamGroups).indexOf(localName);
+        // return Object.keys(this.teamGroups)?.[index] || '';
+        return Object.keys(this.teamGroups)?.[0] || '';
+      }    
+  }
+
   cloneTeamGroups(original: TeamGroups): TeamGroups {
     let clone: TeamGroups = {};
     for (let group in original) {
@@ -167,8 +187,6 @@ export class TeamsGroupsEditorComponent {
     for (let group in this.localCopyTeamGroups) {
       this.localCopyTeamGroups[group] = this.localCopyTeamGroups[group].filter(team => team !== team);
     }
-
-    this.onTeamSelected('');
   }
 
   onAddGroup() { 
@@ -211,15 +229,23 @@ export class TeamsGroupsEditorComponent {
 
   onCancelEdit() {
     console.log(`${perfNow()}: Cancel editing teams and groups`);
+    let selectedItem: string = '';
     
+    // Determine what is currently selected
+    if(this.editMode === EditMode.TEAMS) {
+      selectedItem = this.getOriginalTeamName(this.selectedTeam || '');
+    } else if (this.editMode === EditMode.GROUPS) {
+      selectedItem = this.getOriginalGroupName(this.selectedGroup || '');
+    }
+
     // Recreate the local copy from original values
     this.makeLocalCopy(); 
     
     // Re-select and highlight the original values 
     if (this.editMode === EditMode.TEAMS) {
-      this.onTeamSelected(this.selectedTeam || '');
+      this.onTeamSelected(selectedItem as TeamName);
     } else if (this.editMode === EditMode.GROUPS) {
-      this.onGroupSelected(this.selectedGroup || ''); 
+      this.onGroupSelected(selectedItem as GroupName); 
     }
     this.editMode = EditMode.NONE;
   }

@@ -78,4 +78,16 @@ export class SelectableListComponent {
     this.editingOrgName = '';
   }
 
+  deleteListItem(name: string) {
+    console.log(`${perfNow()}: Delete Item: ${name}`);
+    let index: number = this.items.indexOf(name);
+    this.deleteItem.emit(name);
+
+    // Select next item
+    if (index < this.items.length - 1) {
+      this.onItemClicked(this.items[index + 1]);
+    } else  if (index > 0) {
+      this.onItemClicked(this.items[index - 1]);
+    }
+  }
 }
