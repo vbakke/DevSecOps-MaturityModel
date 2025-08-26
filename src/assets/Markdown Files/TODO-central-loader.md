@@ -1,5 +1,8 @@
 
 ## Next
+### Dependency graph
+- Dependency graph: Add to CircularHeatmap Details
+- Matrix: Dependency graph: Render in center of page
 
 ## ToDo
 - Heatmap: Fix: asterisk marks when modified
@@ -24,9 +27,6 @@
 - Heatmap: Revert to boolean checkboxes, if definition is only 0% and 100%
 - Heatmap: Read previous local storage for backwards compatibility 
 - Heatmap: Input Teams' evidence
-### Dependency graph
-- Dependency graph: Add to CircularHeatmap Details
-- Matrix: Dependency graph: Render in center of page
 ### Documentation
 - Doc: Update `Usage`
 - Doc: Update `README.md`
