@@ -39,3 +39,9 @@
 .selectable-list button {
   margin-left: 0.5rem;
 }
+
+.selectable-list .edit-hint {
+  font-weight: normal;
+  font-size: 0.8em;
+  color: #666;;
+}

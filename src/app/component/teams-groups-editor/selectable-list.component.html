@@ -2,6 +2,8 @@
 <div class="selectable-list">
   <div class="selectable-list-header">
     <h2>{{ title }}</h2>
+    <div *ngIf="editMode" class="edit-hint">Click Accept when finished</div>
+    <div *ngIf="relationshipEditMode" class="edit-hint">Click to toggle relationship</div>
     <button mat-icon-button *ngIf="canEdit && !editMode && !relationshipEditMode" (click)="toggleEditMode()" title="Edit {{ title }}" color="red">
       <mat-icon>edit</mat-icon>
     </button>
@@ -10,17 +12,14 @@
         <mat-icon>add</mat-icon>
       </button>
       <button mat-icon-button (click)="cancel.emit()" title="Cancel, forget changes">
-        <!-- <mat-icon>close</mat-icon> -->
-        <!-- <mat-icon>keyboard_return</mat-icon> -->
-        <!-- <mat-icon>fast_rewind</mat-icon> -->
-        <!-- <mat-icon>replay</mat-icon> -->
         <mat-icon>undo</mat-icon>
       </button>
       <button mat-icon-button (click)="save.emit()" title="Accept changes">
         <mat-icon>check</mat-icon>
       </button>
     </span>
-</div>
+  </div>
+
   <ul>
     <li *ngFor="let name of items"
         [class.selected]="name === selectedItem"
@@ -35,10 +34,10 @@
       </ng-template>
       <!-- <span *ngIf="!editMode || editingOrgName !== name">{{ name }}</span> -->
       <span *ngIf="editMode">
-        <button mat-icon-button (click)="$event.stopPropagation(); startEditItem(name)" title="Rename {{ name }}">
+        <button mat-icon-button (click)="startEditItem(name)" title="Rename {{ name }}">
           <mat-icon>edit</mat-icon>
         </button>
-        <button mat-icon-button (click)="$event.stopPropagation(); deleteItem.emit(name)" title="Delete {{ name }}">
+        <button mat-icon-button (click)="deleteListItem(name)" title="Delete {{ name }}">
           <mat-icon>delete</mat-icon>
         </button>
       </span>

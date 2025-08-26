@@ -167,8 +167,6 @@ export class TeamsGroupsEditorComponent {
     for (let group in this.localCopyTeamGroups) {
       this.localCopyTeamGroups[group] = this.localCopyTeamGroups[group].filter(team => team !== team);
     }
-
-    this.onTeamSelected('');
   }
 
   onAddGroup() { 

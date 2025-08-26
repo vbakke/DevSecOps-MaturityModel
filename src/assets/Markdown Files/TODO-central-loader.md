@@ -1,6 +1,4 @@
 ## Doing
-- Teams: Bug: On delete team, groups no longer highlights
-- Teams: Bug: On delete team, auto-select next in list (or previous, if at bottom)
 - Teams: Bug: On rename team, in-progress activities must be updated
 
 ## Next
