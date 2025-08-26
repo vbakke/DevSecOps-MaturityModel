@@ -27,12 +27,17 @@
         (click)="onItemClicked(name)">
       <span *ngIf="editMode && editingOrgName === name; then editItem else displayItem"></span>
       <ng-template #editItem>
-        <input #editInput [(ngModel)]="editingName" (keydown.escape)="cancelEditItem(name)" (keydown.enter)="saveEditedItem(name)" (blur)="saveEditedItem(name)" />
+        <input #editInput
+          [(ngModel)]="editingName"
+          (keydown.escape)="cancelEditItem(name)"
+          (keydown.enter)="saveEditedItem(name)"
+          (blur)="saveEditedItem(name)"
+        />
       </ng-template>
       <ng-template #displayItem>
         <span>{{ name }}</span>
       </ng-template>
-      <!-- <span *ngIf="!editMode || editingOrgName !== name">{{ name }}</span> -->
+
       <span *ngIf="editMode">
         <button mat-icon-button (click)="startEditItem(name)" title="Rename {{ name }}">
           <mat-icon>edit</mat-icon>
@@ -42,7 +47,7 @@
         </button>
       </span>
       <span *ngIf="relationshipEditMode">
-        <mat-icon *ngIf="highlightedItems.includes(name);  else unselected" color="primary">check_box</mat-icon>
+        <mat-icon *ngIf="highlightedItems.includes(name); else unselected" color="primary">check_box</mat-icon>
         <ng-template #unselected><mat-icon>check_box_outline_blank</mat-icon></ng-template>
       </span>
     </li>

@@ -18,6 +18,7 @@
 - Matrix: Add a Close/Back button
 ### Teama
 - Teams: Allow user to re-order teams and groups
+- Teams: Bug: Editing name, pushes the item last
 - Teams: Allow editing dates for progress stages
 ### Heatmap:
 - Heatmap: Bug: Selecting a team group does not always get deselected when flipping teams
