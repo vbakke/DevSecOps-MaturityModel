@@ -116,9 +116,14 @@ export class TeamsComponent implements OnInit {
     if (!isEmptyObj(event.teamsRenamed)) {
       for (let oldName in event.teamsRenamed) {
         this.dataStore?.progressStore?.renameTeam(oldName, event.teamsRenamed[oldName]);
+        delete this.info?.[oldName];
+        delete this.info?.[event.teamsRenamed[oldName]];
       }
       this.dataStore?.progressStore?.saveToLocalStorage();
     }
+    this.info[this.infoTitle] = this.makeTeamSummary(this.infoTitle, this.infoTeams);
+    this.dataSource.data = this?.info[this.infoTitle]?.activitiesInProgress || [];
+    
     this.setYamlData(this.dataStore);
   }
 

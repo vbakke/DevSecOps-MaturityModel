@@ -1,5 +1,3 @@
-## Doing
-- Teams: Bug: On rename team, in-progress activities must be updated
 
 ## Next
 
@@ -16,7 +14,7 @@
 - Merge in Dark Mode [PR #381](https://github.com/devsecopsmaturitymodel/DevSecOps-MaturityModel/pull/381)
 ### Matrix
 - Matrix: Add a Close/Back button
-### Teama
+### Teams
 - Teams: Allow user to re-order teams and groups
 - Teams: Bug: Editing name, pushes the item last
 - Teams: Allow editing dates for progress stages
