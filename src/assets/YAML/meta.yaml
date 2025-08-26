@@ -2,6 +2,7 @@
 ¤-allowCheckDsommActivityUpdateInBrowser: true  # Yet to be implemented
 ¤-dsommActivityUrl: https://git...io/dsomm/master....
 
+teamProgressFile: 'team-progress.yaml' 
 progressDefinition:
   "Not started": 0%
   Planned: 10%
@@ -12,19 +13,17 @@ progressDefinition:
 #   Medium maturity: 40%
 #   High maturity: 100% 
 
-¤-allowChangeTeamNameInBrowser: true  # Yet to be implemented
+allowChangeTeamNameInBrowser: true
 teams: 
   $ref: 'default/teams.yaml#/teams'
 teamGroups:
   $ref: 'default/teams.yaml#/teamGroups'
-teamProgressFile: 'team-progress.yaml' 
 
 activityFiles:
     # - generated/generated.yaml 
     - default/activities.yaml 
     # - custom/custom-activities.yaml  # For customizing your own activities
     # - custom/test-ignore-activities.yaml
-
 
 
 #

@@ -13,11 +13,12 @@ import {
   DialogInfo,
 } from '../../component/modal-message/modal-message.component';
 import { Activity, ActivityStore } from 'src/app/model/activity-store';
-import { Uuid, ProgressDefinition, TeamName, ProgressTitle, TeamGroups } from 'src/app/model/meta';
+import { Uuid, ProgressDefinition, TeamName, ProgressTitle, TeamGroups } from 'src/app/model/types';
 import { SectorService } from '../../service/sector-service';
 import { DataStore } from 'src/app/model/data-store';
 import { Sector } from 'src/app/model/sector';
 import { perfNow } from 'src/app/util/util';
+import { downloadYamlFile } from 'src/app/util/download';
 
 @Component({
   selector: 'app-circular-heatmap',
@@ -173,7 +174,6 @@ export class CircularHeatmapComponent implements OnInit {
     // Update team group filter, if one matches selection
     Object.keys(this.teamGroups || {}).forEach(group => {
       let match: boolean = equalArray(selectedTeams, this.teamGroups[group]);
-      console.log(`${perfNow()}: Heat: Team group '${group}', selected: ${selectedTeams}: match: ${match}`);
       this.filtersTeamGroups[group] = match;
     });
     this.filtersTeamGroups = this.filtersTeamGroups;
@@ -578,26 +578,6 @@ export class CircularHeatmapComponent implements OnInit {
     this.showFilters = !this.showFilters;
   }
 
-  exportTeamProgress() {
-    // Remove focus from the button that becomes aria unavailable (avoids ugly console error message)
-    const buttonElement = document.activeElement as HTMLElement;
-    buttonElement.blur();
-    
-    let yamlStr: string | null = this.dataStore?.progressStore?.asYamlString() || null;
-    if (!yamlStr) {
-      this.displayMessage(new DialogInfo('No team progress data available', 'Export Error'));
-      return;
-    }
-    
-    let file = new Blob([yamlStr], { type: 'application/yaml; charset=utf-8' });
-    var link = document.createElement('a');
-    link.href = window.URL.createObjectURL(file);
-    link.download = this.dataStore?.meta?.teamProgressFile?.split('/')?.pop() || 'team-progress.yaml';
-
-    link.click();
-    link.remove();
-  }
-
   recolorSector(index: number) {
     // console.log('recolorSector', index);
     var colorSector = d3
@@ -619,26 +599,42 @@ export class CircularHeatmapComponent implements OnInit {
     }
   }
 
-  deleteLocalTeamsProgress() {
-    // Remove focus from the button that becomes aria unavailable (avoids ugly console error message)
-    const buttonElement = document.activeElement as HTMLElement;
-    buttonElement.blur();
+  exportTeamProgress() {
+    console.log(`${perfNow()}: Exporting teams and groups`);
 
-    let title: string = 'Delete local browser data';
-    let message: string =
-      'Do you want to delete all progress for each team?' +
-      '\n\nThis deletes all progress stored in your local browser, but does ' +
-      'not change any progress stored in the yaml file on the server.';
-    let buttons: string[] = ['Cancel', 'Delete'];
-    this.modal
-      .openDialog({ title, message, buttons, template: '' })
-      .afterClosed()
-      .subscribe(data => {
-        if (data === 'Delete') {
-          this.dataStore?.progressStore?.deleteBrowserStoredTeamProgress();
-          location.reload(); // Make sure all load routines are initialized
-        }
-      });
+    let yamlStr: string | null = this.dataStore?.progressStore?.asYamlString() || null;
+    if (!yamlStr) {
+      this.displayMessage(new DialogInfo('No team progress data available', 'Export Error'));
+      return;
+    }
+
+    downloadYamlFile(yamlStr, this.dataStore?.meta?.teamProgressFile || 'team-progress.yaml');
+  }
+
+  async deleteLocalTeamsProgress() {
+    let buttonClicked: string = await this.displayDeleteLocalProgressDialog();
+
+    if (buttonClicked === 'Delete') {
+      this.dataStore?.progressStore?.deleteBrowserStoredTeamProgress();
+      location.reload(); // Make sure all load routines are initialized
+    }
+  }
+
+  displayDeleteLocalProgressDialog(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      let title: string = 'Delete local browser data';
+      let message: string =
+        'Do you want to delete all progress for each team?' +
+        '\n\nThis deletes all progress stored in your local browser, but does ' +
+        'not change any progress stored in the yaml file on the server.';
+      let buttons: string[] = ['Cancel', 'Delete'];
+      this.modal
+        .openDialog({ title, message, buttons, template: '' })
+        .afterClosed()
+        .subscribe(data => {
+          resolve(data);
+        });      
+      }); 
   }
 
   getDatasetFromBrowserStorage(): any {

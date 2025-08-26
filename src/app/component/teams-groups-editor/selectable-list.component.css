@@ -1,3 +1,16 @@
+.selectable-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.selectable-list input {
+  padding: 0.4rem;
+}
+
 .selectable-list ul {
   list-style: none;
   padding: 0;
@@ -14,15 +27,21 @@
   transition: background 0.2s;
 }
 .selectable-list li.selected {
-  background: #1976d2;
+  background: #66bb6a;
   color: white;
 }
 .selectable-list li.highlighted {
-  background: #bbdefb;
+  background: #66bb6a75;
 }
 .selectable-list li:not(.selected):not(.highlighted) {
   opacity: 0.6;
 }
 .selectable-list button {
   margin-left: 0.5rem;
+}
+
+.selectable-list .edit-hint {
+  font-weight: normal;
+  font-size: 0.8em;
+  color: #666;;
 }

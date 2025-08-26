@@ -8,7 +8,7 @@ import * as XLSX from 'xlsx';
 import { LoaderService } from 'src/app/service/loader/data-loader.service';
 import { DialogInfo, ModalMessageComponent } from 'src/app/component/modal-message/modal-message.component';
 import { DataStore } from 'src/app/model/data-store';
-import { Uuid } from 'src/app/model/meta';
+import { Uuid } from 'src/app/model/types';
 import { perfNow } from 'src/app/util/util';
 
 const GROUP_SEP = '\x1F';
@@ -136,16 +136,16 @@ export class MappingComponent implements OnInit, AfterViewInit {
         samm2: activity?.references?.samm2 || [],
         ISO17: activity?.references?.iso27001_2017 || [],
         ISO22: activity?.references?.iso27001_2022 || [],
-        description: activity.description || '',
-        risk: activity.risk || '',
-        measure: activity.measure || '',
+        description: activity.description.toString() || '',
+        risk: activity.risk.toString() || '',
+        measure: activity.measure.toString() || '',
         knowledge: dataStore.getMetaString('knowledgeLabels', activity.knowledge),
         resources: dataStore.getMetaString('labels', activity.resources),
         time: dataStore.getMetaString('labels', activity.time),
         usefulness: dataStore.getMetaString('labels', activity.usefulness),
         dependsOn: activity.dependsOn || [],
-        comments: activity.comments || '',
-        assessment: activity.assessment || '',
+        comments: activity.comments.toString() || '',
+        assessment: activity.assessment.toString() || '',
         level: activity.level || 0,
         teamImplementation: activity.implementation || {},
         // teamsEvidence: activity.teamsEvidence || {},

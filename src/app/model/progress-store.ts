@@ -1,9 +1,23 @@
 import { YamlService } from '../service/yaml-loader/yaml-loader.service';
-import { isEmptyObj } from '../util/util';
-import { TeamProgress, Progress, TeamNames, ProgressDefinition, Uuid, TeamName, ProgressTitle, TeamProgressFile } from './meta';
+import { isEmptyObj, perfNow } from '../util/util';
+import { 
+  Uuid, 
+  TeamName, 
+  TeamProgress, 
+  Progress, 
+  ProgressDefinition, 
+  ProgressTitle, 
+  TeamProgressFile 
+} from './types';
 
 type ActivityMap = Record<Uuid, string>;
 
+
+export interface TeamActivityProgress {
+  team: TeamName;
+  activityUuid: Uuid;
+  progress: TeamProgress;
+}
 const LOCALSTORAGE_KEY: string = 'progress';
 
 export class ProgressStore {
@@ -73,6 +87,23 @@ export class ProgressStore {
     return inDate.getTime() < orgDate.getTime();
   }
 
+  public renameTeam(oldName: TeamName, newName: TeamName): void {
+    if (!this._progress) return;
+
+    console.log(`${perfNow()} Renaming team '${oldName}' to '${newName}' in progress store`);
+    for (let activityUuid in this._progress) {
+      if (this._progress[activityUuid][oldName]) {
+        this._progress[activityUuid][newName] = this._progress[activityUuid][oldName];
+        delete this._progress[activityUuid][oldName];
+      }
+      // Update the temporary progress as well
+      if (this._tempProgress?.[activityUuid]?.[oldName]) {
+         this._tempProgress[activityUuid][newName] = this._tempProgress[activityUuid][oldName];
+        delete this._tempProgress[activityUuid][oldName];
+      }
+    }
+  }
+
   public getTeamProgress(activityUuid: Uuid, teamName: TeamName, returnBackupValue: boolean = false): TeamProgress {
     if (returnBackupValue) {
       return this._tempProgress?.[activityUuid]?.[teamName];
@@ -113,6 +144,63 @@ export class ProgressStore {
     return this._progressTitles[0];
   }
 
+  public getActivitiesCompletedForTeams(teamNames: TeamName[]): TeamActivityProgress[] {
+    let completedName: ProgressTitle = this._progressTitlesDescOrder?.[0] || '';
+
+    let activitiesCompleted: TeamActivityProgress[] = [];
+    let teamCount = teamNames.length;
+    for (let activityUuid in this._progress) {
+      let count = 0;
+      for (let teamName of teamNames) {
+        if (this._progress?.[activityUuid]?.[teamName]?.[completedName]) {
+          count++;
+        }
+        if (count === teamCount) {
+            let teamActivityProgress: TeamActivityProgress = {
+              team: '',
+              activityUuid: activityUuid,
+              progress: this._progress[activityUuid][teamName]
+            }
+            activitiesCompleted.push(teamActivityProgress);
+          }
+      }
+    }
+    return activitiesCompleted;
+  }
+
+  public getInProgressTitles(): ProgressTitle[] {
+    if (!this._progressTitles) return [];
+    return this._progressTitles.slice(1, -1);
+  }
+
+  public getCompleetedProgressTitle(): ProgressTitle {
+    if (!this._progressTitles) return '';
+    return this._progressTitles.slice(-1)[0];
+  }
+
+  public getActivitiesInProgressForTeams(teamNames: TeamName[]): TeamActivityProgress[] {
+    let initiatedName: ProgressTitle = this._progressTitles?.[1] || '';
+    let completedName: ProgressTitle = this._progressTitlesDescOrder?.[0] || '';
+
+    let activitiesCompleted: TeamActivityProgress[] = [];
+    for (let activityUuid in this._progress) {
+      for (let teamName of teamNames) {
+        // Only include started, but not completed activities
+        if (this._progress?.[activityUuid]?.[teamName]?.[initiatedName] &&
+            !this._progress?.[activityUuid]?.[teamName]?.[completedName])
+        {
+            let teamActivityProgress: TeamActivityProgress = {
+              team: teamName,
+              activityUuid: activityUuid,
+              progress: this._progress[activityUuid][teamName]
+            }
+            activitiesCompleted.push(teamActivityProgress);
+        }
+      }
+    }
+    return activitiesCompleted;
+  }
+
   // Calculate the progress value for a team progress state
   private getProgressValue(teamProgress: TeamProgress): number {
       if (!this._progressTitlesDescOrder) return 0;
@@ -135,7 +223,7 @@ export class ProgressStore {
       throw Error('Progress states are not initialized');
     }
     console.log(`Setting progress state for activity ${activityUuid} and team ${teamName} to: ${newProgress}`);
-    this.dump(activityUuid, teamName);
+    // this.dump(activityUuid, teamName);
     
     if (!this._progress[activityUuid]) {
       this._progress[activityUuid] = {};
@@ -144,7 +232,6 @@ export class ProgressStore {
       this._progress[activityUuid][teamName] = {};
     }
 
-    // let teamProgress: TeamProgress = this._progress[activityUuid][teamName];
     let orgProgress: ProgressTitle = this.getTeamProgressTitle(activityUuid, teamName);
     let orgIndex: number = this._progressTitles.indexOf(orgProgress);
     let newIndex: number = this._progressTitles.indexOf(newProgress);
@@ -154,12 +241,12 @@ export class ProgressStore {
     } else if (newIndex > orgIndex) {
       this.setTeamActivityProgress(activityUuid, teamName, orgIndex + 1, newIndex);
     }
-    this.dump(activityUuid, teamName);
+    // this.dump(activityUuid, teamName);
     this.saveToLocalStorage();
   }
 
   private dump(activityUuid: Uuid, teamName: TeamName) {
-    console.log(`${activityUuid}: ${teamName}`);
+    console.log(`Dump: ${activityUuid}: ${teamName}`);
     if (this._progressTitles == null) return;
     for (let i = 0; i < this._progressTitles.length; i++) {
       let progress = this._progressTitles[i];
@@ -177,6 +264,7 @@ export class ProgressStore {
   }
 
   public deleteBrowserStoredTeamProgress(): void {
+    console.log('Deleting team progress from browser storage');
     localStorage.removeItem(LOCALSTORAGE_KEY);
   }
 
@@ -187,6 +275,9 @@ export class ProgressStore {
     return null;
   }
     
+  /**
+   * Custom YAML stringifier for the progress data, to include activity name as a comment
+   */
   private toProgressYamlString(progress: Progress, indent: number = 2): string {
     let str = 'progress:\n';
     let tab = ' '.repeat(indent);

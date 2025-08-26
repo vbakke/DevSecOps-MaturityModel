@@ -1,7 +1,7 @@
 import { appendHashElement } from '../util/ArrayHash';
-import { isEmptyObj } from '../util/util';
 import { IgnoreList } from './ignore-list';
-import { TeamProgress, Progress } from './meta';
+import { Progress } from './types';
+import { MarkdownText } from './markdown-text';
 
 export type Data = Record<string, Category>;
 export type Category = Record<string, Dimension>;
@@ -14,22 +14,22 @@ export interface Activity {
   dimension: string;
   level: number;
   name: string;
-  description: string;
-  risk: string;
-  measure: string;
+  description: MarkdownText;
+  risk: MarkdownText;
+  measure: MarkdownText;
   tags: string[];
-  implementationGuide: string;
+  implementationGuide: MarkdownText;
   difficultyOfImplementation: DifficultyOfImplementation;
   usefulness: number;
   knowledge: number;
   resources: number;
   time: number;
   dependsOn: string[];
-  comments: string;
+  comments: MarkdownText;
   implementation: Implementation[];
-  evidence: string;
+  evidence: MarkdownText;
   teamsEvidence: Object;
-  assessment: string;
+  assessment: MarkdownText;
   references: FrameworkReferences;
   isImplemented: boolean;
   teamsImplemented: Record<string, any>;
@@ -42,32 +42,6 @@ export interface FrameworkReferences {
   openCRE: string[];
 }
 
-// export interface activityDescription {
-//   level: string;
-//   tags: string[];
-//   activityName: string;
-//   uuid: string;
-//   description: string;
-//   risk: string;
-//   measure: string;
-//   implementationGuide: string;
-//   iso: string[];
-//   iso22: string[];
-//   samm: string[];
-//   openCRE: string[];
-//   knowledge: number;
-//   resources: number;
-//   time: number;
-//   dependsOn: string[];
-//   implementation: Implementation[];
-//   usefulness: number;
-//   evidence: string;
-//   teamsEvidence: Object;
-//   assessment: string;
-//   comments: string;
-//   // isImplemented: boolean;
-//   // teamsImplemented: Record<string, any>;
-// }
 export interface Implementation {
   name: string;
   tags: string[];
@@ -241,6 +215,14 @@ export class ActivityStore {
             continue;
           }
           // console.log(`  - ${categoryName} -- ${dimName} -- ${activityName}`);
+
+          // Initiate markdown strings
+          activity.description = new MarkdownText(activity.description as unknown as string);
+          activity.risk = new MarkdownText(activity.risk as unknown as string);
+          activity.measure = new MarkdownText(activity.measure as unknown as string);
+          activity.comments = new MarkdownText(activity.comments as unknown as string);
+          activity.assessment = new MarkdownText(activity.assessment as unknown as string);
+          activity.evidence = new MarkdownText(activity.evidence as unknown as string);
 
           // Rename properties to match the Activity interface
           activity.category = categoryName;

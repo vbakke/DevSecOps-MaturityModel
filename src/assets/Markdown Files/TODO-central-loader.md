@@ -1,24 +1,23 @@
-## Doing
-- Teams: Allow editing teams names in browser
-
 
 ## Next
-### Teams
-- Teams: Store teams names in localstorage
-- Teams: Export teams YAML from teams page
-
 
 ## ToDo
 - Heatmap: Fix: asterisk marks when modified
   - ViewController needs to know about changes vs temp storage
 - Heatmap: Bug: Clicking on grey sector leaves cursor on that sector
-- Heatmap: Run Markdown on yaml text
-- Use DOMPurify to check markdown before innerHTML
+### Settings
+- Make settings page
+  - Date format (don't rely just on browser language)
+  - Display mode dark/light
+  - Alter Progress Stages
 ### Dark Mode
 - Merge in Dark Mode [PR #381](https://github.com/devsecopsmaturitymodel/DevSecOps-MaturityModel/pull/381)
 ### Matrix
-- Matrix: Fix markdown rendering
 - Matrix: Add a Close/Back button
+### Teams
+- Teams: Allow user to re-order teams and groups
+- Teams: Bug: Editing name, pushes the item last
+- Teams: Allow editing dates for progress stages
 ### Heatmap:
 - Heatmap: Bug: Selecting a team group does not always get deselected when flipping teams
 - Heatmap: meta-yaml: If progress definition is missing, default to 0% + 100% 
@@ -48,6 +47,8 @@
 - DSOMM: Read latest "generated.yaml" from DSOMM-data's github repo, to check for any new releases
 
 # Later
+- App: Search activities, across title description etc
+- Export to Excel. Move from Mapping, to just progress data
 - Filter: Bug: SPACE key does not trigger
 - Heatmap, Card: Add Complete-symbol per activity
 - Heatmap: Update url on open details + read querystring on open
@@ -55,12 +56,19 @@
 - Matrix: Brushup layout of details page
 - Matrix: Remember filters, when moving back from details
 - Matrix: Dependency graph: Make it clickable
+- Matrix: Go through tags: remove, add and rename
 - Misc: What is the activities.yaml comment field for? Should it be displayed to the user?
 - Teams: View active initiatives for a team (>0% and <100%)
-- Teams: View timeline for a team 
-
+- Teams: View timeline for a team
+- Meta.yaml: Allow admins to customize the terms 'Team' and 'Group' (e.g. to 'App' and 'Portfolio')
 
 # Done
+- Using Angular's built-in DomSanitizer to check [innerHTML]
+- Heatmap: Run Markdown on yaml text
+- Matrix: Fix markdown rendering
+- Teams: Display some core info about the selected team/group
+- Teams: Export teams and groups names as yaml
+- Teams: Store teams names in localstorage
 - Teams: Move team group 'All' from data-loader-service to Heatmap load
 - Teams: Refactor to adhere to new data structure. 
 - Mapping: Add search filters 
