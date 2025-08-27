@@ -6,12 +6,15 @@ import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { FormControl } from '@angular/forms';
 import * as XLSX from 'xlsx';
 import { LoaderService } from 'src/app/service/loader/data-loader.service';
-import { DialogInfo, ModalMessageComponent } from 'src/app/component/modal-message/modal-message.component';
+import {
+  DialogInfo,
+  ModalMessageComponent,
+} from 'src/app/component/modal-message/modal-message.component';
 import { DataStore } from 'src/app/model/data-store';
 import { Uuid } from 'src/app/model/types';
 import { perfNow } from 'src/app/util/util';
 
-const GROUP_SEP = '\x1F';
+const SEPARATOR = '\x1F'; // ASCII Unit Separator
 
 export interface MappingRow {
   uuid: Uuid;
@@ -75,10 +78,7 @@ export class MappingComponent implements OnInit, AfterViewInit {
   searchTerms: string[] = [];
   searchCtrl = new FormControl('');
 
-  constructor(
-    private loader: LoaderService,
-    public modal: ModalMessageComponent
-  ) {}
+  constructor(private loader: LoaderService, public modal: ModalMessageComponent) {}
 
   ngOnInit(): void {
     console.log(`${perfNow()}: Mapping: Loading yamls...`);
@@ -115,7 +115,7 @@ export class MappingComponent implements OnInit, AfterViewInit {
   }
 
   setYamlData(dataStore: DataStore) {
-    this.dataStore = dataStore;    
+    this.dataStore = dataStore;
     this.allTeams = dataStore.meta?.teams || [];
     this.allMappings = this.transformDataStore(dataStore);
     this.dataSource.data = this.allMappings;
@@ -152,7 +152,7 @@ export class MappingComponent implements OnInit, AfterViewInit {
       };
     });
   }
-  
+
   exportToExcel() {
     let element = document.getElementById('excel-table');
     const ws: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element, { raw: true });
@@ -161,12 +161,12 @@ export class MappingComponent implements OnInit, AfterViewInit {
     XLSX.writeFile(wb, 'DSOMM - Activities.xlsx');
     console.log(`${perfNow()}: Mapping: Exported to Excel`);
   }
-  
+
   //-----------------------------
   // Filtering and sorting logic
   //-----------------------------
   applyFilter(event: KeyboardEvent) {
-    const input = (event.target as HTMLInputElement);
+    const input = event.target as HTMLInputElement;
     const value = input.value.trim();
     if (event.key === 'Enter' && value) {
       if (!this.searchTerms.includes(value.toLowerCase())) {
@@ -192,23 +192,26 @@ export class MappingComponent implements OnInit, AfterViewInit {
     this.searchCtrl.setValue('');
   }
 
-
   updateFilter() {
-    this.dataSource.filter = this.searchTerms.join(GROUP_SEP);
-    console.log(`${perfNow()}: Mapping: Search filter: ${this.dataSource.filter?.replace(GROUP_SEP, ', ')}`);
+    this.dataSource.filter = this.searchTerms.join(SEPARATOR);
+    console.log(
+      `${perfNow()}: Mapping: Search filter: ${this.dataSource.filter?.replace(SEPARATOR, ', ')}`
+    );
   }
 
   filterFunction(data: MappingRow, filter: string): boolean {
     // Split filter into terms, require all terms to match
-    const terms = filter.split(GROUP_SEP).filter(t => t);
+    const terms = filter.split(SEPARATOR).filter(t => t);
     const dataStr = [
-        data.dimension,
-        data.subDimension,
-        data.activityName,
-        (data.samm2 || []).join(' '),
-        (data.ISO17 || []).join(' '),
-        (data.ISO22 || []).join(' ')
-      ].join(' ').toLowerCase();
+      data.dimension,
+      data.subDimension,
+      data.activityName,
+      (data.samm2 || []).join(' '),
+      (data.ISO17 || []).join(' '),
+      (data.ISO22 || []).join(' '),
+    ]
+      .join(' ')
+      .toLowerCase();
 
     return terms.every(term => dataStr.includes(term));
   }

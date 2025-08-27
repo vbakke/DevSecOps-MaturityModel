@@ -4,7 +4,11 @@
     <mat-form-field appearance="outline" class="search-box">
       <mat-label>Search</mat-label>
       <mat-chip-list #chipList aria-label="Search terms">
-        <mat-chip *ngFor="let term of searchTerms" [selectable]="false" [removable]="true" (removed)="removeSearchTerm(term)">
+        <mat-chip
+          *ngFor="let term of searchTerms"
+          [selectable]="false"
+          [removable]="true"
+          (removed)="removeSearchTerm(term)">
           {{ term }}
           <button matChipRemove><mat-icon>cancel</mat-icon></button>
         </mat-chip>
@@ -15,8 +19,7 @@
           [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
           (keydown)="applyFilter($event)"
           placeholder="Type and press Enter..."
-          [matChipInputAddOnBlur]="false"
-        />
+          [matChipInputAddOnBlur]="false" />
       </mat-chip-list>
       <button mat-icon-button matSuffix *ngIf="searchTerms.length" (click)="clearFilter()">
         <mat-icon>close</mat-icon>
@@ -28,11 +31,7 @@
     </button>
   </div>
 
-  <table
-    mat-table
-    matSort
-    [dataSource]="dataSource"
-    class="mat-elevation-z8 matrix-table">
+  <table mat-table matSort [dataSource]="dataSource" class="mat-elevation-z8 matrix-table">
     <ng-container matColumnDef="dimension">
       <th mat-header-cell mat-sort-header *matHeaderCellDef>Dimension</th>
       <td mat-cell *matCellDef="let element">{{ element.dimension }}</td>
