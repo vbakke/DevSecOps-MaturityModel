@@ -1,11 +1,11 @@
 <div class="team-section">
-  <teams-groups-editor
+  <app-teams-groups-editor
     [teams]="teams"
     [teamGroups]="teamGroups"
     [canEdit]="canEdit"
     (selectionChanged)="onSelectionChanged($event)"
     (namesChanged)="onTeamsChanged($event)"
-    (click)="$event.stopPropagation()"></teams-groups-editor>
+    (click)="$event.stopPropagation()"></app-teams-groups-editor>
   <div class="button-container" *ngIf="dataStore?.meta?.hasLocalStorage">
     <button mat-raised-button (click)="onExportTeamGroups()">Download team setup</button>
     <button mat-raised-button (click)="onResetTeamGroups()">Reset team setup</button>

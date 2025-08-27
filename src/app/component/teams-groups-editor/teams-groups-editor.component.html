@@ -19,8 +19,7 @@
       (editModeChange)="onGroupsEditModeChange($event)"
       (relationshipToggle)="onTeamGroupToggle(selectedTeam, $event)"
       (save)="onSave()"
-      (cancel)="onCancelEdit()"
-    ></app-selectable-list>
+      (cancel)="onCancelEdit()"></app-selectable-list>
   </div>
   <div class="editor-list-panel">
     <app-selectable-list
@@ -38,7 +37,6 @@
       (editModeChange)="onTeamsEditModeChange($event)"
       (relationshipToggle)="onTeamGroupToggle($event, selectedGroup)"
       (save)="onSave()"
-      (cancel)="onCancelEdit()"
-    ></app-selectable-list>
+      (cancel)="onCancelEdit()"></app-selectable-list>
   </div>
 </div>
