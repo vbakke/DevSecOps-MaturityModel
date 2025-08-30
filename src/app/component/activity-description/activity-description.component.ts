@@ -37,7 +37,7 @@ export class ActivityDescriptionComponent implements OnInit {
       .load()
       .then((dataStore: DataStore) => {
         // Find the activity with matching UUID (or potentially name)
-        if (!dataStore.activityStore) throw Error("TODO: Must handle these");
+        if (!dataStore.activityStore) throw Error('TODO: Must handle these');
 
         let activity: Activity = dataStore.activityStore.getActivity(uuid, name);
         if (!activity) {
@@ -47,12 +47,16 @@ export class ActivityDescriptionComponent implements OnInit {
         // Get meta data
         const meta = dataStore.getMetaStrings();
         this.currentActivity = activity;
+        /* eslint-disable */
         this.KnowledgeLabel = dataStore.getMetaString('knowledgeLabels', activity.difficultyOfImplementation.knowledge);
         this.TimeLabel = dataStore.getMetaString('labels', activity.difficultyOfImplementation.time);
         this.ResourceLabel = dataStore.getMetaString('labels', activity.difficultyOfImplementation.resources);
         this.UsefulnessLabel = dataStore.getMetaString('labels', activity.usefulness);
+        /* eslint-enable */
 
-        setTimeout(() => { this.openAll() }, 1);
+        setTimeout(() => {
+          this.openAll();
+        }, 1);
       })
       .catch(err => {
         console.error('Error loading activity data:', err);
