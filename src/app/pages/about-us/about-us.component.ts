@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { perfNow } from 'src/app/util/util';
 
 @Component({
@@ -6,8 +6,9 @@ import { perfNow } from 'src/app/util/util';
   templateUrl: './about-us.component.html',
   styleUrls: ['./about-us.component.css'],
 })
-export class AboutUsComponent {
+export class AboutUsComponent implements OnInit {
   constructor() {}
+
   ngOnInit() {
     console.log(`${perfNow()}: Page loaded: About Us`);
   }
