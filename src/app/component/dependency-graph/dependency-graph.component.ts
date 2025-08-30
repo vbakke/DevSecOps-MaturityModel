@@ -1,8 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import * as d3 from 'd3';
-// import { ymlService } from 'src/app/service/yaml-parser/yaml-parser.service';
 import { LoaderService } from '../../service/loader/data-loader.service';
-import { ActivityStore } from 'src/app/model/activity-store';
 import { Activity } from 'src/app/model/activity-store';
 import { DataStore } from 'src/app/model/data-store';
 

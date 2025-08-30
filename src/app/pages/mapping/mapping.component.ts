@@ -1,5 +1,4 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
-import { ymlService } from '../../service/yaml-parser/yaml-parser.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
