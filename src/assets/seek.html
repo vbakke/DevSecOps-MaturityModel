@@ -7,21 +7,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
     <link rel="preconnect" href="https://fonts.gstatic.com" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap"
-      rel="stylesheet" />
-    <link
-      href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      rel="stylesheet" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css" />
+    <!-- eslint-disable -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css" />
+    <!-- eslint-enable -->
     <style>
       tr > * {
         text-align: right;
       }
     </style>
-    </head>
+  </head>
   <body class="mat-typography">
     <button onclick="test()">Seek</button>
     <panel>
@@ -29,6 +25,7 @@
       <table>
         <thead></thead>
         <tbody></tbody>
+      </table>
     </panel>
   </body>
   <script>
@@ -47,9 +44,9 @@
         let arrayCount = await seekArray(array, array);
         let arrayObjCount = await seekArrayObj(arrayObj, array);
         let hashCount = await seekHash(hash, array);
-        results.push({size, hashCount, arrayCount, arrayObjCount});
+        results.push({ size, hashCount, arrayCount, arrayObjCount });
       }
-      
+
       document.querySelector('value').innerText = '';
       await displayResults(results);
     }
@@ -92,7 +89,7 @@
 
         hash[uuid] = i;
         array.push(uuid);
-        arrayObj.push({uuid, id:i});
+        arrayObj.push({ uuid, id: i });
       }
 
       return [array, arrayObj, hash];
@@ -103,11 +100,11 @@
       let stop_time = Date.now() + TIME_SPAN;
       let count = 0;
       while (Date.now() < stop_time) {
-        let seek_i = Math.trunc(Math.random()*size);
+        let seek_i = Math.trunc(Math.random() * size);
         let seek = keys[seek_i];
         if (hash[seek] == seek_i) count++;
       }
-      return (count/1000).toFixed(0) + 'k';
+      return (count / 1000).toFixed(0) + 'k';
       // return count;
     }
     async function seekArray(array, keys) {
@@ -115,29 +112,29 @@
       let stop_time = Date.now() + TIME_SPAN;
       let count = 0;
       while (Date.now() < stop_time) {
-        let seek_i = Math.trunc(Math.random()*size);
+        let seek_i = Math.trunc(Math.random() * size);
         let seek = keys[seek_i];
         if (array.indexOf(seek) == seek_i) count++;
       }
-      return (count/1000).toFixed(0) + 'k';
+      return (count / 1000).toFixed(0) + 'k';
     }
     async function seekArrayObj(array, keys) {
       let size = keys.length;
       let stop_time = Date.now() + TIME_SPAN;
       let count = 0;
       while (Date.now() < stop_time) {
-        let seek_i = Math.trunc(Math.random()*size);
+        let seek_i = Math.trunc(Math.random() * size);
         let seek = keys[seek_i];
         let i = 0;
         while (array[i].uuid != seek) i++;
         if (array[i].id == seek_i) count++;
       }
-      return (count/1000).toFixed(0) + 'k';
+      return (count / 1000).toFixed(0) + 'k';
       // return count;
     }
 
     function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
   </script>
 </html>

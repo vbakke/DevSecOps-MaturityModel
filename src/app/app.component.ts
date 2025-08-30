@@ -22,9 +22,9 @@ export class AppComponent implements OnInit {
     }
 
     if (environment?.experimental) {
-      fetch('https://api.github.com/repos/vbakke/DevSecOps-MaturityModel/branches/experiment')
-        .then(async (response) =>  {
-          let gitinfo: any  = await response.json();
+      fetch('https://api.github.com/repos/vbakke/DevSecOps-MaturityModel/branches/experiment').then(
+        async response => {
+          let gitinfo: any = await response.json();
           let commitDate: string = gitinfo?.commit?.commit?.author?.date;
           let commitMsg: string = gitinfo?.commit?.commit?.message;
           if (commitDate) {
@@ -36,7 +36,8 @@ export class AppComponent implements OnInit {
               }
             }
           }
-      });
+        }
+      );
     }
   }
 
