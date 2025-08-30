@@ -43,7 +43,7 @@ export class DependencyGraphComponent implements OnInit {
     this.loader.load().then((dataStore: DataStore) => {
       this.dataStore = this.dataStore;
       if (!dataStore.activityStore) {
-        throw Error("Must handel this");
+        throw Error('No activity store loaded');
       }
       let activity: Activity = dataStore.activityStore.getActivityByName(this.activityName);
       if (activity) {
