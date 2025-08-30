@@ -1,6 +1,6 @@
 import * as md from 'markdown-it';
 
-let markdown: md = md({html: true});
+let markdown: md = md({ html: true });
 
 export class MarkdownText {
   private plain: string | undefined;

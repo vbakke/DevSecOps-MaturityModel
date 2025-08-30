@@ -92,7 +92,7 @@ export class ActivityStore {
     }
     return activity;
   }
-  
+
   public getActivityByName(name: string): Activity {
     return this._activityByName[name];
   }
@@ -110,8 +110,6 @@ export class ActivityStore {
     return this._maxLevel;
   }
 
-
-
   public addActivityFile(yaml: Data, errors: string[]) {
     let activityList: Activity[] = [];
     let ignoreList: IgnoreList = new IgnoreList();
@@ -119,12 +117,7 @@ export class ActivityStore {
     this._maxLevel = -1;
     if (this._activityList.length == 0) {
       this._activityList = activityList;
-      this.buildLookups(
-        activityList,
-        this._activityByName,
-        this._activityByUuid,
-        errors
-      );
+      this.buildLookups(activityList, this._activityByName, this._activityByUuid, errors);
       this.data = yaml;
     } else {
       this.removeIgnoredActivities(ignoreList, this._activityList);
@@ -137,12 +130,7 @@ export class ActivityStore {
       // Reset lookup tables after merge
       this._activityByName = {};
       this._activityByUuid = {};
-      this.buildLookups(
-        this._activityList,
-        this._activityByName,
-        this._activityByUuid,
-        errors
-      );
+      this.buildLookups(this._activityList, this._activityByName, this._activityByUuid, errors);
     }
     this.buildDataHierarchy(this._activityList);
     this.buildDimensionList(this._activityList);
@@ -182,15 +170,11 @@ export class ActivityStore {
 
   /**
    * Prepare activities loaded from a YAML file.
-   *  
+   *
    * Add category, dimension and activity name to activity object,
    * unless ignored, then add it to the ignoreList
    */
-  prepareActivities(
-    yaml: Data,
-    activityList: Activity[],
-    ignoreList: IgnoreList
-  ): void {
+  prepareActivities(yaml: Data, activityList: Activity[], ignoreList: IgnoreList): void {
     for (let categoryName in yaml) {
       let category = yaml[categoryName];
       for (let dimName in category) {
@@ -230,11 +214,11 @@ export class ActivityStore {
           activity.name = activityName;
           if (activity.references) {
             let references: any = activity.references;
-            if (references.hasOwnProperty('iso27001-2017')){
+            if (references.hasOwnProperty('iso27001-2017')) {
               references.iso27001_2017 = references['iso27001-2017'];
               delete references['iso27001-2017'];
             }
-            if (references.hasOwnProperty('iso27001-2022')){
+            if (references.hasOwnProperty('iso27001-2022')) {
               references.iso27001_2022 = references['iso27001-2022'];
               delete references['iso27001-2022'];
             }
@@ -304,11 +288,7 @@ export class ActivityStore {
    *
    * If any errors are detected, return this by the error list.
    */
-  mergeActivities(
-    newActivities: Activity[],
-    existingData: Activity[],
-    errors: string[]
-  ) {
+  mergeActivities(newActivities: Activity[], existingData: Activity[], errors: string[]) {
     for (let newActivity of newActivities) {
       let foundExistingActivity: Activity | null = null;
 
@@ -355,6 +335,4 @@ export class ActivityStore {
 
     Object.assign(existingActivity, newActivity);
   }
-
 }
-

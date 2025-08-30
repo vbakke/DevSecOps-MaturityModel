@@ -58,8 +58,4 @@ export class DataStore {
     let maxLvl: number = this.getMaxLevel();
     return this.getMetaStrings().maturityLevels.slice(0, maxLvl);
   }
-
-
 }
-
-
