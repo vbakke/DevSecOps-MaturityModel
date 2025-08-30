@@ -237,14 +237,14 @@
                   <ng-container *ngFor="let team of filtersTeams | keyvalue">
                     <li *ngIf="team.value || !hasTeamsFilter">
                       <label class="team-label"> {{ team.key }}: </label>
-                      <progress-slider
+                      <app-progress-slider
                         [DBG_name]="activity['name']"
                         [steps]="progressStates"
                         [state]="getTeamProgressState(activity['uuid'], team.key)"
                         [originalState]="getBackedupTeamProgressState(activity['uuid'], team.key)"
                         (progressChange)="
                           onProgressChange(activity['uuid'], team.key, $event)
-                        "></progress-slider>
+                        "></app-progress-slider>
                     </li>
                   </ng-container>
                 </ul>

@@ -9,10 +9,9 @@ describe('ProgressSliderComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ProgressSliderComponent ],
-      imports: [ FormsModule, MatSliderModule ]
-    })
-    .compileComponents();
+      declarations: [ProgressSliderComponent],
+      imports: [FormsModule, MatSliderModule],
+    }).compileComponents();
   });
 
   beforeEach(() => {
@@ -44,4 +43,4 @@ describe('ProgressSliderComponent', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('.step-label')?.textContent).toContain('Step 2');
   });
-}); 
+});
