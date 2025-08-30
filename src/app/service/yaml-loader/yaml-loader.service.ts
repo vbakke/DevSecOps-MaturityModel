@@ -1,9 +1,6 @@
 import { K, Y } from '@angular/cdk/keycodes';
 import { Injectable } from '@angular/core';
-import { 
-  parse as yamlParse,
-  stringify as yamlStringify,
-} from 'yaml';
+import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
 // import YAML from 'yaml';
 import { perfNow } from 'src/app/util/util';
 
@@ -16,14 +13,12 @@ export class YamlService {
   }
 
   public parse(yamlStr: string): any {
-    return yamlParse(yamlStr, {schema: 'yaml-1.1'});
+    return yamlParse(yamlStr, { schema: 'yaml-1.1' });
   }
 
   public stringify(yamlObj: any): string {
     return yamlStringify(yamlObj);
   }
-
-
 
   /**
    * Loads and swaps any '$ref' references.
@@ -47,11 +42,9 @@ export class YamlService {
     const timeStart: Date = new Date();
     console.debug(`${perfNow()}: YAML: Fetching ${url}`);
     const response: Response = await fetch(url);
-    
+
     if (!response.ok) {
-      throw new Error(
-        `Failed to fetch the '${url}' YAML file: ${response.statusText}`
-      );
+      throw new Error(`Failed to fetch the '${url}' YAML file: ${response.statusText}`);
     }
     const yamlText: string = await response.text();
     const timeFetched: Date = new Date();
@@ -59,7 +52,7 @@ export class YamlService {
     let yaml: any = this.parse(yamlText);
     const timeParsed: Date = new Date();
     console.debug(`${perfNow()}: YAML: Parsed ${url}`);
-    console.log(`${perfNow()}: YAML: Fetched ${url}: load: ${timeFetched.getTime() - timeStart.getTime()} ms, parse: ${timeParsed.getTime() - timeFetched.getTime()} ms`);
+    console.log(`${perfNow()}: YAML: Fetched ${url}: load: ${timeFetched.getTime() - timeStart.getTime()} ms, parse: ${timeParsed.getTime() - timeFetched.getTime()} ms`); // eslint-disable-line
     return yaml;
   }
 
@@ -99,12 +92,7 @@ export class YamlService {
 
       // Recursively enter any child objects
       if (yaml[key] instanceof Object) {
-        yaml[key] = await this._substituteYamlRefs(
-          yaml[key],
-          orgYaml,
-          referencePath,
-          lvl + 1
-        );
+        yaml[key] = await this._substituteYamlRefs(yaml[key], orgYaml, referencePath, lvl + 1);
       }
 
       if (key == '$ref') {
@@ -118,11 +106,7 @@ export class YamlService {
   /**
    * Parse the ref, load and return the referenced object
    */
-  async fetchRef(
-    ref: string,
-    orgYaml: any,
-    referencePath: string
-  ): Promise<any> {
+  async fetchRef(ref: string, orgYaml: any, referencePath: string): Promise<any> {
     let [file, yPath] = this.parseRef(ref);
 
     let refObj: any = file ? await this.loadRef(file, referencePath) : orgYaml;
@@ -194,8 +178,7 @@ export class YamlService {
   }
 
   public makeFullPath(relativePath: string, relativeTo: string) {
-    let fullPath = new URL(relativePath, 'https://example.org/.' + relativeTo)
-      .pathname;
+    let fullPath = new URL(relativePath, 'https://example.org/.' + relativeTo).pathname;
 
     // Make sure the new path does not escape its cage
     let i = relativeTo.lastIndexOf('/');

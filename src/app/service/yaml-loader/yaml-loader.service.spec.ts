@@ -50,9 +50,7 @@ describe('YamlLoaderService', () => {
       await service.substituteYamlRefs(yaml, '.');
       expect('substituteYamlRefs()').toThrowError('Should not get here');
     } catch (error) {
-      expect(String(error)).toEqual(
-        "Error: Cannot find 'references/not-there' in yaml file"
-      );
+      expect(String(error)).toEqual("Error: Cannot find 'references/not-there' in yaml file");
     }
   });
 });
