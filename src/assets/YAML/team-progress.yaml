@@ -24,7 +24,7 @@ progress:
     'Team D':
       'Planned': 2025-04-01
     'Team A':
-      'Planned': 2025-07-22
+      'Planned': 2025-07-13
   3d1f4c3b-f713-46d9-933a-54a014a26c03:  # Simple system metrics
     'Team D':
       'Implemented': 2025-05-22
@@ -61,60 +61,60 @@ progress:
       'Planned': 2025-04-01
   e9a6d403-a467-445e-b98a-74f0c29da0b1:  # Simple application metrics
     'Team D':
-      'Implemented': 2025-07-22
-      'Started': 2025-07-22
-      'Planned': 2025-07-22
+      'Implemented': 2025-07-12
+      'Started': 2025-07-02
+      'Planned': 2025-06-22
     'Team C':
-      'Implemented': 2025-07-22
-      'Started': 2025-07-22
-      'Planned': 2025-07-22
+      'Implemented': 2025-07-21
+      'Started': 2025-07-19
+      'Planned': 2025-06-22
     'Team B':
-      'Implemented': 2025-07-22
-      'Started': 2025-07-22
-      'Planned': 2025-07-22
+      'Implemented': 2025-08-22
+      'Started': 2025-07-29
+      'Planned': 2025-06-22
     'Team A':
       'Implemented': 2025-04-01
       'Started': 2025-03-13
       'Planned': 2025-03-01
   4eced38a-7904-4c45-adb0-50b663065540:  # Centralized system logging
     'Team B':
-      'Planned': 2025-07-22
+      'Planned': 2025-05-22
     'Team C':
-      'Started': 2025-07-22
-      'Planned': 2025-07-22
+      'Started': 2025-05-22
+      'Planned': 2025-05-22
     'Team D':
-      'Implemented': 2025-07-22
-      'Started': 2025-07-22
-      'Planned': 2025-07-22
+      'Implemented': 2025-05-24
+      'Started': 2025-05-22
+      'Planned': 2025-05-22
   74938a3f-1269-49b9-9d0f-c43a79a1985a:  # Defined deployment process
     'Team A':
       'Started': 2025-01-01
       'Planned': 2025-01-01
     'Team B':
-      'Planned': 2025-07-22
+      'Planned': 2025-08-22
     'Team C':
-      'Started': 2025-07-22
-      'Planned': 2025-07-22
+      'Started': 2025-08-22
+      'Planned': 2025-07-19
     'Team D':
-      'Planned': 2025-07-22
+      'Planned': 2025-01-22
   2a44b708-734f-4463-b0cb-86dc46344b2f:  # Inventory of production components
     'Team A':
-      'Planned': 2025-09-22
+      'Planned': 2025-03-22
     'Team B':
-      'Planned': 2025-07-22
+      'Planned': 2025-03-22
     'Team C':
-      'Started': 2025-07-22
-      'Planned': 2025-07-22
+      'Started': 2025-05-17
+      'Planned': 2025-03-22
     'Team D':
-      'Started': 2025-07-22
-      'Planned': 2025-07-22
+      'Started': 2025-06-12
+      'Planned': 2025-03-22
   9f107927-61e9-4574-85ad-3f2b4bca8665:  # Signing of code
     'Team A':
-      'Implemented': 2025-07-22
+      'Implemented': 2025-04-22
       'Started': 2025-03-12
       'Planned': 2025-03-02
     'Team B':
-      'Started': 2025-07-22
-      'Planned': 2025-07-22
+      'Started': 2025-06-02
+      'Planned': 2025-04-04
     'Team C':
-      'Planned': 2025-07-22
+      'Planned': 2025-09-22
