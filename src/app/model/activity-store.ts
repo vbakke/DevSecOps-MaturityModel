@@ -63,15 +63,10 @@ export class ActivityStore {
   private _categoryNames: string[] = [];
   private _allDimensions: Record<string, Activity[]> = {};
   private _maxLevel: number = -1;
-  private _progress: Progress = {};
 
   public getData(): Data {
     return this.data;
   }
-
-  // public getProgress(): Progress {
-  //   return this._progress;
-  // }
 
   public getAllActivities(): Activity[] {
     return this._activityList;
@@ -121,10 +116,6 @@ export class ActivityStore {
       this.data = yaml;
     } else {
       this.removeIgnoredActivities(ignoreList, this._activityList);
-      // let activityByName: Record<string, Activity> = {};
-      // let activityByUuid: Record<string, Activity> = {};
-      //this._ensureNoDuplicateIds(...)
-      //this.buildLookups(activityList, activityByName, activityByUuid,errors);
       this.mergeActivities(activityList, this._activityList, errors);
 
       // Reset lookup tables after merge

@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
+import { sum } from 'd3';
 import {
   DialogInfo,
   ModalMessageComponent,
@@ -33,7 +34,7 @@ export class TeamsComponent implements OnInit, AfterViewInit {
   infoTeams: TeamNames = [];
   info: Record<string, TeamSummary> = {};
 
-  dataSource: MatTableDataSource<TeamActivityProgress> = new MatTableDataSource<TeamActivityProgress>([]); // eslint-disable-line
+  dataSource: MatTableDataSource<TeamSummaryActivityProgress> = new MatTableDataSource<TeamSummaryActivityProgress>([]); // eslint-disable-line
   allColumnNames: string[] = [];
   progressColumnNames: string[] = [];
   @ViewChild(MatSort, { static: false }) sort!: MatSort;
@@ -60,7 +61,10 @@ export class TeamsComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
     if (this.sort) {
       this.dataSource.sort = this.sort;
-      this.dataSource.sortingDataAccessor = (item: TeamActivityProgress, property: string) => {
+      this.dataSource.sortingDataAccessor = (
+        item: TeamSummaryActivityProgress,
+        property: string
+      ) => {
         if (property === 'Team') {
           return item.team;
         }
@@ -170,12 +174,13 @@ export class TeamsComponent implements OnInit, AfterViewInit {
 
   makeTeamSummary(name: string, teams: TeamNames): TeamSummary {
     /* eslint-disable */
-    let activitiesCompleted: progressStoreMapping[] = this.dataStore?.progressStore?.getActivitiesCompletedForTeams(teams) || [];
+    let activitiesStarted: progressStoreMapping[] = this.dataStore?.progressStore?.getActivitiesStartedForTeams(teams) || [];
     let activitiesInProgress: progressStoreMapping[] = this.dataStore?.progressStore?.getActivitiesInProgressForTeams(teams) || [];
+    let activitiesCompleted: progressStoreMapping[] = this.dataStore?.progressStore?.getActivitiesCompletedForTeams(teams) || [];
 
     let summary: TeamSummary = {
       teams,
-      lastUpdated: new Date(),
+      lastUpdated: null,
       activitiesCompleted: [],
       activitiesInProgress: [],
       uniqueActivitiesCompletedCount: 0,
@@ -186,32 +191,43 @@ export class TeamsComponent implements OnInit, AfterViewInit {
     summary.activitiesInProgress = activitiesInProgress.map(activityProgress => _self.mapIncludeActivity(activityProgress));
     summary.uniqueActivitiesCompletedCount = uniqueCount(summary.activitiesCompleted.map(item => item.activity.uuid));
     summary.uniqueActivitiesInProgressCount = uniqueCount(summary.activitiesInProgress.map(item => item.activity.uuid));
+    if (activitiesStarted.length == 0) {
+      summary.lastUpdated = null;
+    } else {
+      summary.lastUpdated = activitiesStarted.map(activityProgress => _self.mapIncludeActivity(activityProgress).lastUpdated)
+        // .map(activityProgress => activityProgress.lastUpdated)
+        .reduce((max, current) => (current > max ? current : max));
+    }
     /* eslint-enable */
 
     return summary;
   }
 
-  mapIncludeActivity(input: progressStoreMapping): TeamActivityProgress {
+  mapIncludeActivity(input: progressStoreMapping): TeamSummaryActivityProgress {
     return {
       team: input.team,
       activity:
         this.dataStore?.activityStore?.getActivityByUuid(input.activityUuid) || ({} as Activity),
       progress: input.progress,
+      lastUpdated: Object.values(input.progress).reduce((max, current) =>
+        current > max ? current : max
+      ),
     };
   }
 }
 
 export interface TeamSummary {
   teams: TeamNames;
-  lastUpdated: Date;
-  activitiesCompleted: TeamActivityProgress[];
-  activitiesInProgress: TeamActivityProgress[];
+  lastUpdated: Date | null;
+  activitiesCompleted: TeamSummaryActivityProgress[];
+  activitiesInProgress: TeamSummaryActivityProgress[];
   uniqueActivitiesCompletedCount: number;
   uniqueActivitiesInProgressCount: number;
 }
 
-export interface TeamActivityProgress {
+export interface TeamSummaryActivityProgress {
   team: TeamName;
   activity: Activity;
   progress: TeamProgress;
+  lastUpdated: Date;
 }

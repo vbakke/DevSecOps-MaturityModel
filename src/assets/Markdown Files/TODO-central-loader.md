@@ -1,6 +1,5 @@
 ## Doing
  - Bug: Teams: Reads progress heading from activityStore, not metaStore
- - Bug: Teams: Last updated gives the incorrect date
 
 ## Next
 ### Dependency graph

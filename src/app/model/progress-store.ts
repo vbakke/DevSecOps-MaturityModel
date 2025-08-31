@@ -160,6 +160,19 @@ export class ProgressStore {
     return this._progressTitles[0];
   }
 
+  public getInProgressTitles(): ProgressTitle[] {
+    if (!this._progressTitles) return [];
+    return this._progressTitles.slice(1, -1);
+  }
+
+  public getCompletedProgressTitle(): ProgressTitle {
+    if (!this._progressTitles) return '';
+    return this._progressTitles.slice(-1)[0];
+  }
+
+  /* All activities:
+   *  - where all teams have Completed status
+   */
   public getActivitiesCompletedForTeams(teamNames: TeamName[]): TeamActivityProgress[] {
     let completedName: ProgressTitle = this._progressTitlesDescOrder?.[0] || '';
 
@@ -184,16 +197,32 @@ export class ProgressStore {
     return activitiesCompleted;
   }
 
-  public getInProgressTitles(): ProgressTitle[] {
-    if (!this._progressTitles) return [];
-    return this._progressTitles.slice(1, -1);
+  /* Activities Started:
+   *  - where at least one teams have a progress stage > 0%
+   */
+  public getActivitiesStartedForTeams(teamNames: TeamName[]): TeamActivityProgress[] {
+    let initiatedName: ProgressTitle = this._progressTitles?.[1] || '';
+
+    let activitiesCompleted: TeamActivityProgress[] = [];
+    for (let activityUuid in this._progress) {
+      for (let teamName of teamNames) {
+        // Only include started activities
+        if (this._progress?.[activityUuid]?.[teamName]?.[initiatedName]) {
+          let teamActivityProgress: TeamActivityProgress = {
+            team: teamName,
+            activityUuid: activityUuid,
+            progress: this._progress[activityUuid][teamName],
+          };
+          activitiesCompleted.push(teamActivityProgress);
+        }
+      }
+    }
+    return activitiesCompleted;
   }
 
-  public getCompleetedProgressTitle(): ProgressTitle {
-    if (!this._progressTitles) return '';
-    return this._progressTitles.slice(-1)[0];
-  }
-
+  /* Activities In Progress:
+   *  - where at least one teams have a progress stage > 0%, but also less than 100%
+   */
   public getActivitiesInProgressForTeams(teamNames: TeamName[]): TeamActivityProgress[] {
     let initiatedName: ProgressTitle = this._progressTitles?.[1] || '';
     let completedName: ProgressTitle = this._progressTitlesDescOrder?.[0] || '';
