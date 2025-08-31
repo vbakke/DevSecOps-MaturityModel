@@ -17,7 +17,6 @@ import { LogoComponent } from './component/logo/logo.component';
 import { SidenavButtonsComponent } from './component/sidenav-buttons/sidenav-buttons.component';
 import { TopHeaderComponent } from './component/top-header/top-header.component';
 import { ActivityDescriptionComponent } from './component/activity-description/activity-description.component';
-import { ymlService } from './service/yaml-parser/yaml-parser.service';
 import { LoaderService } from './service/loader/data-loader.service';
 import { HttpClientModule } from '@angular/common/http';
 import { ReadmeToHtmlComponent } from './component/readme-to-html/readme-to-html.component';
@@ -25,11 +24,7 @@ import { DependencyGraphComponent } from './component/dependency-graph/dependenc
 import { ToStringValuePipe } from './pipe/to-string-value.pipe';
 import { ModalMessageComponent } from './component/modal-message/modal-message.component';
 import { ProgressSliderComponent } from './component/progress-slider/progress-slider.component';
-import {
-  MatDialogModule,
-  MAT_DIALOG_DATA,
-  MatDialogRef,
-} from '@angular/material/dialog';
+import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TeamsGroupsEditorModule } from './component/teams-groups-editor/teams-groups-editor.module';
 
 @NgModule({
@@ -63,7 +58,6 @@ import { TeamsGroupsEditorModule } from './component/teams-groups-editor/teams-g
     TeamsGroupsEditorModule,
   ],
   providers: [
-    ymlService,
     LoaderService,
     ModalMessageComponent,
     { provide: MAT_DIALOG_DATA, useValue: {} },

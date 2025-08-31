@@ -1,5 +1,5 @@
-import { YamlService } from "../service/yaml-loader/yaml-loader.service";
-import { ProgressDefinition, TeamNames, TeamGroups } from "./types";
+import { YamlService } from '../service/yaml-loader/yaml-loader.service';
+import { ProgressDefinition, TeamNames, TeamGroups } from './types';
 import { perfNow } from 'src/app/util/util';
 
 export interface MetaStrings {
@@ -8,6 +8,12 @@ export interface MetaStrings {
   maturityLevels: string[];
   knowledgeLabels: string[];
 }
+const fallbackMetaStrings: MetaStrings = {
+  allTeamsGroupName: 'All',
+  maturityLevels: ['Level 1', 'Level 2'],
+  labels: ['Easy', 'Medium', 'Hard'],
+  knowledgeLabels: ['Low', 'Medium', 'High'],
+};
 
 const LOCALSTORAGE_KEY: string = 'meta';
 
@@ -15,10 +21,10 @@ export class MetaStore {
   private yamlService: YamlService = new YamlService();
 
   public hasLocalStorage: boolean = false;
-  
+
   checkForDsommUpdates: boolean = false;
   lang: string = 'en';
-  strings: Record<string, MetaStrings> = {};
+  strings: Record<string, MetaStrings> = { en: fallbackMetaStrings };
   progressDefinition: ProgressDefinition = {};
   teamGroups: TeamGroups = {};
   teams: TeamNames = [];
@@ -27,16 +33,23 @@ export class MetaStore {
   allowChangeTeamNameInBrowser: boolean = false;
 
   public init(metaData: any): void {
+    this.addMeta(metaData);
+  }
+
+  public addMeta(metaData: any): void {
     if (metaData) {
-      this.checkForDsommUpdates = metaData.checkForDsommUpdates || this.checkForDsommUpdates || false;
+      // Only overwrite existing values if new values are provided
+      this.checkForDsommUpdates =
+        metaData.checkForDsommUpdates || this.checkForDsommUpdates || false;
       this.lang = metaData.lang || this.lang || 'en';
-      this.strings = metaData.strings || this.strings || {};
-      this.progressDefinition = metaData.progressDefinition ||this.progressDefinition || {};
+      this.strings = metaData.strings || this.strings || fallbackMetaStrings;
+      this.progressDefinition = metaData.progressDefinition || this.progressDefinition || {};
       this.teamGroups = metaData.teamGroups || this.teamGroups || {};
       this.teams = metaData.teams || this.teams || [];
       this.activityFiles = metaData.activityFiles || this.activityFiles || [];
       this.teamProgressFile = metaData.teamProgressFile || this.teamProgressFile || '';
-      if (metaData.allowChangeTeamNameInBrowser !== undefined) this.allowChangeTeamNameInBrowser = metaData.allowChangeTeamNameInBrowser;
+      if (metaData.allowChangeTeamNameInBrowser !== undefined)
+        this.allowChangeTeamNameInBrowser = metaData.allowChangeTeamNameInBrowser;
     }
   }
 
@@ -47,7 +60,7 @@ export class MetaStore {
   }
 
   public asStorableYamlString(): string {
-    return this.yamlService.stringify({teams: this.teams, teamGroups: this.teamGroups});
+    return this.yamlService.stringify({ teams: this.teams, teamGroups: this.teamGroups });
   }
 
   public saveToLocalStorage() {
@@ -65,8 +78,8 @@ export class MetaStore {
     let storedMeta: string | null = localStorage.getItem(LOCALSTORAGE_KEY);
     if (storedMeta) {
       try {
-        let metaData = this.yamlService.parse(storedMeta);        
-        this.init(metaData);
+        let metaData = this.yamlService.parse(storedMeta);
+        this.addMeta(metaData);
         this.hasLocalStorage = true;
         console.log('Loaded stored meta from localStorage');
       } catch (error) {
@@ -75,4 +88,3 @@ export class MetaStore {
     }
   }
 }
-

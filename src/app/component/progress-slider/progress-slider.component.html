@@ -7,8 +7,8 @@
     [tickInterval]="1"
     (input)="onStepChange($event.value)">
   </mat-slider>
-  <span class="step-label">{{ steps[currentValue] }}
-    <span *ngIf="currentValue  > originalValue"> *</span>
+  <span class="step-label">{{ steps[currentValue] }} <!-- eslint-disable-line -->
+    <span *ngIf="currentValue > originalValue"> *</span>
     <span *ngIf="currentValue < originalValue"> **</span>
   </span>
-</div> 
+</div>

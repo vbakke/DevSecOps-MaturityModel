@@ -1,19 +1,17 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 
-
 @Component({
-  selector: 'progress-slider',
+  selector: 'app-progress-slider',
   templateUrl: './progress-slider.component.html',
-  styleUrls: ['./progress-slider.component.css']
+  styleUrls: ['./progress-slider.component.css'],
 })
-
 export class ProgressSliderComponent implements OnInit {
   @Input() DBG_name: string = '';
   @Input() steps: string[] = [];
   @Input() state: string = '';
   @Input() originalState: string = '';
   @Output() progressChange = new EventEmitter<string>();
-  
+
   originalValue: number = 0;
   currentValue: number = 0;
 
@@ -23,10 +21,8 @@ export class ProgressSliderComponent implements OnInit {
 
     if (this.currentValue === -1) this.currentValue = 0;
     if (this.originalValue === -1) this.originalValue = 0;
-    
-    if (this.originalValue <= 0) this.originalValue = this.currentValue; 
 
-    // console.log(`ProgressSliderComponent: ${this.DBG_name}: previous: ${this.originalValue}, current: ${this.currentValue} (${this.state},${this.originalState})`);
+    if (this.originalValue <= 0) this.originalValue = this.currentValue;
   }
 
   getCurrent() {
@@ -47,4 +43,4 @@ export class ProgressSliderComponent implements OnInit {
       this.progressChange?.emit(this.getCurrent());
     }
   }
-} 
+}

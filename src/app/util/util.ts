@@ -1,4 +1,3 @@
-
 export function perfNow(): string {
   return (performance.now() / 1000).toFixed(3);
 }
@@ -22,10 +21,10 @@ export function deepCopy(obj: any): any {
 }
 
 export function renameArrayElement(array: any[], oldName: string, newName: string): any[] {
-  return array.map(item => item === oldName ? newName : item);  
+  return array.map(item => (item === oldName ? newName : item));
 }
 
-export function equalArray(a: any[]|undefined|null, b: any[]|undefined|null): boolean {
+export function equalArray(a: any[] | undefined | null, b: any[] | undefined | null): boolean {
   if (!a && !b) return true;
   if (!a || !b) return false;
   if (a.length !== b.length) return false;
@@ -43,6 +42,6 @@ export function dateStr(date: Date | null | undefined): string {
   return date.toLocaleDateString(navigator.language, {
     year: 'numeric',
     month: '2-digit',
-    day: '2-digit'
+    day: '2-digit',
   });
 }

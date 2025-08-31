@@ -9,10 +9,9 @@ describe('ProgressSliderComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ProgressSliderComponent ],
-      imports: [ FormsModule, MatSliderModule ]
-    })
-    .compileComponents();
+      declarations: [ProgressSliderComponent],
+      imports: [FormsModule, MatSliderModule],
+    }).compileComponents();
   });
 
   beforeEach(() => {
@@ -27,7 +26,7 @@ describe('ProgressSliderComponent', () => {
   });
 
   it('should initialize with the correct initial step', () => {
-    component.originalValue = 1;
+    component.state = 'Step 2';
     component.ngOnInit();
     expect(component.currentValue).toBe(1);
   });
@@ -35,7 +34,7 @@ describe('ProgressSliderComponent', () => {
   it('should emit step changes', () => {
     spyOn(component.progressChange, 'emit');
     component.onStepChange(2);
-    expect(component.progressChange.emit).toHaveBeenCalledWith(2);
+    expect(component.progressChange.emit).toHaveBeenCalledWith('Step 3');
   });
 
   it('should display the correct step label', () => {
@@ -44,4 +43,4 @@ describe('ProgressSliderComponent', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('.step-label')?.textContent).toContain('Step 2');
   });
-}); 
+});

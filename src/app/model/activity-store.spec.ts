@@ -50,10 +50,10 @@ describe('ActivityStore', () => {
     expect(store.getAllDimensionNames()).toHaveSize(3);
     expect(store.getActivityByName('Activity 111')).toBeUndefined(); // Changed name, to:
     expect(store.getActivityByName('OVERRIDE 111')?.uuid).toBe('00000000-1111-1111-1111-000000000000');
-    expect(store.getActivityByName('OVERRIDE 111')?.description).toBe('OVERRIDE DESC AND LEVEL');
+    expect(store.getActivityByName('OVERRIDE 111')?.description.toString()).toBe('OVERRIDE DESC AND LEVEL');
     expect(store.getActivityByName('OVERRIDE 111')?.level).toBe(2);
     
-    expect(store.getActivityByName('Activity 112')?.description).toBe('OVERRIDE: BASED ON NAME'); 
+    expect(store.getActivityByName('Activity 112')?.description.toString()).toBe('OVERRIDE: BASED ON NAME'); 
     expect(store.getActivityByName('Activity 121')).toBeUndefined(); // Ignored
     expect(store.getActivityByName('Activity 211')).toBeUndefined(); // Ignored    
     expect(store.getActivityByName('New Activity 311')).toBeTruthy();
