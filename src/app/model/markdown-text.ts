@@ -6,9 +6,14 @@ export class MarkdownText {
   private plain: string | undefined;
   private md: string | undefined;
 
-  constructor(text: string | undefined) {
-    this.plain = text;
-    this.md = undefined;
+  constructor(text: MarkdownText | string | undefined) {
+    if (text instanceof MarkdownText) {
+      this.plain = text.plain;
+      this.md = text.md;
+    } else {
+      this.plain = text;
+      this.md = undefined;
+    }
   }
 
   empty(): boolean {

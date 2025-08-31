@@ -8,6 +8,12 @@ export interface MetaStrings {
   maturityLevels: string[];
   knowledgeLabels: string[];
 }
+const fallbackMetaStrings: MetaStrings = {
+  allTeamsGroupName: 'All',
+  maturityLevels: ['Level 1', 'Level 2'],
+  labels: ['Easy', 'Medium', 'Hard'],
+  knowledgeLabels: ['Low', 'Medium', 'High'],
+};
 
 const LOCALSTORAGE_KEY: string = 'meta';
 
@@ -18,7 +24,7 @@ export class MetaStore {
 
   checkForDsommUpdates: boolean = false;
   lang: string = 'en';
-  strings: Record<string, MetaStrings> = {};
+  strings: Record<string, MetaStrings> = { en: fallbackMetaStrings };
   progressDefinition: ProgressDefinition = {};
   teamGroups: TeamGroups = {};
   teams: TeamNames = [];
@@ -27,11 +33,16 @@ export class MetaStore {
   allowChangeTeamNameInBrowser: boolean = false;
 
   public init(metaData: any): void {
+    this.addMeta(metaData);
+  }
+
+  public addMeta(metaData: any): void {
     if (metaData) {
+      // Only overwrite existing values if new values are provided
       this.checkForDsommUpdates =
         metaData.checkForDsommUpdates || this.checkForDsommUpdates || false;
       this.lang = metaData.lang || this.lang || 'en';
-      this.strings = metaData.strings || this.strings || {};
+      this.strings = metaData.strings || this.strings || fallbackMetaStrings;
       this.progressDefinition = metaData.progressDefinition || this.progressDefinition || {};
       this.teamGroups = metaData.teamGroups || this.teamGroups || {};
       this.teams = metaData.teams || this.teams || [];
@@ -68,7 +79,7 @@ export class MetaStore {
     if (storedMeta) {
       try {
         let metaData = this.yamlService.parse(storedMeta);
-        this.init(metaData);
+        this.addMeta(metaData);
         this.hasLocalStorage = true;
         console.log('Loaded stored meta from localStorage');
       } catch (error) {

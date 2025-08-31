@@ -42,6 +42,7 @@ export class TeamsComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     console.log(`${perfNow()}: Teams: Loading yamls...`);
+
     this.loader
       .load()
       .then((dataStore: DataStore) => {
@@ -77,10 +78,6 @@ export class TeamsComponent implements OnInit, AfterViewInit {
     }
   }
 
-  displayMessage(dialogInfo: DialogInfo) {
-    this.modal.openDialog(dialogInfo);
-  }
-
   setYamlData(dataStore: DataStore) {
     this.dataStore = dataStore;
     if (this.dataStore.meta) {
@@ -92,6 +89,10 @@ export class TeamsComponent implements OnInit, AfterViewInit {
 
     this.progressColumnNames = this.dataStore?.progressStore?.getInProgressTitles() || [];
     this.allColumnNames = ['Team', 'Activity', ...this.progressColumnNames];
+  }
+
+  displayMessage(dialogInfo: DialogInfo) {
+    this.modal.openDialog(dialogInfo);
   }
 
   onSelectionChanged(event: SelectionChangedEvent) {

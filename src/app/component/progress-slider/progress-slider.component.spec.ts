@@ -26,7 +26,7 @@ describe('ProgressSliderComponent', () => {
   });
 
   it('should initialize with the correct initial step', () => {
-    component.originalValue = 1;
+    component.state = 'Step 2';
     component.ngOnInit();
     expect(component.currentValue).toBe(1);
   });
@@ -34,7 +34,7 @@ describe('ProgressSliderComponent', () => {
   it('should emit step changes', () => {
     spyOn(component.progressChange, 'emit');
     component.onStepChange(2);
-    expect(component.progressChange.emit).toHaveBeenCalledWith(2);
+    expect(component.progressChange.emit).toHaveBeenCalledWith('Step 3');
   });
 
   it('should display the correct step label', () => {

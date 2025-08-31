@@ -265,14 +265,11 @@ export class ActivityStore {
     let uuidExists = activityByUuid.hasOwnProperty(activity.uuid);
 
     if (nameExists && uuidExists) {
-      // eslint-disable-next-line
-      errors.push(`Duplicate activity '${activity.name}' (${activity.uuid}). Please remove one from your activity yaml files.`)
+      errors.push(`Duplicate activity '${activity.name}' (${activity.uuid}). Please remove one from your activity yaml files.`) // eslint-disable-line
     } else if (nameExists) {
-      // eslint-disable-next-line
-      errors.push(`Duplicate activity name '${activity.name}' (${activity.uuid} and ${activityByName[activity.name].uuid}). Please remove or rename one of the activities.`)
+      errors.push(`Duplicate activity name '${activity.name}' (${activity.uuid} and ${activityByName[activity.name].uuid}). Please remove or rename one of the activities.`) // eslint-disable-line
     } else if (uuidExists) {
-      // eslint-disable-next-line
-      errors.push(`Duplicate activity uuid '${activity.uuid}' ('${activity.name}' and '${activityByUuid[activity.uuid].name}').`)
+      errors.push(`Duplicate activity uuid '${activity.uuid}' ('${activity.name}' and '${activityByUuid[activity.uuid].name}').`) // eslint-disable-line
     } else {
       activityByName[activity.name] = activity;
       activityByUuid[activity.uuid] = activity;
@@ -305,7 +302,7 @@ export class ActivityStore {
           // The uuid is new, but verify that the name does not exist (i.e. double uuids)
           if (this._activityByName.hasOwnProperty(newActivity.name)) {
             errors.push(
-              `The activity '${newActivity.name}' exists with different uuids ` +          // eslint-disable-line
+              `The activity '${newActivity.name}' exists with different uuids ` +            // eslint-disable-line
                 `(${newActivity.uuid} and ${this._activityByName[newActivity.name].uuid})`   // eslint-disable-line
             );
           }

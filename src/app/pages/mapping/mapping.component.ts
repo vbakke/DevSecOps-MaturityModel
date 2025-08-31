@@ -52,7 +52,6 @@ enum SortMode {
 export class MappingComponent implements OnInit, AfterViewInit {
   allMappings: MappingRow[] = [];
   dataSource = new MatTableDataSource<MappingRow>([]);
-  // currentSort: SortMode = SortMode.Activity;
 
   //labels
   knowledgeLabels: string[] = [];

@@ -2,7 +2,7 @@ import { Component, ViewChildren, QueryList, OnInit } from '@angular/core';
 import { MatAccordion } from '@angular/material/expansion';
 import { ActivatedRoute } from '@angular/router';
 import { LoaderService } from '../../service/loader/data-loader.service';
-import { Activity, ActivityStore } from '../../model/activity-store';
+import { Activity } from '../../model/activity-store';
 import { DataStore } from 'src/app/model/data-store';
 
 @Component({
@@ -26,11 +26,8 @@ export class ActivityDescriptionComponent implements OnInit {
   constructor(private route: ActivatedRoute, private loader: LoaderService) {}
 
   ngOnInit() {
-    let name: string, uuid: string;
-    this.route.queryParams.subscribe(params => {
-      uuid = params['uuid'];
-      name = params['activityName'];
-    });
+    let uuid: string = this.route.snapshot.queryParams['uuid'];
+    let name: string = this.route.snapshot.queryParams['name'];
 
     // Load data
     this.loader
@@ -45,9 +42,8 @@ export class ActivityDescriptionComponent implements OnInit {
         }
 
         // Get meta data
-        const meta = dataStore.getMetaStrings();
-        this.currentActivity = activity;
         /* eslint-disable */
+        this.currentActivity = activity;
         this.KnowledgeLabel = dataStore.getMetaString('knowledgeLabels', activity.difficultyOfImplementation.knowledge);
         this.TimeLabel = dataStore.getMetaString('labels', activity.difficultyOfImplementation.time);
         this.ResourceLabel = dataStore.getMetaString('labels', activity.difficultyOfImplementation.resources);
@@ -56,7 +52,7 @@ export class ActivityDescriptionComponent implements OnInit {
 
         setTimeout(() => {
           this.openAll();
-        }, 1);
+        });
       })
       .catch(err => {
         console.error('Error loading activity data:', err);

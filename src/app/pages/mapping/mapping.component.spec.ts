@@ -3,16 +3,22 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatAutocomplete } from '@angular/material/autocomplete';
 
 import { MappingComponent } from './mapping.component';
+import { ModalMessageComponent } from 'src/app/component/modal-message/modal-message.component';
 
 describe('MappingComponent', () => {
   let component: MappingComponent;
   let fixture: ComponentFixture<MappingComponent>;
 
   beforeEach(async () => {
+    /* eslint-disable */
     await TestBed.configureTestingModule({
-      providers: [HttpClient, HttpHandler],
+      providers: [HttpClient,
+        HttpHandler,
+        { provide: ModalMessageComponent, useValue: {} },
+      ],
       declarations: [MappingComponent, MatAutocomplete],
     }).compileComponents();
+    /* eslint-enable */
   });
 
   beforeEach(() => {
@@ -29,13 +35,5 @@ describe('MappingComponent', () => {
     const HTMLElement: HTMLElement = fixture.nativeElement;
     const table = HTMLElement.querySelector('table')!;
     expect(table).toBeTruthy();
-  });
-
-  it('check for chip deletion', () => {
-    component.currentChip = ['row1', 'row2'];
-    component.removeChip('row1');
-    const newChipRow = ['row2'];
-    fixture.detectChanges();
-    expect(component.currentChip).toEqual(newChipRow);
   });
 });

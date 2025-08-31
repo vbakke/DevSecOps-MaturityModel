@@ -28,14 +28,21 @@ export class DataStore {
 
     let lang: string = this.meta.lang || 'en';
     if (!this.meta.strings?.hasOwnProperty(lang)) {
-      lang = Object(this.meta?.strings).keys()[0];
-      this.meta.lang = lang;
+      // Requested lang does not exist. Fall back to first available lang
+      let availableLangs: string[] = Object.keys(this.meta?.strings || {});
+      if (availableLangs.length > 0) {
+        lang = availableLangs[0];
+        this.meta.lang = lang;
+      }
     }
-    return this.meta?.strings[lang];
+    return this.meta?.strings?.[lang];
   }
 
   public getMetaString(name: keyof MetaStrings, index: number = 0): string {
     let meta: MetaStrings = this.getMetaStrings();
+    if (meta === undefined) {
+      throw Error('Meta strings not loaded');
+    }
     if (!meta.hasOwnProperty(name)) {
       throw Error(`Meta string '${name}' not found in meta.yaml`);
     }
@@ -56,6 +63,6 @@ export class DataStore {
 
   public getLevels(): string[] {
     let maxLvl: number = this.getMaxLevel();
-    return this.getMetaStrings().maturityLevels.slice(0, maxLvl);
+    return this.getMetaStrings()?.maturityLevels?.slice(0, maxLvl) || [];
   }
 }

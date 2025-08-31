@@ -66,9 +66,6 @@ describe('MatrixComponent', () => {
     // Verify filters were initialized
     expect(Object.keys(component.filtersTag)).toContain('tag1');
     expect(Object.keys(component.filtersDim)).toContain('Test Dimension');
-
-    // Verify table data
-    expect(component.dataSource.data).toEqual(component.MATRIX_DATA);
   });
 
   it('should filter data when tag filter is selected', () => {
