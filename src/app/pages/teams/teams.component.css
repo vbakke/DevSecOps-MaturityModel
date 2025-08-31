@@ -57,6 +57,11 @@ h3 {
     flex-direction: column;
 }
 
+.team-info .subheader {
+    text-align: center;
+    font-style: italic;
+}
+
 .info-kpis {
     display: flex;
     flex-direction: row;

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { perfNow } from 'src/app/util/util';
 
 @Component({
@@ -6,7 +6,7 @@ import { perfNow } from 'src/app/util/util';
   templateUrl: './userday.component.html',
   styleUrls: ['./userday.component.css'],
 })
-export class UserdayComponent {
+export class UserdayComponent implements OnInit {
   constructor() {}
 
   ngOnInit() {

@@ -8,6 +8,6 @@ import { FormsModule } from '@angular/forms';
 @NgModule({
   declarations: [TeamsGroupsEditorComponent, SelectableListComponent],
   imports: [CommonModule, MaterialModule, FormsModule],
-  exports: [TeamsGroupsEditorComponent]
+  exports: [TeamsGroupsEditorComponent],
 })
 export class TeamsGroupsEditorModule {}

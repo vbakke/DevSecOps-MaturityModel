@@ -4,7 +4,7 @@ import { perfNow } from 'src/app/util/util';
 @Component({
   selector: 'app-selectable-list',
   templateUrl: './selectable-list.component.html',
-  styleUrls: ['./selectable-list.component.css']
+  styleUrls: ['./selectable-list.component.css'],
 })
 export class SelectableListComponent {
   @Input() title: string = '';
@@ -20,7 +20,7 @@ export class SelectableListComponent {
   @Output() addItem = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
   @Output() save = new EventEmitter<void>();
-  @Output() renameItem = new EventEmitter<{oldName: string, newName: string}>();
+  @Output() renameItem = new EventEmitter<{ oldName: string; newName: string }>();
   @Output() deleteItem = new EventEmitter<string>();
   @Output() relationshipToggle = new EventEmitter<string>();
   @Output() editModeChange = new EventEmitter<boolean>();
@@ -30,7 +30,6 @@ export class SelectableListComponent {
   editingName: string = '';
   editingOrgName: string = '';
 
-  
   onItemClicked(name: string) {
     console.log(`Item clicked: ${name}`);
     if (!this.relationshipEditMode) {
@@ -43,7 +42,7 @@ export class SelectableListComponent {
   toggleEditMode() {
     this.editMode = !this.editMode;
     if (this.editMode) {
-      if(!this.selectedItem && this.items.length > 0) {
+      if (!this.selectedItem && this.items.length > 0) {
         this.onItemClicked(this.items[0]);
       }
     }
@@ -65,7 +64,7 @@ export class SelectableListComponent {
   cancelEditItem(oldName: string) {
     console.log(`${perfNow()}: Cancel editing: ${oldName}`);
     this.editingName = '';
-    this.editingOrgName = '';    
+    this.editingOrgName = '';
   }
 
   saveEditedItem(oldName: string) {
@@ -86,7 +85,7 @@ export class SelectableListComponent {
     // Select next item
     if (index < this.items.length - 1) {
       this.onItemClicked(this.items[index + 1]);
-    } else  if (index > 0) {
+    } else if (index > 0) {
       this.onItemClicked(this.items[index - 1]);
     }
   }

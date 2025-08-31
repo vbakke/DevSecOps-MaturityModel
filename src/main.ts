@@ -6,9 +6,9 @@ import { environment } from './environments/environment';
 import { faro, getWebInstrumentations, initializeFaro, LogLevel } from '@grafana/faro-web-sdk';
 import { TracingInstrumentation } from '@grafana/faro-web-tracing';
 
-export const version: string = '1.3.5';
+export const version: string = '1.4.0';
 
-const localDevelopment:boolean = (window.location.hostname == 'localhost');
+const localDevelopment: boolean = window.location.hostname == 'localhost';
 if (environment.production) {
   enableProdMode();
 }
@@ -23,7 +23,7 @@ if (environment?.experimental && !localDevelopment) {
     },
     sessionTracking: {
       samplingRate: 1,
-      persistent: true
+      persistent: true,
     },
     instrumentations: [
       // Mandatory, omits default instrumentations otherwise.
@@ -34,26 +34,25 @@ if (environment?.experimental && !localDevelopment) {
     ],
     consoleInstrumentation: {
       consoleErrorAsLog: true,
-      
+
       disabledLevels: [LogLevel.DEBUG, LogLevel.TRACE],
     },
   });
 
   // Identify specific sessions
-  let debugid: string = (new URLSearchParams(location.search)).get('debugid') || '';
+  let debugid: string = new URLSearchParams(location.search).get('debugid') || '';
   if (debugid) localStorage.setItem('debugid', debugid);
   else debugid = localStorage.getItem('debugid') || '';
-  faro.api.setUser(
-    { attributes: {
-        debugid: debugid,
-        debugfamily: debugid.split('-')[0],
-        debugreferrer: document.referrer,
-      }, 
-    });
-    if (debugid) console.log('Faro debugid:', debugid);
-    if (document.referrer) console.log('Faro referrer:', document.referrer);
+  faro.api.setUser({
+    attributes: {
+      debugid: debugid,
+      debugfamily: debugid.split('-')[0],
+      debugreferrer: document.referrer,
+    },
+  });
+  if (debugid) console.log('Faro debugid:', debugid);
+  if (document.referrer) console.log('Faro referrer:', document.referrer);
 }
-
 
 platformBrowserDynamic()
   .bootstrapModule(AppModule)

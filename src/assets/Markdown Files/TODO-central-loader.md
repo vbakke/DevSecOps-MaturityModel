@@ -1,3 +1,5 @@
+## Doing
+ - Bug: Teams: Reads progress heading from activityStore, not metaStore
 
 ## Next
 ### Dependency graph
@@ -34,6 +36,8 @@
 - Doc: Update `Development.md`
 - Doc: Update `INSTALL.md`
 ### Misc
+- Move all getMetaString into MetaStore()
+- Add fallbacks for getMetaString in MetaStore()
 - Fix dependsOn that is uuid (e.g. 83057028-0b77-4d2e-8135-40969768ae88)
 - Refactor: Labels for knowledge, time, resources, and usefulness (used by both Matrix and Heatmap)
 - Move META_FILE constant from data service to main app
@@ -63,6 +67,7 @@
 - Meta.yaml: Allow admins to customize the terms 'Team' and 'Group' (e.g. to 'App' and 'Portfolio')
 
 # Done
+ - Linting
 - Using Angular's built-in DomSanitizer to check [innerHTML]
 - Heatmap: Run Markdown on yaml text
 - Matrix: Fix markdown rendering

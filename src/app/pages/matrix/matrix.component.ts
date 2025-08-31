@@ -7,7 +7,10 @@ import { Activity, ActivityStore, Data } from 'src/app/model/activity-store';
 import { UntilDestroy } from '@ngneat/until-destroy';
 import { MatChip, MatChipList } from '@angular/material/chips';
 import { deepCopy } from 'src/app/util/util';
-import { ModalMessageComponent, DialogInfo } from '../../component/modal-message/modal-message.component';
+import {
+  ModalMessageComponent,
+  DialogInfo,
+} from '../../component/modal-message/modal-message.component';
 import { DataStore } from 'src/app/model/data-store';
 import { perfNow } from 'src/app/util/util';
 
@@ -253,7 +256,7 @@ export class MatrixComponent implements OnInit {
     const navigationExtras: NavigationExtras = {
       queryParams: { uuid: uuid },
     };
-    console.log(`${perfNow()}: Matrix: Open Details: '${this.dataStore?.activityStore?.getActivityByUuid(uuid).name}'`);
+    console.log(`${perfNow()}: Matrix: Open Details: '${this.dataStore?.activityStore?.getActivityByUuid(uuid).name}'`); // eslint-disable-line
     this.router.navigate([this.Routing], navigationExtras);
   }
 }

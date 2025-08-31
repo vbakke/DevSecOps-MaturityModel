@@ -30,11 +30,11 @@ export class LoaderService {
     this.dataStore = new DataStore();
     try {
       if (this.debug) console.log(`${perfNow()}: ----- Load Service Begin -----`);
-      
+
       // Load meta.yaml first
       this.dataStore.meta = await this.loadMeta();
       this.dataStore.progressStore?.init(this.dataStore.meta.progressDefinition);
-      
+
       // Then load activities
       this.dataStore.addActivities(await this.loadActivities(this.dataStore.meta));
 
@@ -48,10 +48,11 @@ export class LoaderService {
       // Load the progress for each team's activities
       let teamProgress: TeamProgressFile = await this.loadTeamProgress(this.dataStore.meta);
       this.dataStore.addProgressData(teamProgress.progress);
-      let browserProgress: TeamProgressFile | null = this.dataStore.progressStore?.retrieveStoredTeamProgress() || null;
+      let browserProgress: TeamProgressFile | null =
+        this.dataStore.progressStore?.retrieveStoredTeamProgress() || null;
       if (browserProgress != null) {
         this.dataStore.addProgressData(browserProgress?.progress);
-      }   
+      }
 
       // TODO: Load old yaml format (generated.yaml)
       // TODO: Load old yaml format (localStorage)
@@ -81,14 +82,14 @@ export class LoaderService {
     // Recalculate percentages of progress definition
     this.recalculateProgressDefinition(meta);
 
-    // Remove group teams not specified 
+    // Remove group teams not specified
     Object.keys(meta.teamGroups).forEach(group => {
       meta.teamGroups[group] = meta.teamGroups[group].filter(team => meta.teams.includes(team));
     });
 
     // Resolve paths relative to meta.yaml
     meta.teamProgressFile = this.yamlService.makeFullPath(meta.teamProgressFile, this.META_FILE);
-    meta.activityFiles = meta.activityFiles.map(file => 
+    meta.activityFiles = meta.activityFiles.map(file =>
       this.yamlService.makeFullPath(file, this.META_FILE)
     );
 
@@ -96,7 +97,7 @@ export class LoaderService {
     console.log(`${perfNow()} s: Loaded teams: ${meta.teams.join(', ')}`);
     return meta;
   }
-  
+
   private async loadTeamProgress(meta: MetaStore): Promise<TeamProgressFile> {
     if (this.debug) console.log(`${perfNow()}s: Loading Team Progress: ${meta.teamProgressFile}`);
     return this.yamlService.loadYamlUnresolvedRefs(meta.teamProgressFile);
@@ -106,11 +107,11 @@ export class LoaderService {
     const activityStore = new ActivityStore();
     const errors: string[] = [];
     let usingHistoricYamlFile = false;
-    
+
     for (let filename of meta.activityFiles) {
       if (this.debug) console.log(`${perfNow()}s: Loading activity file: ${filename}`);
       const data: Data = await this.loadActivityFile(filename);
-      
+
       usingHistoricYamlFile ||= filename.endsWith('generated/generated.yaml');
       activityStore.addActivityFile(data, errors);
 
@@ -148,7 +149,7 @@ export class LoaderService {
       if (typeof value === 'string') {
         let isPercentage: boolean = (value as string).includes('%');
         value = parseFloat(value);
-        if (isPercentage) { 
+        if (isPercentage) {
           value = value / 100;
         }
         if (value > 1 || value < 0) {
@@ -158,7 +159,7 @@ export class LoaderService {
       }
       meta.progressDefinition[state] = value;
     }
-    
+
     if (Math.min(...Object.values(meta.progressDefinition)) !== 0) {
       errors.push(`The meta.progressDefinition must specify a name for 0% completed`);
     }
@@ -168,14 +169,8 @@ export class LoaderService {
 
     if (errors.length > 0) {
       throw new DataValidationError(
-        'Data validation error for progress definition in meta.yaml: \n\n- ' +
-          errors.join('\n- ')
+        'Data validation error for progress definition in meta.yaml: \n\n- ' + errors.join('\n- ')
       );
     }
   }
-
-
-
-
-  
 }
