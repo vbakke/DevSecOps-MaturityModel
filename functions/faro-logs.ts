@@ -1,10 +1,17 @@
 // Cloudflare Functions: Proxy for Grafana Faro log messages
-// Place this file in your /functions directory as 'faro-logs.js'
+// Place this file in your /functions directory as 'faro-logs.ts'
 
-export async function onRequest(context) {
-  const { request } = context;
+interface CloudflareContext {
+  request: Request;
+  env: {
+    GRAFANA_FARO_KEY: string; 
+  };
+}
 
-  if (request.method == 'GET') {
+export async function onRequest(context: CloudflareContext): Promise<Response> {
+  const { request, env } = context;
+
+  if (request.method === 'GET') {
     return new Response('GET method is not allowed. Please use POST to send logs.', { status: 405 });
   }
   if (request.method !== 'POST') {
@@ -12,8 +19,7 @@ export async function onRequest(context) {
   }
 
   // Replace with your actual Grafana Faro endpoint
-  // const GRAFANA_FARO_URL = 'https://faro-collector-prod-eu-west-0.grafana.net/collect';
-  const GRAFANA_FARO_URL = 'https://faro-collector-prod-eu-north-0.grafana.net/collect/a7eda57dbf6b581662f2bf43a70c7508';
+  const GRAFANA_FARO_URL = 'https://faro-collector-prod-eu-north-0.grafana.net/collect/' + env.GRAFANA_FARO_KEY;
 
   // Forward headers except host/origin
   const headers = new Headers(request.headers);
