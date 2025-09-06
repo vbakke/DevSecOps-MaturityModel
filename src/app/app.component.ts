@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { environment } from 'src/environments/environment';
-import { version } from 'src/main';
-
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -9,7 +7,7 @@ import { version } from 'src/main';
 })
 export class AppComponent implements OnInit {
   title = 'DSOMM';
-  version: string = version || '';
+  version: string = environment.version || 'unknown';
   menuIsOpen: boolean = true;
 
   __experimental__updated: Date = new Date();
