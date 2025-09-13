@@ -1,11 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { ThemeService } from '../../service/theme.service';
 
 @Component({
   selector: 'app-sidenav-buttons',
   templateUrl: './sidenav-buttons.component.html',
   styleUrls: ['./sidenav-buttons.component.css'],
 })
-export class SidenavButtonsComponent {
+export class SidenavButtonsComponent implements OnInit {
   Options: string[] = [
     'Overview',
     'Matrix',
@@ -13,7 +14,8 @@ export class SidenavButtonsComponent {
     'Usage',
     'Teams',
     'About Us',
-    'Experimental Roadmap',
+    'DSOMM User Day 2025',
+    'Roadmap v4.0',
   ];
   Icons: string[] = [
     'pie_chart',
@@ -23,6 +25,7 @@ export class SidenavButtonsComponent {
     'people',
     'info',
     'school',
+    'landscape',
   ];
   Routing: string[] = [
     '/circular-heatmap',
@@ -31,7 +34,22 @@ export class SidenavButtonsComponent {
     '/usage',
     '/teams',
     '/about',
+    '/userday',
     '/roadmap',
   ];
-  constructor() {}
+
+  isNightMode = false;
+
+  constructor(private themeService: ThemeService) {}
+
+  ngOnInit(): void {
+    const currentTheme = this.themeService.getTheme();
+    this.isNightMode = currentTheme === 'dark';
+  }
+
+  toggleTheme(): void {
+    this.isNightMode = !this.isNightMode;
+    const newTheme = this.isNightMode ? 'dark' : 'light';
+    this.themeService.setTheme(newTheme);
+  }
 }

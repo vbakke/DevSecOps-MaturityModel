@@ -10,6 +10,6 @@ export class UserdayComponent implements OnInit {
   constructor() {}
 
   ngOnInit() {
-    console.log(`${perfNow()}: Page loaded: Roadmap`);
+    console.log(`${perfNow()}: Page loaded: Userday`);
   }
 }

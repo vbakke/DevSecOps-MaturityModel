@@ -27,11 +27,11 @@
   transition: background 0.2s;
 }
 .selectable-list li.selected {
-  background: #66bb6a;
+  background: color-mix(in oklab, var(--primary-color), black 10%);
   color: white;
 }
 .selectable-list li.highlighted {
-  background: #66bb6a75;
+  background: color-mix(in oklab, var(--primary-color), transparent 70%);
 }
 .selectable-list li:not(.selected):not(.highlighted) {
   opacity: 0.6;

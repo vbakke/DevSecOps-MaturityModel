@@ -8,6 +8,7 @@ import { MatrixComponent } from './pages/matrix/matrix.component';
 import { ActivityDescriptionComponent } from './component/activity-description/activity-description.component';
 import { UsageComponent } from './pages/usage/usage.component';
 import { TeamsComponent } from './pages/teams/teams.component';
+import { RoadmapComponent } from './pages/roadmap/roadmap.component';
 
 const routes: Routes = [
   { path: '', component: CircularHeatmapComponent },
@@ -19,7 +20,8 @@ const routes: Routes = [
   { path: 'usage/:page', component: UsageComponent },
   { path: 'teams', component: TeamsComponent },
   { path: 'about', component: AboutUsComponent },
-  { path: 'roadmap', component: UserdayComponent },
+  { path: 'userday', component: UserdayComponent },
+  { path: 'roadmap', component: RoadmapComponent },
 ];
 
 @NgModule({

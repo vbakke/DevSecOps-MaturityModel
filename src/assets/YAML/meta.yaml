@@ -1,10 +1,7 @@
 ---
-¤-allowCheckDsommActivityUpdateInBrowser: true  # Yet to be implemented
-¤-dsommActivityUrl: https://git...io/dsomm/master....
-
 teamProgressFile: 'team-progress.yaml' 
 progressDefinition:
-  "Not started": 0%
+  Backlog: 0%
   Planned: 10%
   Started: 30%
   Implemented: 100% 

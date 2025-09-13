@@ -9,14 +9,14 @@ import {
   ModalMessageComponent,
   DialogInfo,
 } from '../../component/modal-message/modal-message.component';
-import { Activity, ActivityStore } from 'src/app/model/activity-store';
+import { Activity } from 'src/app/model/activity-store';
 import { Uuid, ProgressDefinition, TeamName, ProgressTitle, TeamGroups } from 'src/app/model/types';
 import { SectorService } from '../../service/sector-service';
 import { DataStore } from 'src/app/model/data-store';
 import { Sector } from 'src/app/model/sector';
 import { perfNow } from 'src/app/util/util';
 import { downloadYamlFile } from 'src/app/util/download';
-
+import { ThemeService } from '../../service/theme.service';
 @Component({
   selector: 'app-circular-heatmap',
   templateUrl: './circular-heatmap.component.html',
@@ -49,56 +49,88 @@ export class CircularHeatmapComponent implements OnInit {
   progressStates: string[] = [];
   allSectors: Sector[] = [];
   selectedSector: Sector | null = null;
+  theme: string;
+  theme_colors!: Record<string, string>;
 
   constructor(
     private loader: LoaderService,
     private sectorService: SectorService,
-    private router: Router,
+    private themeService: ThemeService,
     public modal: ModalMessageComponent
-  ) {}
+  ) {
+    this.theme = this.themeService.getTheme();
+  }
 
   ngOnInit(): void {
-    console.log(`${perfNow()}: Heat: Loading yamls...`);
-    // Ensure that Levels and Teams load before MaturityData
-    // using promises, since ngOnInit does not support async/await
-    this.loader
-      .load()
-      .then((dataStore: DataStore) => {
-        if (!dataStore.activityStore) {
-          throw Error('TODO: Ooops! Dette må håndteres');
-        }
-        if (!dataStore.progressStore) {
-          throw Error('TODO: Ooops! Dette må håndteres');
-        }
+    const savedTheme: string = this.themeService.getTheme() || 'light';
+    this.themeService.setTheme(savedTheme); // sets .light-theme or .dark-theme
+    requestAnimationFrame(() => {
+      // Now the DOM has the correct class and CSS vars are live
+      console.log('Initial theme:', this.theme);
+      const css = getComputedStyle(document.body);
+      this.theme_colors = {
+        background: css.getPropertyValue('--heatmap-background').trim(),
+        filled: css.getPropertyValue('--heatmap-filled').trim(),
+        disabled: css.getPropertyValue('--heatmap-disabled').trim(),
+        cursor: css.getPropertyValue('--heatmap-cursor').trim(),
+        stroke: css.getPropertyValue('--heatmap-stroke').trim(),
+      };
 
-        this.filtersTeams = this.buildFilters(dataStore.meta?.teams as string[]);
-        // Insert key: 'All' with value: [], in the first position of the meta.teamGroups Record
-        const allTeamsGroupName: string = dataStore.getMetaString('allTeamsGroupName') || 'All';
-        this.teamGroups = { [allTeamsGroupName]: [], ...(dataStore.meta?.teamGroups || {}) };
-        this.filtersTeamGroups = this.buildFilters(Object.keys(this.teamGroups));
-        this.filtersTeamGroups[allTeamsGroupName] = true;
+      console.log(`${perfNow()}: Heat: Loading yamls...`);
+      // Ensure that Levels and Teams load before MaturityData
+      // using promises, since ngOnInit does not support async/await
+      this.loader
+        .load()
+        .then((dataStore: DataStore) => {
+          if (!dataStore.activityStore) {
+            throw Error('No activityStore available');
+          }
+          if (!dataStore.progressStore) {
+            throw Error('No progressStore available');
+          }
 
-        let progressDefinition: ProgressDefinition = dataStore.meta?.progressDefinition || {};
-        this.sectorService.init(
-          dataStore.progressStore,
-          dataStore.meta?.teams || [],
-          dataStore?.progressStore?.getProgressData() || {},
-          progressDefinition
-        );
-        this.progressStates = this.sectorService.getProgressStates();
+          this.filtersTeams = this.buildFilters(dataStore.meta?.teams as string[]);
+          // Insert key: 'All' with value: [], in the first position of the meta.teamGroups Record
+          const allTeamsGroupName: string = dataStore.getMetaString('allTeamsGroupName') || 'All';
+          this.teamGroups = { [allTeamsGroupName]: [], ...(dataStore.meta?.teamGroups || {}) };
+          this.filtersTeamGroups = this.buildFilters(Object.keys(this.teamGroups));
+          this.filtersTeamGroups[allTeamsGroupName] = true;
 
-        this.setYamlData(dataStore);
+          let progressDefinition: ProgressDefinition = dataStore.meta?.progressDefinition || {};
+          this.sectorService.init(
+            dataStore.progressStore,
+            dataStore.meta?.teams || [],
+            dataStore?.progressStore?.getProgressData() || {},
+            progressDefinition
+          );
+          this.progressStates = this.sectorService.getProgressStates();
 
-        // For now, just draw the sectors (no activities yet)
-        this.loadCircularHeatMap('#chart', this.allSectors, this.dimensionLabels, this.maxLevel);
-        console.log(`${perfNow()}: Page loaded: Circular Heatmap`);
-      })
-      .catch(err => {
-        this.displayMessage(new DialogInfo(err.message, 'An error occurred'));
-        if (err.hasOwnProperty('stack')) {
-          console.warn(err);
-        }
-      });
+          this.setYamlData(dataStore);
+
+          // For now, just draw the sectors (no activities yet)
+          this.loadCircularHeatMap('#chart', this.allSectors, this.dimensionLabels, this.maxLevel);
+          console.log(`${perfNow()}: Page loaded: Circular Heatmap`);
+        })
+        .catch(err => {
+          this.displayMessage(new DialogInfo(err.message, 'An error occurred'));
+          if (err.hasOwnProperty('stack')) {
+            console.warn(err);
+          }
+        });
+    });
+    // Reactively handle theme changes (if user toggles later)
+    this.themeService.theme$.subscribe((theme: string) => {
+      const css = getComputedStyle(document.body);
+      this.theme_colors = {
+        background: css.getPropertyValue('--heatmap-background').trim(),
+        filled: css.getPropertyValue('--heatmap-filled').trim(),
+        disabled: css.getPropertyValue('--heatmap-disabled').trim(),
+        cursor: css.getPropertyValue('--heatmap-cursor').trim(),
+        stroke: css.getPropertyValue('--heatmap-stroke').trim(),
+      };
+
+      this.reColorHeatmap(); // repaint segments with new theme
+    });
   }
 
   displayMessage(dialogInfo: DialogInfo) {
@@ -232,8 +264,6 @@ export class CircularHeatmapComponent implements OnInit {
       .innerRadius(innerRadius)
       .segmentHeight(segmentHeight)
       .domain([0, 1])
-      .range(['white', 'green'])
-      // .radialLabels(radial_labels)
       .segmentLabels(dimLabels)
       .segmentLabelHeight(segmentLabelHeight);
 
@@ -298,13 +328,13 @@ export class CircularHeatmapComponent implements OnInit {
       segmentHeight = 20,
       segmentLabelHeight = 12,
       domain: any = null,
-      range = ['white', 'red'],
+      range = [this.theme_colors['background'], this.theme_colors['filled']],
       accessor = function (d: any) {
         return d;
       };
     var radialLabels = [];
     var segmentLabels: any[] = [];
-
+    let _self: any = this;
     function chart(selection: any) {
       selection.each(function (this: any, data: any) {
         var svg = d3.select(this);
@@ -337,10 +367,10 @@ export class CircularHeatmapComponent implements OnInit {
             return 'index-' + i;
           })
           .attr('d', d3.arc<any>().innerRadius(ir).outerRadius(or).startAngle(sa).endAngle(ea))
-          .attr('stroke', '#252525')
+          .attr('stroke', _self.theme_colors['stroke'])
           .attr('fill', function (d: any) {
             if (!d.activities || d.activities.length === 0) {
-              return '#DCDCDC';
+              return _self.theme_colors['disabled'];
             }
             return color(accessor(d));
           });
@@ -536,7 +566,6 @@ export class CircularHeatmapComponent implements OnInit {
 
   closeOverlay() {
     this.showOverlay = false;
-    // console.log(`${perfNow()}: Heat: Close Overlay:  '${this.old_activityDetails.name}'`);
   }
 
   toggleFilters() {
@@ -545,14 +574,17 @@ export class CircularHeatmapComponent implements OnInit {
 
   recolorSector(index: number) {
     // console.log('recolorSector', index);
-    var colorSector = d3.scaleLinear<string, string>().domain([0, 1]).range(['white', 'green']);
+    var colorSector = d3
+      .scaleLinear<string, string>()
+      .domain([0, 1])
+      .range([this.theme_colors['background'], this.theme_colors['filled']]);
 
     let progressValue: number = this.sectorService.getSectorProgress(
       this.allSectors[index].activities
     );
     d3.select('#index-' + index).attr(
       'fill',
-      isNaN(progressValue) ? '#DCDCDC' : colorSector(progressValue)
+      isNaN(progressValue) ? this.theme_colors['disabled'] : colorSector(progressValue)
     );
     // console.log(`Recolor sector ${index} with progress ${(progressValue*100).toFixed(1)}%`);
   }
@@ -603,12 +635,6 @@ export class CircularHeatmapComponent implements OnInit {
 
   getDatasetFromBrowserStorage(): any {
     console.log(`${perfNow()}s: getDatasetFromBrowserStorage() ####`);
-    // @ts-ignore
-    if (this.old_ALL_CARD_DATA?.length && this.old_ALL_CARD_DATA[0]?.Task != null) {
-      console.log('Found outdated dataset, removing');
-      localStorage.removeItem('dataset');
-    }
-
     var content = localStorage.getItem('dataset');
     if (content != null) {
       return JSON.parse(content);

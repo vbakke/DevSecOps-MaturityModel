@@ -12,6 +12,7 @@ import { MappingComponent } from './pages/mapping/mapping.component';
 import { TeamsComponent } from './pages/teams/teams.component';
 import { UsageComponent } from './pages/usage/usage.component';
 import { UserdayComponent } from './pages/userday/userday.component';
+import { RoadmapComponent } from './pages/roadmap/roadmap.component';
 import { AboutUsComponent } from './pages/about-us/about-us.component';
 import { LogoComponent } from './component/logo/logo.component';
 import { SidenavButtonsComponent } from './component/sidenav-buttons/sidenav-buttons.component';
@@ -44,6 +45,7 @@ import { TeamsGroupsEditorModule } from './component/teams-groups-editor/teams-g
     TeamsComponent,
     ToStringValuePipe,
     UserdayComponent,
+    RoadmapComponent,
     ModalMessageComponent,
     ProgressSliderComponent,
   ],

@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ElementRef } from '@angular/core';
 import * as d3 from 'd3';
 import { LoaderService } from '../../service/loader/data-loader.service';
 import { Activity } from 'src/app/model/activity-store';
