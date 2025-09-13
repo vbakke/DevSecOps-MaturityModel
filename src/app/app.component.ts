@@ -26,17 +26,16 @@ export class AppComponent implements OnInit {
     }
 
     if (environment?.production === false) {
-      fetch(
-        'https://api.github.com/repos/vbakke/DevSecOps-MaturityModel/branches/experiment'
-      ).then(async response => {
-        let gitinfo: any = await response.json();
-        let commitDate: string = gitinfo?.commit?.commit?.author?.date;
-        if (commitDate) {
-          this.subtitle = `Released: ${commitDate?.replace('T', ' ')}`;
+      fetch('https://api.github.com/repos/vbakke/DevSecOps-MaturityModel/branches/experiment').then(
+        async response => {
+          let gitinfo: any = await response.json();
+          let commitDate: string = gitinfo?.commit?.commit?.author?.date;
+          if (commitDate) {
+            this.subtitle = `Released: ${commitDate?.replace('T', ' ')}`;
+          }
         }
-      });
+      );
     }
-
   }
 
   toggleMenu(): void {
