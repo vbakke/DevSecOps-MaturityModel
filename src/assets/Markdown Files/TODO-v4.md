@@ -1,5 +1,6 @@
 ## Doing
- - Bug: Teams: Reads progress heading from activityStore, not metaStore
+- Teams: Bug: Reads progress heading from activityStore, not metaStore
+- Heatmap: Bug: Clicking on grey sector leaves cursor on that sector
 
 ## Next
 ### Dependency graph
@@ -9,14 +10,13 @@
 ## ToDo
 - Heatmap: Fix: asterisk marks when modified
   - ViewController needs to know about changes vs temp storage
-- Heatmap: Bug: Clicking on grey sector leaves cursor on that sector
 ### Settings
 - Make settings page
   - Date format (don't rely just on browser language)
   - Display mode dark/light
   - Alter Progress Stages
-### Dark Mode
-- Merge in Dark Mode [PR #381](https://github.com/devsecopsmaturitymodel/DevSecOps-MaturityModel/pull/381)
+  - Max Maturity Level
+  - Dictionary: Allow custom names for: team, group, 
 ### Matrix
 - Matrix: Add a Close/Back button
 ### Teams
@@ -67,7 +67,8 @@
 - Meta.yaml: Allow admins to customize the terms 'Team' and 'Group' (e.g. to 'App' and 'Portfolio')
 
 # Done
- - Linting
+- Merge in Dark Mode [PR #381](https://github.com/devsecopsmaturitymodel/DevSecOps-MaturityModel/pull/381)
+- Linting
 - Using Angular's built-in DomSanitizer to check [innerHTML]
 - Heatmap: Run Markdown on yaml text
 - Matrix: Fix markdown rendering
