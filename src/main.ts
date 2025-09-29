@@ -6,11 +6,56 @@ console.log('[main.ts] Theme set to:', savedTheme); //
 import { enableProdMode } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
+import { TracingInstrumentation } from '@grafana/faro-web-tracing';
+import { faro, getWebInstrumentations, initializeFaro, LogLevel } from '@grafana/faro-web-sdk';
+
 import { AppModule } from './app/app.module';
 import { environment } from './environments/environment';
 
 if (environment.production) {
   enableProdMode();
+}
+
+const localDevelopment: boolean = window.location.hostname == 'localhost';
+if (!localDevelopment) {
+  initializeFaro({
+    url: '/faro-logs', // Use the Cloudflare proxy endpoint
+    app: {
+      name: 'dsomm',
+      version: environment.version || 'unknown',
+      environment: localDevelopment ? 'development' : 'experimental',
+    },
+    sessionTracking: {
+      samplingRate: 1,
+      persistent: true,
+    },
+    instrumentations: [
+      // Mandatory, omits default instrumentations otherwise.
+      ...getWebInstrumentations(),
+
+      // Tracing package to get end-to-end visibility for HTTP requests.
+      new TracingInstrumentation(),
+    ],
+    consoleInstrumentation: {
+      consoleErrorAsLog: true,
+
+      disabledLevels: [LogLevel.DEBUG, LogLevel.TRACE],
+    },
+  });
+
+  // Identify specific sessions
+  let debugid: string = new URLSearchParams(location.search).get('debugid') || '';
+  if (debugid) localStorage.setItem('debugid', debugid);
+  else debugid = localStorage.getItem('debugid') || '';
+  faro.api.setUser({
+    attributes: {
+      debugid: debugid,
+      debugfamily: debugid.split('-')[0],
+      debugreferrer: document.referrer,
+    },
+  });
+  if (debugid) console.log('Faro debugid:', debugid);
+  if (document.referrer) console.log('Faro referrer:', document.referrer);
 }
 
 platformBrowserDynamic()

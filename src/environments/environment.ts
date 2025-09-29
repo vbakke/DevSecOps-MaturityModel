@@ -3,6 +3,6 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
+  version: '4.local',
   production: false,
-  experimental: true,
 };

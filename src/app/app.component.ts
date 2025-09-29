@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ThemeService } from './service/theme.service';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -8,6 +9,7 @@ import { ThemeService } from './service/theme.service';
 })
 export class AppComponent implements OnInit {
   title = 'DSOMM';
+  version: string = environment.version || 'unknown';
   subtitle = '';
   menuIsOpen: boolean = true;
 
