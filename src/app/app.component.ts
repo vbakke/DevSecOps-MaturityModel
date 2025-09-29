@@ -24,6 +24,19 @@ export class AppComponent implements OnInit {
         this.menuIsOpen = false;
       }, 600);
     }
+
+    //==============================
+    // Cloudflare specific code
+    fetch('https://api.github.com/repos/vbakke/DevSecOps-MaturityModel/branches/v4-cf').then(
+      async response => {
+        let gitinfo: any = await response.json();
+        let commitDate: string = gitinfo?.commit?.commit?.author?.date;
+        if (commitDate) {
+          this.subtitle = `Released: ${commitDate?.replace('T', ' ')}`;
+        }
+      }
+    );
+    //==============================
   }
 
   toggleMenu(): void {
