@@ -1,0 +1,38 @@
+<div class="settings-container">
+  <h2>Settings</h2>
+  <mat-card>
+    <mat-card-content>
+      <div style="display: flex; align-items: center; gap: 1em">
+        <label for="dateFormatDropdown" style="white-space: nowrap">Date Format</label>
+        <mat-form-field appearance="fill" style="flex: 1; margin: 0">
+          <mat-select
+            id="dateFormatDropdown"
+            name="dateFormat"
+            [(ngModel)]="selectedDateFormat"
+            (ngModelChange)="onDateFormatChange()">
+            <mat-option *ngFor="let format of dateFormats" [value]="format.value">
+              {{ format.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+
+    <mat-card-content>
+      <div style="display: flex; align-items: center; gap: 1em">
+        <label style="white-space: nowrap">Max level</label>
+        <mat-slider
+          id="maxLevelSlider"
+          min="1"
+          [max]="dataStoreMaxLevel || 5"
+          step="1"
+          [value]="selectedMaxLevel"
+          [tickInterval]="1"
+          style="flex: 1"
+          (input)="onMaxLevelChange($event.value)">
+        </mat-slider>
+        <span class="caption">{{ selectedMaxLevelCaption }}</span>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
