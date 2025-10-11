@@ -85,6 +85,7 @@
 - Meta.yaml: Allow admins to customize the terms 'Team' and 'Group' (e.g. to 'App' and 'Portfolio')
 
 # Done
+- Heatmap: Add #uuid to URL, and allow navigation on clicks in dependencies
 - Fix dependsOn that is uuid (e.g. 83057028-0b77-4d2e-8135-40969768ae88)
 - Settings: Make settings page for Date format and Max maturity level
 - Dependency: Make connecting nodes clickable for navigation
