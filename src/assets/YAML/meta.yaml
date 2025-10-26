@@ -14,10 +14,13 @@ progressDefinition:
     definition: Activity has been put in the backlog but not yet started
   Started:
     score: 40%
-    definition: Activity has been started and is partly implemented
+    definition: Activity has been started in at least one application
+  Partly implemented:
+    score: 60%
+    definition: Activity has been fully implemented by in least 50% of the applications
   Fully implemented:
     score: 100%
-    definition: Fully implemented
+    definition: Fully implemented in virtually all applications
 
 teams: 
   $ref: 'default/teams.yaml#/teams'
