@@ -8,8 +8,9 @@ import { environment } from '../environments/environment';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit {
-  title = 'DSOMM';
   version: string = environment.version || 'unknown';
+  title = '';
+  defaultTitle = 'DSOMM beta v' + this.version;
   subtitle = '';
   menuIsOpen: boolean = true;
 
