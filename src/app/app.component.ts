@@ -1,20 +1,24 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
 import { ThemeService } from './service/theme.service';
 import { environment } from '../environments/environment';
+import { TitleService } from './service/title.service';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   version: string = environment.version || 'unknown';
   title = '';
-  defaultTitle = 'DSOMM beta v' + this.version;
+  defaultTitle = 'DSOMM Beta - v' + this.version;
   subtitle = '';
   menuIsOpen: boolean = true;
 
-  constructor(private themeService: ThemeService) {
+  private destroy$ = new Subject<void>();
+
+  constructor(private themeService: ThemeService, private titleService: TitleService) {
     this.themeService.initTheme();
   }
 
@@ -25,6 +29,12 @@ export class AppComponent implements OnInit {
         this.menuIsOpen = false;
       }, 600);
     }
+
+    // Subscribe to title changes
+    this.titleService.titleInfo$.pipe(takeUntil(this.destroy$)).subscribe(titleInfo => {
+      this.title = titleInfo?.dimension || '';
+      this.subtitle = titleInfo?.level ? 'Level ' + titleInfo?.level : '';
+    });
 
     //==============================
     // Cloudflare specific code
@@ -38,6 +48,11 @@ export class AppComponent implements OnInit {
       }
     );
     //==============================
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   toggleMenu(): void {
