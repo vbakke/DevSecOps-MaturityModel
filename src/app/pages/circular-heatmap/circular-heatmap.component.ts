@@ -92,6 +92,7 @@ export class CircularHeatmapComponent implements OnInit, OnDestroy {
       console.debug(`${perfNow()}s: ngOnInit: Heatmap theme colors:`, this.theme_colors);
       if (!this.theme_colors['background'] || !this.theme_colors['filled']) {
         console.debug(css);
+        debugger;
       }
 
       console.log(`${perfNow()}: Heat: Loading yamls...`);
