@@ -143,22 +143,26 @@ export class CircularHeatmapComponent implements OnInit, OnDestroy {
     // Reactively handle theme changes (if user toggles later)
     this.themeService.theme$.pipe(takeUntil(this.destroy$)).subscribe((theme: string) => {
       console.log(`${perfNow()}s: themeService.pipe: Theme changed to:`, theme);
-      const css = getComputedStyle(document.body);
-      this.theme_colors = {
-        background: css.getPropertyValue('--heatmap-background').trim(),
-        filled: css.getPropertyValue('--heatmap-filled').trim(),
-        disabled: css.getPropertyValue('--heatmap-disabled').trim(),
-        cursor: css.getPropertyValue('--heatmap-cursor-hover').trim(),
-        stroke: css.getPropertyValue('--heatmap-stroke').trim(),
-      };
-      console.debug(`${perfNow()}s: themeService.pipe: Heatmap theme colors:`, this.theme_colors);
-      if (!this.theme_colors['background'] || !this.theme_colors['filled']) {
-        console.debug(css);
-        debugger;
-      }
+      console.log(`${perfNow()}s: themeService.pipe: bk.gr col: '${getComputedStyle(document.body).getPropertyValue('--heatmap-background').trim()}'`);
+      // Wait for next animation frame to ensure CSS variables are updated
+      requestAnimationFrame(() => {
+        const css = getComputedStyle(document.body);
+        this.theme_colors = {
+          background: css.getPropertyValue('--heatmap-background').trim(),
+          filled: css.getPropertyValue('--heatmap-filled').trim(),
+          disabled: css.getPropertyValue('--heatmap-disabled').trim(),
+          cursor: css.getPropertyValue('--heatmap-cursor-hover').trim(),
+          stroke: css.getPropertyValue('--heatmap-stroke').trim(),
+        };
+        console.debug(`${perfNow()}s: themeService.pipe: Heatmap theme colors:`, this.theme_colors);
+        if (!this.theme_colors['background'] || !this.theme_colors['filled']) {
+          console.debug(css);
+          debugger;
+        }
 
-      // Repaint segments with new theme
-      this.reColorHeatmap();
+        // Repaint segments with new theme
+        this.reColorHeatmap();
+      });
     });
   }
 
