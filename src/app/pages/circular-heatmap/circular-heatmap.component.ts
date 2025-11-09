@@ -152,6 +152,10 @@ export class CircularHeatmapComponent implements OnInit, OnDestroy {
         stroke: css.getPropertyValue('--heatmap-stroke').trim(),
       };
       console.debug(`${perfNow()}s: themeService.pipe: Heatmap theme colors:`, this.theme_colors);
+      if (!this.theme_colors['background'] || !this.theme_colors['filled']) {
+        console.debug(css);
+        debugger;
+      }
 
       // Repaint segments with new theme
       this.reColorHeatmap();
