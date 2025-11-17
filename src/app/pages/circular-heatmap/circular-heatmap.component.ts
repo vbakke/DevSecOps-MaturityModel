@@ -78,9 +78,10 @@ export class CircularHeatmapComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     const savedTheme: string = this.themeService.getTheme() || 'light';
     this.themeService.setTheme(savedTheme); // sets .light-theme or .dark-theme
+    console.log(`${perfNow()}s: ngOnInit:  pre request animation frame: (stylesheets: ${document.styleSheets.length}) Initial theme:`, this.theme);
     requestAnimationFrame(() => {
       // Now the DOM has the correct class and CSS vars are live
-      console.log(`${perfNow()}s: ngOnInit: Initial theme:`, this.theme);
+      console.log(`${perfNow()}s: ngOnInit: (stylesheets: ${document.styleSheets.length}) Initial theme:`, this.theme);
       const css = getComputedStyle(document.body);
       this.theme_colors = {
         background: css.getPropertyValue('--heatmap-background').trim(),
@@ -143,7 +144,7 @@ export class CircularHeatmapComponent implements OnInit, OnDestroy {
     // Reactively handle theme changes (if user toggles later)
     this.themeService.theme$.pipe(takeUntil(this.destroy$)).subscribe((theme: string) => {
       console.log(`${perfNow()}s: themeService.pipe: Theme changed to:`, theme);
-      console.log(`${perfNow()}s: themeService.pipe: bk.gr col: '${getComputedStyle(document.body).getPropertyValue('--heatmap-background').trim()}'`);
+      console.log(`${perfNow()}s: themeService.pipe: (stylesheets: ${document.styleSheets.length}) bk.gr col: '${getComputedStyle(document.body).getPropertyValue('--heatmap-background').trim()}'`);
       // Wait for next animation frame to ensure CSS variables are updated
       requestAnimationFrame(() => {
         const css = getComputedStyle(document.body);
@@ -154,14 +155,14 @@ export class CircularHeatmapComponent implements OnInit, OnDestroy {
           cursor: css.getPropertyValue('--heatmap-cursor-hover').trim(),
           stroke: css.getPropertyValue('--heatmap-stroke').trim(),
         };
-        console.debug(`${perfNow()}s: themeService.pipe: Heatmap theme colors:`, this.theme_colors);
+        console.debug(`${perfNow()}s: themeService.pipe: (stylesheets: ${document.styleSheets.length}) Heatmap theme colors:`, this.theme_colors);
         if (!this.theme_colors['background'] || !this.theme_colors['filled']) {
           console.debug(css);
           console.debug(`${perfNow()}s: ------------------ Black day --------------`);
           var DBG_i: number = 0;
           var interval = setInterval(() => {
             DBG_i++;
-            console.debug(`${perfNow()}s: #${DBG_i} themeService.pipe: bk.gr col: '${getComputedStyle(document.body).getPropertyValue('--heatmap-background').trim()}'`);
+            console.debug(`${perfNow()}s: #${DBG_i} (stylesheets: ${document.styleSheets.length}) themeService.pipe: bk.gr col: '${getComputedStyle(document.body).getPropertyValue('--heatmap-background').trim()}'`);
             if (DBG_i >= 100) {
               clearInterval(interval);
             }
