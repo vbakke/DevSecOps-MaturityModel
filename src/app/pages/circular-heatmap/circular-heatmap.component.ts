@@ -157,7 +157,15 @@ export class CircularHeatmapComponent implements OnInit, OnDestroy {
         console.debug(`${perfNow()}s: themeService.pipe: Heatmap theme colors:`, this.theme_colors);
         if (!this.theme_colors['background'] || !this.theme_colors['filled']) {
           console.debug(css);
-          debugger;
+          console.debug(`${perfNow()}s: ------------------ Black day --------------`);
+          var DBG_i: number = 0;
+          var interval = setInterval(() => {
+            DBG_i++;
+            console.debug(`${perfNow()}s: #${DBG_i} themeService.pipe: bk.gr col: '${getComputedStyle(document.body).getPropertyValue('--heatmap-background').trim()}'`);
+            if (DBG_i >= 100) {
+              clearInterval(interval);
+            }
+          }, 10);
         }
 
         // Repaint segments with new theme
