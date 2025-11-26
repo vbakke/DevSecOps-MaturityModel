@@ -655,7 +655,7 @@ export class CircularHeatmapComponent implements OnInit, OnDestroy {
         relativeTo: this.route,
         fragment: activity.uuid,
         queryParamsHandling: 'preserve'
-      });      
+      });
     }
     /* eslint-enable */
   }
