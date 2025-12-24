@@ -14,8 +14,8 @@ export class SidenavButtonsComponent implements OnInit {
     'Teams',
     'Settings',
     'Usage',
-    'Roadmap v4.0',
-    'DSOMM User Day 2025',
+    'Roadmap',
+    'DSOMM User Day',
     'About Us',
   ];
   Icons: string[] = [
