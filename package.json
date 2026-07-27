@@ -1,9 +1,10 @@
 {
   "name": "dsomm",
-  "version": "4.0-beta-6",
+  "version": "4.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "prebuild": "node scripts/copy-readme.js",
     "build": "ng build --configuration=production" ,
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
@@ -56,33 +57,23 @@
     "@types/yamljs": "0.2.31",
     "@typescript-eslint/eslint-plugin": "5.27.1",
     "@typescript-eslint/parser": "5.27.1",
-    "eslint": "8.17.0",
-    "eslint-config-prettier": "8.5.0",
-    "eslint-config-standard-with-typescript": "22.0.0",
-    "eslint-plugin-import": "2.26.0",
-    "eslint-plugin-n": "15.2.5",
-    "eslint-plugin-prettier": "4.2.1",
-    "eslint-plugin-promise": "6.0.1",
-    "jasmine-core": "4.0.0",
-    "karma": "6.3.0",
-    "karma-chrome-launcher": "3.1.0",
-    "karma-coverage": "2.2.1",
-    "karma-jasmine": "4.0.0",
-    "karma-jasmine-html-reporter": "1.7.0",
-    "prettier": "2.7.1",
-    "prettier-eslint": "15.0.1",
-    "qs": "6.11.0",
-    "typescript": "4.4.4"
-  },
-  "pnpm": {
-    "overrides": {
-      "@opentelemetry/api": "1.4.1",
-      "@angular/service-worker": "13.3.9"
-    }
-  },
-  "overrides": {
-    "@opentelemetry/api": "1.4.1",
-    "@angular/service-worker": "13.3.9"
+    "eslint": "^8.17.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-config-standard-with-typescript": "^22.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-n": "^15.2.5",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-promise": "^6.0.1",
+    "jasmine-core": "~5.13.0",
+    "karma": "~6.3.0",
+    "karma-chrome-launcher": "~3.1.0",
+    "karma-coverage": "~2.2.1",
+    "karma-jasmine": "~4.0.0",
+    "karma-jasmine-html-reporter": "~1.7.0",
+    "prettier": "^2.7.1",
+    "prettier-eslint": "^15.0.1",
+    "qs": "^6.11.0",
+    "typescript": "4.6.4"
   },
   "browser": {
     "fs": false,

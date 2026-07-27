@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { MatIconRegistry } from '@angular/material/icon';
+import { DomSanitizer } from '@angular/platform-browser';
+import { GITHUB_SVG } from '../../../assets/svg_icons';
 import { ThemeService } from '../../service/theme.service';
 
 @Component({
@@ -12,6 +15,7 @@ export class SidenavButtonsComponent implements OnInit {
     'Matrix',
     'Mappings',
     'Teams',
+    'Report',
     'Settings',
     'Usage',
     'Roadmap',
@@ -23,6 +27,7 @@ export class SidenavButtonsComponent implements OnInit {
     'table_chart',
     'timeline',
     'people',
+    'summarize',
     'list',
     'description',
     'landscape',
@@ -34,6 +39,7 @@ export class SidenavButtonsComponent implements OnInit {
     '/matrix',
     '/mapping',
     '/teams',
+    '/report',
     '/settings',
     '/usage',
     '/roadmap',
@@ -43,7 +49,16 @@ export class SidenavButtonsComponent implements OnInit {
 
   isNightMode = false;
 
-  constructor(private themeService: ThemeService) {}
+  constructor(
+    private themeService: ThemeService,
+    private iconRegistry: MatIconRegistry,
+    private sanitizer: DomSanitizer
+  ) {
+    this.iconRegistry.addSvgIconLiteral(
+      'github',
+      this.sanitizer.bypassSecurityTrustHtml(GITHUB_SVG)
+    );
+  }
 
   ngOnInit(): void {
     const currentTheme = this.themeService.getTheme();

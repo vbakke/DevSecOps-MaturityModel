@@ -5,12 +5,13 @@ browserSettings:
 
 
 teamProgressFile: 'team-progress.yaml' 
+teamEvidenceFile: 'team-evidence.yaml'
 progressDefinition:
   Not implemented:
     score: 0%
     definition: Activity not started and not planned
   Started:
-    score: 40%
+    score: 20%
     definition: Activity has been started, or completed for a few applications
   Partly implemented:
     score: 50%
@@ -18,6 +19,7 @@ progressDefinition:
   Fully implemented:
     score: 100%
     definition: Fully implemented in virtually all applications
+
 
 teams: 
   $ref: 'default/teams.yaml#/teams'

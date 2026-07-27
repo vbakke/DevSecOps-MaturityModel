@@ -8,12 +8,27 @@
   shape-rendering: crispEdges;
 }
 
-.title-button {
-  background-color: transparent;
-  border: none;
-  text-align: left;
-  cursor: pointer;
-  font-weight: 700;
+.title-text {
+  font-weight: 500;
+  margin-right: 5px;
+}
+
+.info-button {
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  opacity: 0.6;
+}
+.compact-tooltip {
+  transform: translateY(-20px) !important;
+}
+
+.info-icon {
+  font-size: 18px;
+}
+
+.info-button:hover {
+  opacity: 1;
 }
 
 .right-panel {
@@ -43,9 +58,6 @@
   max-width: min(100vh - 60px, 100vw - 60px);
 }
 
-.downloadButtonClass {
-  margin: 10px 0;
-}
 .overlay-details {
   z-index: 2;
   background-color: rgba(0, 0, 0, 0.555);
@@ -142,6 +154,23 @@ app-progress-slider {
     font-style: italic;
 }
 
+.evidence-container {
+    margin-top: 12px;
+    margin-bottom: 8px;
+    gap: 8px;
+    display: flex;
+    justify-content: center;
+}
+
+.add-evidence-button mat-icon {
+    font-size: 18px;
+    margin-right: 4px;
+}
+
+mat-chip {
+  cursor: pointer;
+}
+
 button.filter-toggle {
   position: absolute;
   top: 2px;
@@ -159,9 +188,9 @@ button.filter-toggle {
   place-self: flex-end;
   margin: 0 1rem;
   padding-top: 1rem;
-  display: flex;
-  align-items: flex-end;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
 :host ::ng-deep .activity-card .mat-expansion-panel-body {

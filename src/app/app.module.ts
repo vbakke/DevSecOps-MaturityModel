@@ -1,6 +1,8 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatMenuModule } from '@angular/material/menu';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -30,6 +32,14 @@ import { ProgressSliderComponent } from './component/progress-slider/progress-sl
 import { KpiComponent } from './component/kpi/kpi.component';
 import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TeamsGroupsEditorModule } from './component/teams-groups-editor/teams-groups-editor.module';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { ReportComponent } from './pages/report/report.component';
+import { ReportConfigModalComponent } from './component/report-config-modal/report-config-modal.component';
+import { TeamSelectorComponent } from './component/team-selector/team-selector.component';
+import { ColResizeDirective } from './directive/col-resize.directive';
+import { AddEvidenceModalComponent } from './component/add-evidence-modal/add-evidence-modal.component';
+import { EvidencePanelComponent } from './component/evidence-panel/evidence-panel.component';
+import { ViewEvidenceModalComponent } from './component/view-evidence-modal/view-evidence-modal.component';
 
 @NgModule({
   declarations: [
@@ -54,6 +64,13 @@ import { TeamsGroupsEditorModule } from './component/teams-groups-editor/teams-g
     ProgressSliderComponent,
     KpiComponent,
     SettingsComponent,
+    ReportComponent,
+    ReportConfigModalComponent,
+    TeamSelectorComponent,
+    ColResizeDirective,
+    AddEvidenceModalComponent,
+    EvidencePanelComponent,
+    ViewEvidenceModalComponent,
   ],
   imports: [
     BrowserModule,
@@ -62,9 +79,12 @@ import { TeamsGroupsEditorModule } from './component/teams-groups-editor/teams-g
     MaterialModule,
     MatDialogModule,
     ReactiveFormsModule,
+    MatToolbarModule,
+    MatMenuModule,
     FormsModule,
     HttpClientModule,
     TeamsGroupsEditorModule,
+    MatTooltipModule,
   ],
   providers: [
     LoaderService,
